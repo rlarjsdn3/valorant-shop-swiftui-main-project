@@ -8,16 +8,31 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    // MARK: - WRAPPER PROPERTIES
+    
+    @State private var selectedCustomTab: CustomTabType = .shop
+    
+    // MARK: - INTIALIZER
+    
+    init() {
+        UITabBar.appearance().isHidden = true
+    }
+    
+    // MARK: - BODY
+    
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+            TabView(selection: $selectedCustomTab) {
+                
+            }
+            
+            CustomTabView($selectedCustomTab)
         }
-        .padding()
     }
 }
+
+// MARK: - PREVIEW
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
