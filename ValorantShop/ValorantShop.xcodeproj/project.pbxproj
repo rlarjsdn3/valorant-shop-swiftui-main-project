@@ -12,6 +12,7 @@
 		9E29228C2AB0A9D200D6FE07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */; };
 		9E29228F2AB0A9D200D6FE07 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E29228E2AB0A9D200D6FE07 /* Preview Assets.xcassets */; };
 		9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E29229B2AB0AF3D00D6FE07 /* CustomTabView.swift */; };
+		9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A12AB0B51D00D6FE07 /* ShopView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,7 @@
 		9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9E29228E2AB0A9D200D6FE07 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		9E29229B2AB0AF3D00D6FE07 /* CustomTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabView.swift; sourceTree = "<group>"; };
+		9E2922A12AB0B51D00D6FE07 /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,9 @@
 			isa = PBXGroup;
 			children = (
 				9E2922892AB0A9D200D6FE07 /* ContentView.swift */,
+				9E29229E2AB0B50000D6FE07 /* ShopView */,
+				9E29229F2AB0B50700D6FE07 /* CollectionView */,
+				9E2922A02AB0B51300D6FE07 /* SettingsView */,
 				9E29229A2AB0AF3000D6FE07 /* CustomTabView */,
 			);
 			path = Views;
@@ -116,6 +121,28 @@
 				9E29229B2AB0AF3D00D6FE07 /* CustomTabView.swift */,
 			);
 			path = CustomTabView;
+			sourceTree = "<group>";
+		};
+		9E29229E2AB0B50000D6FE07 /* ShopView */ = {
+			isa = PBXGroup;
+			children = (
+				9E2922A12AB0B51D00D6FE07 /* ShopView.swift */,
+			);
+			path = ShopView;
+			sourceTree = "<group>";
+		};
+		9E29229F2AB0B50700D6FE07 /* CollectionView */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = CollectionView;
+			sourceTree = "<group>";
+		};
+		9E2922A02AB0B51300D6FE07 /* SettingsView */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = SettingsView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -190,6 +217,7 @@
 			files = (
 				9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */,
 				9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */,
+				9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */,
 				9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
