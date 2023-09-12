@@ -24,7 +24,14 @@ struct ContentView: View {
     var body: some View {
         VStack {
             TabView(selection: $selectedCustomTab) {
+                ShopView()
+                    .tag(CustomTabType.shop)
                 
+                CollectionView()
+                    .tag(CustomTabType.collection)
+                
+                SettingsView()
+                    .tag(CustomTabType.settings)
             }
             
             CustomTabView($selectedCustomTab)
