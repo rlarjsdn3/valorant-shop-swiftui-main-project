@@ -14,6 +14,7 @@
 		9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E29229B2AB0AF3D00D6FE07 /* CustomTabView.swift */; };
 		9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A12AB0B51D00D6FE07 /* ShopView.swift */; };
 		9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A32AB0B54400D6FE07 /* CollectionView.swift */; };
+		9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		9E29229B2AB0AF3D00D6FE07 /* CustomTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabView.swift; sourceTree = "<group>"; };
 		9E2922A12AB0B51D00D6FE07 /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
 		9E2922A32AB0B54400D6FE07 /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
+		9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +146,7 @@
 		9E2922A02AB0B51300D6FE07 /* SettingsView */ = {
 			isa = PBXGroup;
 			children = (
+				9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */,
 			);
 			path = SettingsView;
 			sourceTree = "<group>";
@@ -221,6 +224,7 @@
 				9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */,
 				9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */,
 				9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */,
+				9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */,
 				9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */,
 				9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */,
 			);
