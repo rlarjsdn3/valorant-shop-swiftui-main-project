@@ -52,7 +52,11 @@
 			isa = PBXGroup;
 			children = (
 				9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */,
-				9E2922892AB0A9D200D6FE07 /* ContentView.swift */,
+				9E2922952AB0AE0B00D6FE07 /* Views */,
+				9E2922962AB0AE2200D6FE07 /* ViewModels */,
+				9E2922972AB0AE2C00D6FE07 /* Managers */,
+				9E2922982AB0AE3300D6FE07 /* Extensions */,
+				9E2922992AB0AE4100D6FE07 /* Constants */,
 				9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */,
 				9E29228D2AB0A9D200D6FE07 /* Preview Content */,
 			);
@@ -65,6 +69,42 @@
 				9E29228E2AB0A9D200D6FE07 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		9E2922952AB0AE0B00D6FE07 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				9E2922892AB0A9D200D6FE07 /* ContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		9E2922962AB0AE2200D6FE07 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		9E2922972AB0AE2C00D6FE07 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		9E2922982AB0AE3300D6FE07 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
+		9E2922992AB0AE4100D6FE07 /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Constants;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
