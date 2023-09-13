@@ -34,6 +34,10 @@ extension CustomTabType: Identifiable {
 
 struct CustomTabView: View {
     
+    // MARK: - PROPERTIES
+    
+    let haptics = HapticManager.shared
+
     // MARK: - WRAPPER PROPERTIES
     
     @Binding var selectedCustomTab: CustomTabType
@@ -52,6 +56,7 @@ struct CustomTabView: View {
                 Spacer()
                 
                 Button {
+                    haptics.play(.soft)
                     selectedCustomTab = type
                 } label: {
                     Image(systemName: type.imageName)
