@@ -61,7 +61,7 @@ struct CustomTabView: View {
                 } label: {
                     Image(systemName: type.imageName)
                         .fontWeight(.bold)
-                        .foregroundColor(type == selectedCustomTab ? Color("ValorantThemeColor") : Color.black)
+                        .foregroundColor(type == selectedCustomTab ? Color.valorantThemeColor : Color.black)
                         .padding()
                 }
 
