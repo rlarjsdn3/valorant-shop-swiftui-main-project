@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266E6F2AB201DD00178F25 /* HapticManager.swift */; };
 		9E266E722AB208C700178F25 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266E712AB208C700178F25 /* Color+Extension.swift */; };
+		9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EA62AB342DC00178F25 /* OAuthManager.swift */; };
 		9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */; };
 		9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922892AB0A9D200D6FE07 /* ContentView.swift */; };
 		9E29228C2AB0A9D200D6FE07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */; };
@@ -22,6 +23,7 @@
 /* Begin PBXFileReference section */
 		9E266E6F2AB201DD00178F25 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		9E266E712AB208C700178F25 /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
+		9E266EA62AB342DC00178F25 /* OAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthManager.swift; sourceTree = "<group>"; };
 		9E2922842AB0A9D200D6FE07 /* ValorantShop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ValorantShop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValorantShopApp.swift; sourceTree = "<group>"; };
 		9E2922892AB0A9D200D6FE07 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 		9E2922972AB0AE2C00D6FE07 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				9E266EA62AB342DC00178F25 /* OAuthManager.swift */,
 				9E266E6F2AB201DD00178F25 /* HapticManager.swift */,
 			);
 			path = Managers;
@@ -234,6 +237,7 @@
 				9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */,
 				9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */,
 				9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */,
+				9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */,
 				9E266E722AB208C700178F25 /* Color+Extension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
