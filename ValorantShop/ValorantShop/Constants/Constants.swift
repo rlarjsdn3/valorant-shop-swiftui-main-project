@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+struct OAuthURL {
+    
+    static var auth: String = "https://auth.riotgames.com/api/v1/authorization"
+    
+}

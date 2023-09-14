@@ -9,4 +9,14 @@ import SwiftUI
 
 final class ViewModel: ObservableObject {
     
+    // MARK: - PROPERTIES
+    
+    let oauthManager = OAuthManager.shared
+    
+    // MARK: - FUNCTIONS
+    
+    func getAuthCookies() async {
+        await oauthManager.getAuthCookies()
+    }
+    
 }
