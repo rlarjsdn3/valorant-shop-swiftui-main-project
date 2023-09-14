@@ -9,9 +9,17 @@ import SwiftUI
 
 @main
 struct ValorantShopApp: App {
+    
+    // MARK: - WRAPPER PROPERTIES
+    
+    @StateObject var viewModel: ViewModel = ViewModel()
+    
+    // MARK: - BODY
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(viewModel)
         }
     }
 }

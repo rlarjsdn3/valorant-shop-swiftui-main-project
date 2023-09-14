@@ -12,6 +12,7 @@
 		9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EA62AB342DC00178F25 /* OAuthManager.swift */; };
 		9E266EA92AB3436600178F25 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EA82AB3436600178F25 /* Constants.swift */; };
 		9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EAA2AB3483300178F25 /* ViewModel.swift */; };
+		9E266EAE2AB34A7400178F25 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EAD2AB34A7400178F25 /* LoginView.swift */; };
 		9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */; };
 		9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922892AB0A9D200D6FE07 /* ContentView.swift */; };
 		9E29228C2AB0A9D200D6FE07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */; };
@@ -28,6 +29,7 @@
 		9E266EA62AB342DC00178F25 /* OAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthManager.swift; sourceTree = "<group>"; };
 		9E266EA82AB3436600178F25 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		9E266EAA2AB3483300178F25 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		9E266EAD2AB34A7400178F25 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		9E2922842AB0A9D200D6FE07 /* ValorantShop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ValorantShop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValorantShopApp.swift; sourceTree = "<group>"; };
 		9E2922892AB0A9D200D6FE07 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -50,6 +52,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9E266EAC2AB34A6800178F25 /* LoginView */ = {
+			isa = PBXGroup;
+			children = (
+				9E266EAD2AB34A7400178F25 /* LoginView.swift */,
+			);
+			path = LoginView;
+			sourceTree = "<group>";
+		};
 		9E29227B2AB0A9D200D6FE07 = {
 			isa = PBXGroup;
 			children = (
@@ -93,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				9E2922892AB0A9D200D6FE07 /* ContentView.swift */,
+				9E266EAC2AB34A6800178F25 /* LoginView */,
 				9E29229E2AB0B50000D6FE07 /* ShopView */,
 				9E29229F2AB0B50700D6FE07 /* CollectionView */,
 				9E2922A02AB0B51300D6FE07 /* SettingsView */,
@@ -242,6 +253,7 @@
 				9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */,
 				9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */,
 				9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */,
+				9E266EAE2AB34A7400178F25 /* LoginView.swift in Sources */,
 				9E266EA92AB3436600178F25 /* Constants.swift in Sources */,
 				9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */,
 				9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */,

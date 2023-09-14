@@ -9,6 +9,10 @@ import SwiftUI
 
 final class ViewModel: ObservableObject {
     
+    // MARK: - WRAPPER PROPERTIES
+    
+    // ...
+    
     // MARK: - PROPERTIES
     
     let oauthManager = OAuthManager.shared
