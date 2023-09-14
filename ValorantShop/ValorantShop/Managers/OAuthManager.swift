@@ -46,6 +46,14 @@ struct Response: Decodable {
 struct URI: Decodable {
     let uri: String?
 }
+
+struct EntitlementResponse: Decodable {
+    let entitlementToken: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case entitlementToken = "entitlements_token"
+    }
+}
     
 // MARK: - MANAGER
 
@@ -78,7 +86,7 @@ final class OAuthManager {
         urlRequest.httpBody = self.encode(authCookiesBody)
         
         // 비동기 HTTP 통신하기
-        let (data, response) = try! await urlSession.data(for: urlRequest)
+        let (_, response) = try! await urlSession.data(for: urlRequest)
         // 상태 코드가 올바른지 확인하기
         guard let statusCode = (response as? HTTPURLResponse)?.statusCode,
               (200..<300) ~= statusCode else {
@@ -128,6 +136,35 @@ final class OAuthManager {
         
         // 결과 반환하기
         return .success(accessToken)
+    }
+    
+    func getEntitlementToken(accessToken token: String) async -> Result<String, OAuthError> {
+        // For Debug
+        print(#function)
+        
+        // URL 만들기
+        guard let url = URL(string: OAuthURL.entitlement) else { return .failure(.urlError) }
+        // URL Request 만들기
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // 비동기 HTTP 통신하기
+        let (data, response) = try! await urlSession.data(for: urlRequest)
+        // 상태 코드가 올바른지 확인하기
+        guard let statusCode = (response as? HTTPURLResponse)?.statusCode,
+              (200..<300) ~= statusCode else {
+            return .failure(.statusCodeError)
+        }
+        // 받아온 데이터를 파싱하기
+        guard let entitlementResponse = self.decode(of: EntitlementResponse.self, data),
+              let entitlementToken = entitlementResponse.entitlementToken else {
+            return .failure(.decodeErorr)
+        }
+        
+        // 결과 반환하기
+        return .success(entitlementToken)
     }
     
     private func encode<T: Encodable>(_ data: T) -> Data? {
