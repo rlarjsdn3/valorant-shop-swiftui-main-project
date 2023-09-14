@@ -40,6 +40,9 @@ final class OAuthManager {
     
     @discardableResult
     func getAuthCookies() async -> Bool {
+        // For Debug
+        print(#function)
+        
         // URL 만들기
         guard let url = URL(string: OAuthURL.auth) else { return false }
         // HTTP Body 만들기
@@ -49,15 +52,15 @@ final class OAuthManager {
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.httpBody = encode(authCookiesBody)
+        
         // 비동기 HTTP 통신하기
-        let (data, response) = try! await urlSession.data(for: urlRequest)
+        let (_, response) = try! await urlSession.data(for: urlRequest)
         // 상태 코드가 올바른지 확인하기
         guard let statusCode = (response as? HTTPURLResponse)?.statusCode,
               (200..<300) ~= statusCode else {
             return false
         }
-        // For Debug
-        dump(data)
+        
         // 결과 반환하기
         return true
     }
