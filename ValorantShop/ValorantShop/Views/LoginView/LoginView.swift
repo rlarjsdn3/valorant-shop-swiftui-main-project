@@ -28,7 +28,10 @@ struct LoginView: View {
             
             Button("로그인") {
                 Task {
-                    await viewModel.getAuthCookies()
+                    await viewModel.login(
+                        username: inputUsername,
+                        password: inputPassword
+                    )
                 }
             }
             .buttonStyle(.borderedProminent)

@@ -19,8 +19,9 @@ final class ViewModel: ObservableObject {
     
     // MARK: - FUNCTIONS
     
-    func getAuthCookies() async {
+    func login(username: String, password: String) async {
         await oauthManager.getAuthCookies()
+        await oauthManager.getAccessToken(username: username, password: password)
     }
     
 }
