@@ -8,5 +8,6 @@
 import RealmSwift
 
 final class Version: Object, Codable {
-    
+    @Persisted var riotClientVersion: String
+    @Persisted var riotClientBuild: String
 }
