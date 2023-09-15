@@ -25,4 +25,8 @@ final class ViewModel: ObservableObject {
         await oauthManager.fetchEntitlementToken(accessToken: accessToken)
     }
     
+    func reAuth() async {
+        await oauthManager.fetchReAuthCookies()
+    }
+    
 }

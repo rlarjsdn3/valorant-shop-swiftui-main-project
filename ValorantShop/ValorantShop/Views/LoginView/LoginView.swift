@@ -35,6 +35,13 @@ struct LoginView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
+            
+            Button("ReAuth") {
+                Task {
+                    await viewModel.reAuth()
+                }
+            }
+            .buttonStyle(.borderedProminent)
         }
         .padding()
     }
