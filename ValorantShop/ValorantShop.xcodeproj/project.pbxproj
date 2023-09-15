@@ -139,8 +139,8 @@
 			isa = PBXGroup;
 			children = (
 				9E266EA62AB342DC00178F25 /* OAuthManager.swift */,
-				9E266E6F2AB201DD00178F25 /* HapticManager.swift */,
 				9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */,
+				9E266E6F2AB201DD00178F25 /* HapticManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
