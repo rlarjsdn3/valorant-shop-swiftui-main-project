@@ -27,6 +27,7 @@
 		9EB4C5632AB49DB500AE4425 /* WeaponSkins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */; };
 		9EB4C5652AB4A14700AE4425 /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5642AB4A14700AE4425 /* Version.swift */; };
 		9EB4C5672AB4A68500AE4425 /* StorePrices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5662AB4A68500AE4425 /* StorePrices.swift */; };
+		9EB4C5692AB4A85D00AE4425 /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 		9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponSkins.swift; sourceTree = "<group>"; };
 		9EB4C5642AB4A14700AE4425 /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 		9EB4C5662AB4A68500AE4425 /* StorePrices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePrices.swift; sourceTree = "<group>"; };
+		9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +140,7 @@
 			children = (
 				9E266EA62AB342DC00178F25 /* OAuthManager.swift */,
 				9E266E6F2AB201DD00178F25 /* HapticManager.swift */,
+				9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -288,6 +291,7 @@
 				9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */,
 				9E266EAE2AB34A7400178F25 /* LoginView.swift in Sources */,
 				9E266EA92AB3436600178F25 /* Constants.swift in Sources */,
+				9EB4C5692AB4A85D00AE4425 /* RealmManager.swift in Sources */,
 				9EB4C5632AB49DB500AE4425 /* WeaponSkins.swift in Sources */,
 				9EB4C5672AB4A68500AE4425 /* StorePrices.swift in Sources */,
 				9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */,
