@@ -9,6 +9,13 @@
 /* Begin PBXBuildFile section */
 		9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266E6F2AB201DD00178F25 /* HapticManager.swift */; };
 		9E266E722AB208C700178F25 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266E712AB208C700178F25 /* Color+Extension.swift */; };
+		9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EA62AB342DC00178F25 /* OAuthManager.swift */; };
+		9E266EA92AB3436600178F25 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EA82AB3436600178F25 /* Constants.swift */; };
+		9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EAA2AB3483300178F25 /* ViewModel.swift */; };
+		9E266EAE2AB34A7400178F25 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EAD2AB34A7400178F25 /* LoginView.swift */; };
+		9E266EB12AB34E6B00178F25 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 9E266EB02AB34E6B00178F25 /* KeychainAccess */; };
+		9E266EB42AB34E8B00178F25 /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 9E266EB32AB34E8B00178F25 /* Realm */; };
+		9E266EB62AB34E8B00178F25 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 9E266EB52AB34E8B00178F25 /* RealmSwift */; };
 		9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */; };
 		9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922892AB0A9D200D6FE07 /* ContentView.swift */; };
 		9E29228C2AB0A9D200D6FE07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */; };
@@ -22,6 +29,10 @@
 /* Begin PBXFileReference section */
 		9E266E6F2AB201DD00178F25 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		9E266E712AB208C700178F25 /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
+		9E266EA62AB342DC00178F25 /* OAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthManager.swift; sourceTree = "<group>"; };
+		9E266EA82AB3436600178F25 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		9E266EAA2AB3483300178F25 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		9E266EAD2AB34A7400178F25 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		9E2922842AB0A9D200D6FE07 /* ValorantShop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ValorantShop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValorantShopApp.swift; sourceTree = "<group>"; };
 		9E2922892AB0A9D200D6FE07 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -38,12 +49,23 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E266EB62AB34E8B00178F25 /* RealmSwift in Frameworks */,
+				9E266EB42AB34E8B00178F25 /* Realm in Frameworks */,
+				9E266EB12AB34E6B00178F25 /* KeychainAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9E266EAC2AB34A6800178F25 /* LoginView */ = {
+			isa = PBXGroup;
+			children = (
+				9E266EAD2AB34A7400178F25 /* LoginView.swift */,
+			);
+			path = LoginView;
+			sourceTree = "<group>";
+		};
 		9E29227B2AB0A9D200D6FE07 = {
 			isa = PBXGroup;
 			children = (
@@ -87,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				9E2922892AB0A9D200D6FE07 /* ContentView.swift */,
+				9E266EAC2AB34A6800178F25 /* LoginView */,
 				9E29229E2AB0B50000D6FE07 /* ShopView */,
 				9E29229F2AB0B50700D6FE07 /* CollectionView */,
 				9E2922A02AB0B51300D6FE07 /* SettingsView */,
@@ -98,6 +121,7 @@
 		9E2922962AB0AE2200D6FE07 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				9E266EAA2AB3483300178F25 /* ViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -105,6 +129,7 @@
 		9E2922972AB0AE2C00D6FE07 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				9E266EA62AB342DC00178F25 /* OAuthManager.swift */,
 				9E266E6F2AB201DD00178F25 /* HapticManager.swift */,
 			);
 			path = Managers;
@@ -121,6 +146,7 @@
 		9E2922992AB0AE4100D6FE07 /* Constants */ = {
 			isa = PBXGroup;
 			children = (
+				9E266EA82AB3436600178F25 /* Constants.swift */,
 			);
 			path = Constants;
 			sourceTree = "<group>";
@@ -173,6 +199,11 @@
 			dependencies = (
 			);
 			name = ValorantShop;
+			packageProductDependencies = (
+				9E266EB02AB34E6B00178F25 /* KeychainAccess */,
+				9E266EB32AB34E8B00178F25 /* Realm */,
+				9E266EB52AB34E8B00178F25 /* RealmSwift */,
+			);
 			productName = ValorantShop;
 			productReference = 9E2922842AB0A9D200D6FE07 /* ValorantShop.app */;
 			productType = "com.apple.product-type.application";
@@ -201,6 +232,10 @@
 				Base,
 			);
 			mainGroup = 9E29227B2AB0A9D200D6FE07;
+			packageReferences = (
+				9E266EAF2AB34E6B00178F25 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+				9E266EB22AB34E8B00178F25 /* XCRemoteSwiftPackageReference "realm-swift" */,
+			);
 			productRefGroup = 9E2922852AB0A9D200D6FE07 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -230,10 +265,14 @@
 				9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */,
 				9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */,
 				9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */,
+				9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */,
 				9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */,
 				9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */,
+				9E266EAE2AB34A7400178F25 /* LoginView.swift in Sources */,
+				9E266EA92AB3436600178F25 /* Constants.swift in Sources */,
 				9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */,
 				9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */,
+				9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */,
 				9E266E722AB208C700178F25 /* Color+Extension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -435,6 +474,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9E266EAF2AB34E6B00178F25 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		9E266EB22AB34E8B00178F25 /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9E266EB02AB34E6B00178F25 /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9E266EAF2AB34E6B00178F25 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
+		};
+		9E266EB32AB34E8B00178F25 /* Realm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9E266EB22AB34E8B00178F25 /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = Realm;
+		};
+		9E266EB52AB34E8B00178F25 /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9E266EB22AB34E8B00178F25 /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9E29227C2AB0A9D200D6FE07 /* Project object */;
 }

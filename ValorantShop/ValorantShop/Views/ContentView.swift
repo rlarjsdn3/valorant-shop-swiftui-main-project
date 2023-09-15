@@ -22,19 +22,24 @@ struct ContentView: View {
     // MARK: - BODY
     
     var body: some View {
-        VStack {
-            TabView(selection: $selectedCustomTab) {
-                ShopView()
-                    .tag(CustomTabType.shop)
+        // For Test
+        if true {
+            LoginView()
+        } else {
+            VStack {
+                TabView(selection: $selectedCustomTab) {
+                    ShopView()
+                        .tag(CustomTabType.shop)
+                    
+                    CollectionView()
+                        .tag(CustomTabType.collection)
+                    
+                    SettingsView()
+                        .tag(CustomTabType.settings)
+                }
                 
-                CollectionView()
-                    .tag(CustomTabType.collection)
-                
-                SettingsView()
-                    .tag(CustomTabType.settings)
+                CustomTabView($selectedCustomTab)
             }
-            
-            CustomTabView($selectedCustomTab)
         }
     }
 }
