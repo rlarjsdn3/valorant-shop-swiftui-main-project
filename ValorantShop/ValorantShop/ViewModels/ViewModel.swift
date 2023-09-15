@@ -20,9 +20,9 @@ final class ViewModel: ObservableObject {
     // MARK: - FUNCTIONS
     
     func login(username: String, password: String) async {
-        await oauthManager.getAuthCookies()
-        let accessToken = await try! oauthManager.getAccessToken(username: username, password: password).get()
-        await oauthManager.getEntitlementToken(accessToken: accessToken)
+        await oauthManager.fetchAuthCookies()
+        let accessToken = await try! oauthManager.fetchAccessToken(username: username, password: password).get()
+        await oauthManager.fetchEntitlementToken(accessToken: accessToken)
     }
     
 }

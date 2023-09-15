@@ -6,12 +6,14 @@
 //
 
 import Foundation
+import KeychainAccess
 
 // MARK: - ERROR
 
 enum OAuthError: Error {
     case urlError
     case statusCodeError
+    case needMultifactor
     case encodeError
     case decodeErorr
     case noTokenError
@@ -65,13 +67,14 @@ final class OAuthManager {
     
     // MARK: - PROPERTIES
     
+    let keychain: Keychain = Keychain()
     // 캐시・쿠키 등 자격 증명을 디스크에 기록하지 않는 URLSession 설정
-    var urlSession: URLSession = URLSession(configuration: .ephemeral)
+    let urlSession: URLSession = URLSession(configuration: .ephemeral)
     
     // MARK: - FUNCTIONS
     
     @discardableResult
-    func getAuthCookies() async -> Result<Bool, OAuthError> {
+    func fetchAuthCookies() async -> Result<Bool, OAuthError> {
         // For Debug
         print(#function)
         
@@ -97,7 +100,16 @@ final class OAuthManager {
         return .success(true)
     }
     
-    func getAccessToken(username: String, password: String) async -> Result<String, OAuthError> {
+    @discardableResult
+    func fetchReAuthCookies() -> Result<Bool, OAuthError> {
+        // For Debug
+        print(#function)
+        
+        return .success(false)
+        
+    }
+    
+    func fetchAccessToken(username: String, password: String) async -> Result<String, OAuthError> {
         // For Debug
         print(#function)
         
@@ -117,8 +129,8 @@ final class OAuthManager {
         // 비동기 HTTP 통신하기
         let (data, response) = try! await urlSession.data(for: urlRequest)
         // 상태 코드가 올바른지 확인하기
-        guard let statusCode = (response as? HTTPURLResponse)?.statusCode,
-              (200..<300) ~= statusCode else {
+        guard let httpResponse = (response as? HTTPURLResponse),
+              (200..<300) ~= httpResponse.statusCode else {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
@@ -128,17 +140,20 @@ final class OAuthManager {
         }
         
         // 리다이렉트된 URI에서 Access Token 추출하기
-        let pattern: String = #"access_token=((?:[a-zA-Z]|\d|\.|-|_)*).*id_token=((?:[a-zA-Z]|\d|\.|-|_)*).*expires_in=(\d*)"#
-        guard let range = uri.range(of: pattern, options: .regularExpression) else {
+        let tokenPattern: String = #"access_token=((?:[a-zA-Z]|\d|\.|-|_)*).*id_token=((?:[a-zA-Z]|\d|\.|-|_)*).*expires_in=(\d*)"#
+        guard let range = uri.range(of: tokenPattern, options: .regularExpression) else {
             return .failure(.noTokenError)
         }
         let accessToken = String(uri[range].split(separator: "&")[0].split(separator: "=")[1])
+        
+        // ReAuth를 위해 SSID와 TDID값을 키체인에 저장하기
+        saveSSIDToKeyChain(httpResponse)
         
         // 결과 반환하기
         return .success(accessToken)
     }
     
-    func getEntitlementToken(accessToken token: String) async -> Result<String, OAuthError> {
+    func fetchEntitlementToken(accessToken token: String) async -> Result<String, OAuthError> {
         // For Debug
         print(#function)
         
@@ -165,6 +180,23 @@ final class OAuthManager {
         
         // 결과 반환하기
         return .success(entitlementToken)
+    }
+    
+    private func saveSSIDToKeyChain(_ httpResponse: HTTPURLResponse) {
+        // For Dubug
+        print(#function)
+        
+        // ReAuth를 위해 SSID와 TDID값을 키체인에 저장하기
+        guard let setCookie = (httpResponse.allHeaderFields["Set-Cookie"] as? String) else {
+            return
+        }
+        // tdid=((?:[a-zA-Z]|\d|\.|-|_)*).*
+        let cookiePattern: String = #"ssid=((?:[a-zA-Z]|\d|\.|-|_)*)"#
+        guard let range = setCookie.range(of: cookiePattern, options: .regularExpression) else {
+            return
+        }
+        let ssid = String(setCookie[range].split(separator: "=")[1])
+        keychain["SSID"] = ssid
     }
     
     private func encode<T: Encodable>(_ data: T) -> Data? {
