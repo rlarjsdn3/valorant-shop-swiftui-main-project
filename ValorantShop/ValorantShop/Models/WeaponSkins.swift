@@ -17,7 +17,7 @@ final class WeaponSkins: Object, Codable {
 }
 
 final class Skin: Object, Codable {
-    @Persisted(primaryKey: true) var uuid: String
+    @Persisted var uuid: String
     @Persisted var displayName: String
     @Persisted var contentTierUUID: ContentTier?
     @Persisted var displayIcon: String?
