@@ -22,7 +22,8 @@ final class ViewModel: ObservableObject {
     func login(username: String, password: String) async {
         await oauthManager.fetchAuthCookies()
         let accessToken = await try! oauthManager.fetchAccessToken(username: username, password: password).get()
-        await oauthManager.fetchEntitlementToken(accessToken: accessToken)
+        let entitlementToken = await try! oauthManager.fetchEntitlementToken(accessToken: accessToken).get()
+        let uuid = await try! oauthManager.fetchRiotAccountPUUID(accessToken: accessToken)
     }
     
     func reAuth() async {

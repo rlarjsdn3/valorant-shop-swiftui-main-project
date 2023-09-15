@@ -14,4 +14,7 @@ struct OAuthURL {
     static var reAuth: String = "https://auth.riotgames.com/api/v1/authorization"
     static var entitlement: String = "https://entitlements.auth.riotgames.com/api/token/v1"
     
+    // For User
+    static var userInfo: String = "https://auth.riotgames.com/userinfo"
+    
 }

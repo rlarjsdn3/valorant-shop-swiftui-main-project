@@ -56,6 +56,14 @@ struct EntitlementResponse: Decodable {
         case entitlementToken = "entitlements_token"
     }
 }
+
+struct PlayerInfoResponse: Decodable {
+    let uuid: String
+    
+    enum CodingKeys: String, CodingKey {
+        case uuid = "sub"
+    }
+}
     
 // MARK: - MANAGER
 
@@ -125,13 +133,11 @@ final class OAuthManager {
         // 상태 코드가 올바른지 확인하기
         guard let httpResponse = (response as? HTTPURLResponse),
               (200..<300) ~= httpResponse.statusCode else {
-            print("상태 코드 에러")
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
         guard let authRequestResponse = decode(of: AuthRequestResponse.self, data),
               let uri = authRequestResponse.response?.parameters?.uri else {
-            print("파싱 에러")
             return .failure(.decodeErorr)
         }
         // 리다이렉트된 URI에서 Access Token 추출하기
@@ -219,6 +225,37 @@ final class OAuthManager {
         return .success(entitlementToken)
     }
     
+    func fetchRiotAccountPUUID(accessToken token: String) async -> Result<String, OAuthError> {
+        // For Debug
+        print(#function)
+        
+        // URL 만들기
+        guard let url = URL(string: OAuthURL.userInfo) else { return .failure(.urlError) }
+        // URL Request 만들기
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "GET"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        // 비동기 HTTP 통신하기
+        let (data, response) = try! await urlSession.data(for: urlRequest)
+        // 상태 코드가 올바른지 확인하기
+        guard let httpResponse = (response as? HTTPURLResponse),
+              (200..<300) ~= httpResponse.statusCode else {
+            print("상태 코드 에러")
+            return .failure(.statusCodeError)
+        }
+        // 받아온 데이터를 파싱하기
+        guard let playerInfoResponse = self.decode(of: PlayerInfoResponse.self, data) else {
+            print("파싱 에러")
+            return .failure(.decodeErorr)
+        }
+        print("puuid = \(playerInfoResponse.uuid)")
+        
+        // 결과 반환하기
+        return .success(playerInfoResponse.uuid)
+    }
+    
     private func saveSSIDToKeyChain(_ httpResponse: HTTPURLResponse) {
         // For Dubug
         print(#function)
@@ -227,7 +264,7 @@ final class OAuthManager {
         guard let setCookie = (httpResponse.allHeaderFields["Set-Cookie"] as? String) else {
             return
         }
-        // tdid=((?:[a-zA-Z]|\d|\.|-|_)*).*
+        
         let cookiePattern: String = #"ssid=((?:[a-zA-Z]|\d|\.|-|_)*)"#
         guard let range = setCookie.range(of: cookiePattern, options: .regularExpression) else {
             return
