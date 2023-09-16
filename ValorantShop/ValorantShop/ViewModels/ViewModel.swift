@@ -44,4 +44,9 @@ final class ViewModel: ObservableObject {
         dump(wallet)
     }
     
+    func fetchWeaponSkins() async {
+        let weaponSkins = await try! resourceManager.fetchWeaponSkins()
+        dump(weaponSkins)
+    }
+    
 }
