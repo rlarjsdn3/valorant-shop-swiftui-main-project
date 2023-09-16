@@ -125,17 +125,44 @@ final class ResourceManager {
         // 상태 코드가 올바른지 확인하기
         guard let httpResponse = (response as? HTTPURLResponse),
               (200..<300) ~= httpResponse.statusCode else {
-            print("상태 코드 에러")
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
         guard let weaponSkins = decode(of: WeaponSkins.self, data) else {
-            print("파싱 에러")
             return .failure(.decodeError)
         }
         
         // 결과 반환하기
         return .success(weaponSkins)
+    }
+    
+    func fetchStorePrices(accessToken: String, riotEntitlement: String) async -> Result<StorePrices, ResourceError> {
+        // For Debug
+        print(#function)
+        
+        // URL 만들기
+        guard let url = URL(string: ResourceURL.prices) else { return .failure(.urlError) }
+        // URL Request 만들기
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "GET"
+        urlRequest.setValue("\(riotEntitlement)", forHTTPHeaderField: "X-Riot-Entitlements-JWT")
+        urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        
+        // 비동기 HTTP 통신하기
+        let (data, response) = try! await urlSession.data(for: urlRequest)
+        // 상태 코드가 올바른지 확인하기
+        guard let httpResponse = (response as? HTTPURLResponse),
+              (200..<300) ~= httpResponse.statusCode else {
+            return .failure(.statusCodeError)
+        }
+        // 받아온 데이터를 파싱하기
+        guard let weaponPrices = decode(of: StorePrices.self, data) else {
+            print("파싱 에러")
+            return .failure(.decodeError)
+        }
+        
+        // 결과 반환하기
+        return .success(weaponPrices)
     }
     
     private func decode<T: Decodable>(of type: T.Type, _ data: Data) -> T? {

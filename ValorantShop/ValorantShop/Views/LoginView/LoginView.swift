@@ -63,6 +63,13 @@ struct LoginView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
+            
+            Button("fetch WeaponPrices") {
+                Task {
+                    await viewModel.fetchWeaponPrices()
+                }
+            }
+            .buttonStyle(.borderedProminent)
         }
         .padding()
     }

@@ -10,14 +10,14 @@ import RealmSwift
 final class StorePrices: Object, Codable {
     @Persisted var offers: List<Offer>
     
-    enum Codingkeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case offers = "Offers"
     }
 }
 
 final class Offer: Object, Codable {
     @Persisted var offerID: String // 무기 스킨의 첫 번째 Level의 UUID값
-    @Persisted var cost: Cost
+    @Persisted var cost: Cost?
     
     enum CodingKeys: String, CodingKey {
         case offerID = "OfferID"

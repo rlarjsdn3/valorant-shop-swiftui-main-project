@@ -21,7 +21,9 @@ struct OAuthURL {
 struct ResourceURL {
     
     // For Resource
-    static var version: String = "https://valorant-api.com/v1/version"
+    static var version: String = "https://valorant-api.com/v1/version/"
     static var wallet: String = "https://pd.kr.a.pvp.net/store/v1/wallet/"
-    static var skins: String = "https://valorant-api.com/v1/weapons/skins"
+    static var skins: String = "https://valorant-api.com/v1/weapons/skins/"
+    static var prices: String = "https://pd.kr.a.pvp.net/store/v1/offers/"
+    
 }

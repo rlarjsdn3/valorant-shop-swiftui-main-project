@@ -27,8 +27,11 @@ final class ViewModel: ObservableObject {
         let uuid = await try! oauthManager.fetchRiotAccountPUUID(accessToken: accessToken).get()
     }
     
-    func reAuth() async {
+    func reAuth() async -> (String, String, String) {
         let accessToken = await try! oauthManager.fetchReAuthCookies().get()
+        let riotEntitlement = await try! oauthManager.fetchRiotEntitlement(accessToken: accessToken).get()
+        let uuid = await try! oauthManager.fetchRiotAccountPUUID(accessToken: accessToken).get()
+        return (accessToken, riotEntitlement, uuid)
     }
     
     func fetchRiotVersion() async {
@@ -47,6 +50,14 @@ final class ViewModel: ObservableObject {
     func fetchWeaponSkins() async {
         let weaponSkins = await try! resourceManager.fetchWeaponSkins()
         dump(weaponSkins)
+    }
+    
+    func fetchWeaponPrices() async {
+        let tokens = await reAuth()
+        print(tokens.0)
+        print(tokens.1)
+        let weaponPrices = await try! resourceManager.fetchStorePrices(accessToken: tokens.0, riotEntitlement: tokens.1)
+        dump(weaponPrices)
     }
     
 }
