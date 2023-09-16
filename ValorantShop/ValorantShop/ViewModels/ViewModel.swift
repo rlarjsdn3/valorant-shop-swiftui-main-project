@@ -23,17 +23,25 @@ final class ViewModel: ObservableObject {
     func login(username: String, password: String) async {
         await oauthManager.fetchAuthCookies()
         let accessToken = await try! oauthManager.fetchAccessToken(username: username, password: password).get()
-        let entitlementToken = await try! oauthManager.fetchEntitlementToken(accessToken: accessToken).get()
-        let uuid = await try! oauthManager.fetchRiotAccountPUUID(accessToken: accessToken)
+        let entitlementToken = await try! oauthManager.fetchRiotEntitlement(accessToken: accessToken).get()
+        let uuid = await try! oauthManager.fetchRiotAccountPUUID(accessToken: accessToken).get()
     }
     
     func reAuth() async {
-        await oauthManager.fetchReAuthCookies()
+        let accessToken = await try! oauthManager.fetchReAuthCookies().get()
     }
     
     func fetchRiotVersion() async {
         let riotVersion = await try? resourceManager.fetchValorantVersion().get()
         dump(riotVersion)
+    }
+    
+    func fetchWallet() async {
+        let accessToken = await try! oauthManager.fetchReAuthCookies().get()
+        let entitlementToken = await try! oauthManager.fetchRiotEntitlement(accessToken: accessToken).get()
+        let uuid = await try! oauthManager.fetchRiotAccountPUUID(accessToken: accessToken).get()
+        let wallet = await try? resourceManager.fetchUserWallet(accessToken: accessToken, riotEntitlement: entitlementToken, puuid: uuid).get()
+        dump(wallet)
     }
     
 }

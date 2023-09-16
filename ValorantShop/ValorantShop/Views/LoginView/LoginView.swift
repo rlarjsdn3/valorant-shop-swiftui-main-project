@@ -49,6 +49,13 @@ struct LoginView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
+            
+            Button("fetch Wallet") {
+                Task {
+                    await viewModel.fetchWallet()
+                }
+            }
+            .buttonStyle(.borderedProminent)
         }
         .padding()
     }
