@@ -42,6 +42,34 @@ struct LoginView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
+            
+            Button("fetch RiotVersion") {
+                Task {
+                    await viewModel.fetchRiotVersion()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            
+            Button("fetch Wallet") {
+                Task {
+                    await viewModel.fetchWallet()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            
+            Button("fetch WeaponSkins") {
+                Task {
+                    await viewModel.fetchWeaponSkins()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            
+            Button("fetch WeaponPrices") {
+                Task {
+                    await viewModel.fetchWeaponPrices()
+                }
+            }
+            .buttonStyle(.borderedProminent)
         }
         .padding()
     }

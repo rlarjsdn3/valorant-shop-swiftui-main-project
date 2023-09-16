@@ -196,7 +196,7 @@ final class OAuthManager {
         return .success(accessToken)
     }
     
-    func fetchEntitlementToken(accessToken token: String) async -> Result<String, OAuthError> {
+    func fetchRiotEntitlement(accessToken token: String) async -> Result<String, OAuthError> {
         // For Debug
         print(#function)
         
@@ -217,12 +217,12 @@ final class OAuthManager {
         }
         // 받아온 데이터를 파싱하기
         guard let entitlementResponse = self.decode(of: EntitlementResponse.self, data),
-              let entitlementToken = entitlementResponse.entitlementToken else {
+              let riotEntitlement = entitlementResponse.entitlementToken else {
             return .failure(.decodeErorr)
         }
         
         // 결과 반환하기
-        return .success(entitlementToken)
+        return .success(riotEntitlement)
     }
     
     func fetchRiotAccountPUUID(accessToken token: String) async -> Result<String, OAuthError> {
