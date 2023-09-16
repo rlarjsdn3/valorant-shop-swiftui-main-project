@@ -16,5 +16,10 @@ struct OAuthURL {
     
     // For User
     static var userInfo: String = "https://auth.riotgames.com/userinfo"
+}
+
+struct ResourceURL {
     
+    // For Resource
+    static var version: String = "https://valorant-api.com/v1/version"
 }

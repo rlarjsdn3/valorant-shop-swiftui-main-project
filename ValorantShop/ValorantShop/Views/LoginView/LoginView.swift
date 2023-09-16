@@ -42,6 +42,13 @@ struct LoginView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
+            
+            Button("fetch RiotVersion") {
+                Task {
+                    await viewModel.fetchRiotVersion()
+                }
+            }
+            .buttonStyle(.borderedProminent)
         }
         .padding()
     }

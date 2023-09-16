@@ -16,6 +16,7 @@ final class ViewModel: ObservableObject {
     // MARK: - PROPERTIES
     
     let oauthManager = OAuthManager.shared
+    let resourceManager = ResourceManager.shared
     
     // MARK: - FUNCTIONS
     
@@ -28,6 +29,11 @@ final class ViewModel: ObservableObject {
     
     func reAuth() async {
         await oauthManager.fetchReAuthCookies()
+    }
+    
+    func fetchRiotVersion() async {
+        let riotVersion = await try? resourceManager.fetchValorantVersion().get()
+        dump(riotVersion)
     }
     
 }
