@@ -8,7 +8,9 @@
 import SwiftUI
 
 extension Color {
+    
     static var valorantThemeColor: Color {
         Color(red: 235.0 / 255.0, green: 86.0 / 255.0, blue: 91.0 / 255.0)
     }
+    
 }
