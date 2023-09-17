@@ -70,6 +70,13 @@ struct LoginView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
+            
+            Button("로그아웃") {
+                Task {
+                    await viewModel.logout()
+                }
+            }
+            .buttonStyle(.borderedProminent)
         }
         .padding()
     }

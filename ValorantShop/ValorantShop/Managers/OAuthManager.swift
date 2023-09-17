@@ -146,12 +146,13 @@ final class OAuthManager {
             return .failure(.noTokenError)
         }
         let accessToken = String(uri[range].split(separator: "&")[0].split(separator: "=")[1])
-        
+        print(accessToken) // ...
         // 결과 반환하기
         return .success(accessToken)
         
     }
     
+    @discardableResult
     func fetchAccessToken(username: String, password: String) async -> Result<String, OAuthError> {
         // For Debug
         print(#function)
@@ -174,21 +175,24 @@ final class OAuthManager {
         // 상태 코드가 올바른지 확인하기
         guard let httpResponse = (response as? HTTPURLResponse),
               (200..<300) ~= httpResponse.statusCode else {
+            print("상태 코드 에러")
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
         guard let authRequestResponse = decode(of: AuthRequestResponse.self, data),
               let uri = authRequestResponse.response?.parameters?.uri else {
+            print("파싱 에러")
             return .failure(.decodeErorr)
         }
         
         // 리다이렉트된 URI에서 Access Token 추출하기
         let tokenPattern: String = #"access_token=((?:[a-zA-Z]|\d|\.|-|_)*).*id_token=((?:[a-zA-Z]|\d|\.|-|_)*).*expires_in=(\d*)"#
         guard let range = uri.range(of: tokenPattern, options: .regularExpression) else {
+            print("정규 표현식 에러")
             return .failure(.noTokenError)
         }
         let accessToken = String(uri[range].split(separator: "&")[0].split(separator: "=")[1])
-
+        print(accessToken) // ...
         // ReAuth를 위해 SSID와 TDID값을 키체인에 저장하기
         saveSSIDToKeyChain(httpResponse)
         

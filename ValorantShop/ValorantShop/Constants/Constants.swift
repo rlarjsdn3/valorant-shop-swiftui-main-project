@@ -7,6 +7,15 @@
 
 import Foundation
 
+struct UserDefaultsKey {
+    
+    // For Auth
+    static var isLoggedIn: String = "isLoggedIn"
+    
+    // For Resource
+    static var isDataDownloaded: String = "isDataDownloaded"
+}
+
 struct OAuthURL {
     
     // For Auth

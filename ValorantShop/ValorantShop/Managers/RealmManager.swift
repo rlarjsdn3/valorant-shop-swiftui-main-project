@@ -19,7 +19,7 @@ final class RealmManager {
     
     // MARK: - FUNCTIONS
     
-    func create(object: Object) {
+    func create(_ object: Object) {
         try! realm.write {
             realm.add(object)
         }
