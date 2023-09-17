@@ -14,23 +14,34 @@ enum ImageType: String {
     case weaponSkinChromas
     case weaponSkinSwatchs
     
-    var path: String {
+    var path1: String {
         switch self {
         case .weaponSkins:
             return "weaponskins"
         case .weaponSkinChromas:
-            return "weaponskinchromas"
+            fallthrough
         case .weaponSkinSwatchs:
-            return "weaponskinswatch"
+            return "weaponskinchromas"
+        }
+    }
+    
+    var path2: String {
+        switch self {
+        case .weaponSkins:
+            return "displayicon"
+        case .weaponSkinChromas:
+            return "fullrender"
+        case .weaponSkinSwatchs:
+            return "swatch"
         }
     }
     
     var prefixFileName: String {
         switch self {
         case .weaponSkins:
-            return "skin"
+            return "displayicon"
         case .weaponSkinChromas:
-            return "chroma"
+            return "displayicon"
         case .weaponSkinSwatchs:
             return "swatch"
         }
@@ -64,6 +75,24 @@ struct Balance: Codable {
         case vp = "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741"
         case rp = "e59aa87c-4cbf-517a-5983-6e81511be9b7"
         case kp = "85ca954a-41f2-ce94-9b45-8ca3dd39a00d"
+    }
+}
+
+struct StorefrontResponse: Codable {
+    let skinsPanelLayout: SkinsPanelLayout
+    
+    enum CodingKeys: String, CodingKey {
+        case skinsPanelLayout = "SkinsPanelLayout"
+    }
+}
+
+struct SkinsPanelLayout: Codable {
+    let singleItemOffers: [String]
+    let singleItemOffersRemainingDurationInSeconds: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case singleItemOffers = "SingleItemOffers"
+        case singleItemOffersRemainingDurationInSeconds = "SingleItemOffersRemainingDurationInSeconds"
     }
 }
 
@@ -133,6 +162,35 @@ final class ResourceManager {
         
         // 결과 반환하기
         return .success(walletResponse)
+    }
+    
+    func fetchStorefront(accessToken: String, riotEntitlement: String, puuid: String) async -> Result<StorefrontResponse, ResourceError> {
+        // For Debug
+        print(#function)
+        
+        // URL 만들기
+        guard let url = URL(string: ResourceURL.storefront + "\(puuid)") else { return .failure(.urlError) }
+        // URL Request 만들기
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "GET"
+        urlRequest.setValue("\(riotEntitlement)", forHTTPHeaderField: "X-Riot-Entitlements-JWT")
+        urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        
+        // 비동기 HTTP 통신하기
+        let (data, response) = try! await urlSession.data(for: urlRequest)
+        // 상태 코드가 올바른지 확인하기
+        guard let httpResponse = (response as? HTTPURLResponse),
+              (200..<300) ~= httpResponse.statusCode else {
+            return .failure(.statusCodeError)
+        }
+        // 받아온 데이터를 파싱하기
+        guard let storefrontResponse = decode(of: StorefrontResponse.self, data) else {
+            return .failure(.decodeError)
+        }
+        
+        // 결과 반환하기
+        return .success(storefrontResponse)
+        
     }
     
     func fetchWeaponSkins() async -> Result<WeaponSkins, ResourceError> {

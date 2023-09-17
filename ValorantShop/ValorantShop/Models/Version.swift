@@ -17,7 +17,7 @@ final class Version: Object, Codable {
     }
 }
 
-final class ValorantVersion: Object, Codable {
+final class ValorantVersion: EmbeddedObject, Codable {
     @Persisted var riotClientVersion: String
     @Persisted var riotClientBuild: String
     

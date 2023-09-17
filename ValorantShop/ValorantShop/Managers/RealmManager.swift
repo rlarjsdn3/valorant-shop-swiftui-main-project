@@ -11,15 +11,20 @@ final class RealmManager {
     
     // MARK: - SINGLETON
     static let shared = RealmManager()
-    private init() { }
+    private init() {
+        let configuration = Realm.Configuration.init(
+            deleteRealmIfMigrationNeeded: true
+        )
+        realm = try! Realm(configuration: configuration)
+    }
     
     // MARK: - PROPERTIES
     
-    let realm: Realm = try! Realm()
+    let realm: Realm
     
     // MARK: - FUNCTIONS
     
-    func create(object: Object) {
+    func create(_ object: Object) {
         try! realm.write {
             realm.add(object)
         }

@@ -7,6 +7,22 @@
 
 import Foundation
 
+struct UserDefaults {
+    
+    // For Auth
+    static var isLoggedIn: String = "isLoggedIn"
+    
+    // For Resource
+    static var isDataDownloaded: String = "isDataDownloaded"
+}
+
+struct Keychains {
+    
+    // For Cookie
+    static var ssid: String = "SSID"
+    
+}
+
 struct OAuthURL {
     
     // For Auth
@@ -25,9 +41,10 @@ struct ResourceURL {
     static var wallet: String = "https://pd.kr.a.pvp.net/store/v1/wallet/"
     static var skins: String = "https://valorant-api.com/v1/weapons/skins/"
     static var prices: String = "https://pd.kr.a.pvp.net/store/v1/offers/"
+    static var storefront: String = "https://pd.kr.a.pvp.net/store/v2/storefront/"
     
     static func displayIcon(of type: ImageType, uuid: String) -> String {
-        let urlString = "https://media.valorant-api.com/\(type.path)/\(uuid)/displayicon.png"
+        let urlString = "https://media.valorant-api.com/\(type.path1)/\(uuid)/\(type.path2).png"
         return urlString
     }
     

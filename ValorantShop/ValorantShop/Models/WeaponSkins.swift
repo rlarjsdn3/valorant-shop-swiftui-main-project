@@ -16,7 +16,7 @@ final class WeaponSkins: Object, Codable {
     }
 }
 
-final class Skin: Object, Codable {
+final class Skin: EmbeddedObject, Codable {
     @Persisted var uuid: String
     @Persisted var displayName: String
     @Persisted var contentTierUUID: ContentTier?
@@ -40,7 +40,7 @@ enum ContentTier: String, PersistableEnum, Codable {
     case ultraEdition = "411e4a55-4e59-7757-41f0-86a53f101bb5"
 }
 
-final class Chroma: Object, Codable {
+final class Chroma: EmbeddedObject, Codable {
     @Persisted var uuid: String
     @Persisted var displayIcon: String?
     @Persisted var swatch: String?
@@ -52,7 +52,7 @@ final class Chroma: Object, Codable {
     }
 }
 
-final class Level: Object, Codable {
+final class Level: EmbeddedObject, Codable {
     @Persisted var uuid: String
     @Persisted var levelItem: LevelItem?
     @Persisted var streamedVideo: String?

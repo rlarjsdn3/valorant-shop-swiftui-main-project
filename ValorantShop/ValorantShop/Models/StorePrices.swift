@@ -15,7 +15,7 @@ final class StorePrices: Object, Codable {
     }
 }
 
-final class Offer: Object, Codable {
+final class Offer: EmbeddedObject, Codable {
     @Persisted var offerID: String // 무기 스킨의 첫 번째 Level의 UUID값
     @Persisted var cost: Cost?
     
@@ -25,7 +25,7 @@ final class Offer: Object, Codable {
     }
 }
 
-final class Cost: Object, Codable {
+final class Cost:  EmbeddedObject, Codable {
     @Persisted var vp: Int
 
     enum CodingKeys: String, CodingKey {

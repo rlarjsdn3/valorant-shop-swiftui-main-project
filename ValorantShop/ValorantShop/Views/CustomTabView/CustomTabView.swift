@@ -30,7 +30,7 @@ extension CustomTabType: Identifiable {
     var id: String { self.rawValue }
 }
 
-// MARK: - STRUCT
+// MARK: - VIEW
 
 struct CustomTabView: View {
     
