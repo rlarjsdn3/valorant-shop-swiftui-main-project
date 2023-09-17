@@ -36,7 +36,7 @@ struct ResourceURL {
     static var prices: String = "https://pd.kr.a.pvp.net/store/v1/offers/"
     
     static func displayIcon(of type: ImageType, uuid: String) -> String {
-        let urlString = "https://media.valorant-api.com/\(type.path)/\(uuid)/displayicon.png"
+        let urlString = "https://media.valorant-api.com/\(type.path1)/\(uuid)/\(type.path2).png"
         return urlString
     }
     

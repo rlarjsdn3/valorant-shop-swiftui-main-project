@@ -8,13 +8,41 @@
 import SwiftUI
 
 struct DownloadView: View {
+    
+    // MARK: - WRAPPER PROPERTIES
+    
+    @EnvironmentObject var viewModel: ViewModel
+    
+    // MARK: - BODY
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            ProgressView(value: Float(viewModel.totalDownloadedImageCount) / Float(viewModel.totalImageCountToDownload))
+                .progressViewStyle(.linear)
+            
+            Text("\(viewModel.totalDownloadedImageCount) / \(viewModel.totalImageCountToDownload)")
+                .font(.title)
+            
+            Button("다운로드 시작") {
+                Task {
+                    await viewModel.downloadStoreData()
+                }
+            }
+            .buttonStyle(.bordered)
+            
+            Button("데이터 전부 삭제") {
+                viewModel.deleteAll()
+            }
+        }
+        .padding()
     }
 }
+
+// MARK: - PREVIEW
 
 struct DownloadView_Previews: PreviewProvider {
     static var previews: some View {
         DownloadView()
+            .environmentObject(ViewModel())
     }
 }

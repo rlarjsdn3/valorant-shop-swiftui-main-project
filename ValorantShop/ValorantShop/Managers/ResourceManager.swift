@@ -14,23 +14,34 @@ enum ImageType: String {
     case weaponSkinChromas
     case weaponSkinSwatchs
     
-    var path: String {
+    var path1: String {
         switch self {
         case .weaponSkins:
             return "weaponskins"
         case .weaponSkinChromas:
-            return "weaponskinchromas"
+            fallthrough
         case .weaponSkinSwatchs:
-            return "weaponskinswatch"
+            return "weaponskinchromas"
+        }
+    }
+    
+    var path2: String {
+        switch self {
+        case .weaponSkins:
+            return "displayicon"
+        case .weaponSkinChromas:
+            return "fullrender"
+        case .weaponSkinSwatchs:
+            return "swatch"
         }
     }
     
     var prefixFileName: String {
         switch self {
         case .weaponSkins:
-            return "skin"
+            return "displayicon"
         case .weaponSkinChromas:
-            return "chroma"
+            return "displayicon"
         case .weaponSkinSwatchs:
             return "swatch"
         }
@@ -206,6 +217,7 @@ final class ResourceManager {
         // 상태 코드가 올바른지 확인하기
         guard let httpResponse = (response as? HTTPURLResponse),
               (200..<300) ~= httpResponse.statusCode else {
+            print("이미지 다운로드 실패 - \(uuid)")
             return .failure(.statusCodeError)
         }
         
