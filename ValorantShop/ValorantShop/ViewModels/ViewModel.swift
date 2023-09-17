@@ -46,8 +46,8 @@ final class ViewModel: ObservableObject {
     func login(username: String, password: String) async {
         do {
             // ID와 패스워드로 로그인이 가능한지 확인하기
-            try await oauthManager.fetchAuthCookies().get()
-            try await oauthManager.fetchAccessToken(username: username, password: password).get()
+            let _ = try await oauthManager.fetchAuthCookies().get()
+            let _ = try await oauthManager.fetchAccessToken(username: username, password: password).get()
             // 로그인에 성공하면 UserDefaults 수정하기
             self.isLoggedIn = true
         } catch {
@@ -179,7 +179,6 @@ final class ViewModel: ObservableObject {
             let uuid = notDownloadedImage.uuid
             // 이미지 다운로드하기
             do {
-                print("다운로드할 이미지 이름 - \(makeImageFileName(of: imageType, uuid: uuid))")
                 imageData = try await resourceManager.fetchSkinImageData(
                     of: notDownloadedImage.imageType,
                     uuid: notDownloadedImage.uuid
@@ -199,7 +198,13 @@ final class ViewModel: ObservableObject {
         return "\(type.prefixFileName)-\(uuid).png"
     }
     
-    // For Test
+}
+
+
+
+// For Test
+extension ViewModel {
+    
     func deleteAll() {
         realmManager.deleteAll()
     }

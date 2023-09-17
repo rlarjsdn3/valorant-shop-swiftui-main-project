@@ -19,9 +19,9 @@ struct UserDefaultsKey {
 struct OAuthURL {
     
     // For Auth
-    static var auth: String = "https://auth.riotgames.com/api/v1/authorization"
-    static var reAuth: String = "https://auth.riotgames.com/api/v1/authorization"
-    static var entitlement: String = "https://entitlements.auth.riotgames.com/api/token/v1"
+    static var auth: String = "https://auth.riotgames.com/api/v1/authorization/"
+    static var reAuth: String = "https://auth.riotgames.com/api/v1/authorization/"
+    static var entitlement: String = "https://entitlements.auth.riotgames.com/api/token/v1/"
     
     // For User
     static var userInfo: String = "https://auth.riotgames.com/userinfo"
@@ -34,6 +34,7 @@ struct ResourceURL {
     static var wallet: String = "https://pd.kr.a.pvp.net/store/v1/wallet/"
     static var skins: String = "https://valorant-api.com/v1/weapons/skins/"
     static var prices: String = "https://pd.kr.a.pvp.net/store/v1/offers/"
+    static var storefront: String = "https://pd.kr.a.pvp.net/store/v2/storefront/"
     
     static func displayIcon(of type: ImageType, uuid: String) -> String {
         let urlString = "https://media.valorant-api.com/\(type.path1)/\(uuid)/\(type.path2).png"
