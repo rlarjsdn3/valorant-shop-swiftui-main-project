@@ -16,6 +16,8 @@ struct LoginView: View {
     @State private var inputUsername: String = ""
     @State private var inputPassword: String = ""
     
+    @State private var isPresenetDownloadView: Bool = false
+    
     // MARK: - BODY
     
     var body: some View {
@@ -36,49 +38,22 @@ struct LoginView: View {
             }
             .buttonStyle(.borderedProminent)
             
-            Button("ReAuth") {
-                Task {
-                    await viewModel.reAuth()
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Button("fetch RiotVersion") {
-                Task {
-                    await viewModel.fetchRiotVersion()
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Button("fetch Wallet") {
-                Task {
-                    await viewModel.fetchWallet()
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Button("fetch WeaponSkins") {
-                Task {
-                    await viewModel.fetchWeaponSkins()
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Button("fetch WeaponPrices") {
-                Task {
-                    await viewModel.fetchWeaponPrices()
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            
             Button("로그아웃") {
                 Task {
                     await viewModel.logout()
                 }
             }
             .buttonStyle(.borderedProminent)
+            
+            Button("데이터 다운로드") {
+                isPresenetDownloadView = true
+            }
+            .buttonStyle(.borderedProminent)
         }
         .padding()
+        .sheet(isPresented: $isPresenetDownloadView) {
+            DownloadView()
+        }
     }
 }
 
