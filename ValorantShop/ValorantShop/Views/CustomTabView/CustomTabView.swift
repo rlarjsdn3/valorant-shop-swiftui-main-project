@@ -40,13 +40,7 @@ struct CustomTabView: View {
 
     // MARK: - WRAPPER PROPERTIES
     
-    @Binding var selectedCustomTab: CustomTabType
-    
-    // MARK: - INTIALIZER
-    
-    init(_ selectedCustomTab: Binding<CustomTabType>) {
-        self._selectedCustomTab = selectedCustomTab
-    }
+    @EnvironmentObject var viewModel: ViewModel
     
     // MARK: - BODY
     
@@ -57,11 +51,11 @@ struct CustomTabView: View {
                 
                 Button {
                     haptics.play(.soft)
-                    selectedCustomTab = type
+                    viewModel.selectedCustomTab = type
                 } label: {
                     Image(systemName: type.imageName)
                         .fontWeight(.bold)
-                        .foregroundColor(type == selectedCustomTab ? Color.valorantThemeColor : Color.black)
+                        .foregroundColor(type == viewModel.selectedCustomTab ? Color.valorantThemeColor : Color.black)
                         .padding()
                 }
 
@@ -78,6 +72,6 @@ struct CustomTabView: View {
 
 struct CustomTabView_Previews: PreviewProvider {
     static var previews: some View {
-        CustomTabView(.constant(.shop))
+        CustomTabView()
     }
 }

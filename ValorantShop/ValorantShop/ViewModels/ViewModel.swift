@@ -30,6 +30,7 @@ final class ViewModel: ObservableObject {
     // MARK: - WRAPPER PROPERTIES
     
     // For CustomTab
+    @Published var selectedCustomTab: CustomTabType = .shop
     
     // For Downlaod Data
     @Published var totalImageCountToDownload: Int = 0

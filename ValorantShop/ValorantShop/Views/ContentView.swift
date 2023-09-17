@@ -13,8 +13,6 @@ struct ContentView: View {
     
     @EnvironmentObject var viewModel: ViewModel
     
-    @State private var selectedCustomTab: CustomTabType = .shop
-    
     // MARK: - INTIALIZER
     
     init() {
@@ -33,7 +31,7 @@ struct ContentView: View {
         // 로그인을 하지 않았다면
         } else {
             VStack(spacing: 0) {
-                TabView(selection: $selectedCustomTab) {
+                TabView(selection: $viewModel.selectedCustomTab) {
                     ShopView()
                         .tag(CustomTabType.shop)
                     
@@ -44,7 +42,7 @@ struct ContentView: View {
                         .tag(CustomTabType.settings)
                 }
                 
-                CustomTabView($selectedCustomTab)
+                CustomTabView()
             }
             .onAppear {
                 Task {
