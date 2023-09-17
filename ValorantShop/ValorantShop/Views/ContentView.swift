@@ -11,6 +11,8 @@ struct ContentView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
+    @EnvironmentObject var viewModel: ViewModel
+    
     @State private var selectedCustomTab: CustomTabType = .shop
     
     // MARK: - INTIALIZER
@@ -22,11 +24,15 @@ struct ContentView: View {
     // MARK: - BODY
     
     var body: some View {
-        // For Test
-        if true {
+        // 로그인을 하였다면
+        if !viewModel.isLoggedIn {
             LoginView()
+                .onAppear {
+                    print(viewModel.isLoggedIn)
+                }
+        // 로그인을 하지 않았다면
         } else {
-            VStack {
+            VStack(spacing: 0) {
                 TabView(selection: $selectedCustomTab) {
                     ShopView()
                         .tag(CustomTabType.shop)
@@ -40,6 +46,11 @@ struct ContentView: View {
                 
                 CustomTabView($selectedCustomTab)
             }
+            .onAppear {
+                Task {
+                    await viewModel.getStoreRotationWeaponSkins()
+                }
+            }
         }
     }
 }
@@ -49,5 +60,6 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .environmentObject(ViewModel())
     }
 }

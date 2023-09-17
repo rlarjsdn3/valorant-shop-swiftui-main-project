@@ -106,7 +106,7 @@ final class ResourceManager {
     
     // MARK: - PROPERTIES
     
-    let urlSession = URLSession.shared
+    var urlSession = URLSession.shared
     
     // MARK: - FUNCTIONS
     

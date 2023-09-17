@@ -77,7 +77,7 @@ final class OAuthManager {
     
     let keychain: Keychain = Keychain()
     // 캐시・쿠키 등 자격 증명을 디스크에 기록하지 않는 URLSession 설정
-    let urlSession: URLSession = URLSession(configuration: .ephemeral)
+    var urlSession: URLSession = URLSession(configuration: .ephemeral)
     
     // MARK: - FUNCTIONS
     

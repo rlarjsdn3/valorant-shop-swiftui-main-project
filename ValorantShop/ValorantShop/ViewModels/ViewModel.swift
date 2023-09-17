@@ -29,9 +29,14 @@ final class ViewModel: ObservableObject {
     
     // MARK: - WRAPPER PROPERTIES
     
+    // For CustomTab
+    
     // For Downlaod Data
     @Published var totalImageCountToDownload: Int = 0
     @Published var totalDownloadedImageCount: Int = 0
+    
+    // For Storefront
+    @Published var storeRotationWeaponSkins: [(skin: Skin, price: Int)] = []
     
     // MARK: - PROPERTIES
     
@@ -48,7 +53,7 @@ final class ViewModel: ObservableObject {
             // ID와 패스워드로 로그인이 가능한지 확인하기
             let _ = try await oauthManager.fetchAuthCookies().get()
             let _ = try await oauthManager.fetchAccessToken(username: username, password: password).get()
-            // 로그인에 성공하면 UserDefaults 수정하기
+            // 로그인에 성공하면 성공 여부 수정하기
             self.isLoggedIn = true
         } catch {
             // 로그인에 실패하면 예외 처리하기
@@ -56,6 +61,10 @@ final class ViewModel: ObservableObject {
     }
     
     func logout() {
+        // 새로운 세션 할당하기
+        oauthManager.urlSession = URLSession(configuration: .ephemeral)
+        resourceManager.urlSession = URLSession.shared
+        
         // ReAuth를 위한 쿠키 정보 삭제하기
         try? keychain.removeAll()
         
@@ -191,19 +200,22 @@ final class ViewModel: ObservableObject {
             try imageData.write(to: saveUrl)
         }
         
+        // 다운로드를 모두 마치면 성공 여부 수정하기
+        self.isDataDownloaded = true
+        
     }
     
     private func makeImageFileName(of type: ImageType, uuid: String) -> String {
         return "\(type.prefixFileName)-\(uuid).png"
     }
     
-    func getStoreRotationWeaponSkins() async -> [(skin: Skin, price: Int)]? {
+    func getStoreRotationWeaponSkins() async {
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
         var storeRotationWeaponSkins: [(skin: Skin, price: Int)] = []
         // Realm으로부터 스킨 데이터 불러오기
-        guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else { return nil }
+        guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else { return }
         // Realm으로부터 가격 데이터 불러오기
-        guard let prices = realmManager.read(of: StorePrices.self).first?.offers else { return nil }
+        guard let prices = realmManager.read(of: StorePrices.self).first?.offers else { return }
         
         do {
             // 접근 토큰, 등록 정보 및 PUUID값 가져오기
@@ -240,10 +252,10 @@ final class ViewModel: ObservableObject {
                 storeRotationWeaponSkins.append((skin, price))
             }
 
-            // 결과 반환하기
-            return storeRotationWeaponSkins
+            // 결과 업데이트하기
+            self.storeRotationWeaponSkins = storeRotationWeaponSkins
         } catch {
-            return nil
+            return
         }
     }
     

@@ -8,12 +8,28 @@
 import SwiftUI
 
 struct SettingsView: View {
+    
+    // MARK: - WRAPPER PROPERTIES
+    
+    @EnvironmentObject var viewModel: ViewModel
+    
+    // MARK: - BODY
+    
     var body: some View {
-        Text("Settings View")
-            .font(.largeTitle)
-            .fontWeight(.black)
+        NavigationStack {
+            List {
+                Section {
+                    Button("로그아웃", role: .destructive) {
+                        viewModel.logout()
+                    }
+                }
+            }
+            .navigationTitle("설정")
+        }
     }
 }
+
+// MARK: - PREVIEW
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {

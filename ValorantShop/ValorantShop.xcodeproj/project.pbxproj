@@ -30,6 +30,7 @@
 		9EB4C5672AB4A68500AE4425 /* StorePrices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5662AB4A68500AE4425 /* StorePrices.swift */; };
 		9EB4C5692AB4A85D00AE4425 /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */; };
 		9ED509562AB6A6F200149206 /* DownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509552AB6A6F200149206 /* DownloadView.swift */; };
+		9ED509582AB71D8700149206 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509572AB71D8700149206 /* View+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		9EB4C5662AB4A68500AE4425 /* StorePrices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePrices.swift; sourceTree = "<group>"; };
 		9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
 		9ED509552AB6A6F200149206 /* DownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadView.swift; sourceTree = "<group>"; };
+		9ED509572AB71D8700149206 /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,6 +156,7 @@
 		9E2922982AB0AE3300D6FE07 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				9ED509572AB71D8700149206 /* View+Extension.swift */,
 				9E266E712AB208C700178F25 /* Color+Extension.swift */,
 			);
 			name = Extensions;
@@ -291,6 +294,7 @@
 				9ED509562AB6A6F200149206 /* DownloadView.swift in Sources */,
 				9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */,
 				9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */,
+				9ED509582AB71D8700149206 /* View+Extension.swift in Sources */,
 				9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */,
 				9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */,
 				9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */,
