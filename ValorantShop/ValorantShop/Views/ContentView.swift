@@ -30,19 +30,30 @@ struct ContentView: View {
                 }
         // 로그인을 하지 않았다면
         } else {
-            VStack(spacing: 0) {
-                TabView(selection: $viewModel.selectedCustomTab) {
-                    ShopView()
-                        .tag(CustomTabType.shop)
-                    
-                    CollectionView()
-                        .tag(CustomTabType.collection)
-                    
-                    SettingsView()
-                        .tag(CustomTabType.settings)
+            Group {
+                if viewModel.showLaunchScreenView {
+                    VStack {
+                        Text("VALORANT SHOP")
+                            .font(.custom("VALORANT-Regular", size: 30))
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                    }
+                } else {
+                    VStack(spacing: 0) {
+                        TabView(selection: $viewModel.selectedCustomTab) {
+                            ShopView()
+                                .tag(CustomTabType.shop)
+                            
+                            CollectionView()
+                                .tag(CustomTabType.collection)
+                            
+                            SettingsView()
+                                .tag(CustomTabType.settings)
+                        }
+                        
+                        CustomTabView()
+                    }
                 }
-                
-                CustomTabView()
             }
             .onAppear {
                 Task {

@@ -31,6 +31,7 @@
 		9EB4C5692AB4A85D00AE4425 /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */; };
 		9ED509562AB6A6F200149206 /* DownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509552AB6A6F200149206 /* DownloadView.swift */; };
 		9ED509582AB71D8700149206 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509572AB71D8700149206 /* View+Extension.swift */; };
+		9ED5095B2AB7358400149206 /* Valorant-Font.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ED5095A2AB7358400149206 /* Valorant-Font.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,8 @@
 		9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
 		9ED509552AB6A6F200149206 /* DownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadView.swift; sourceTree = "<group>"; };
 		9ED509572AB71D8700149206 /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
+		9ED5095A2AB7358400149206 /* Valorant-Font.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Valorant-Font.ttf"; sourceTree = "<group>"; };
+		9ED5095C2AB735D900149206 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +103,7 @@
 		9E2922862AB0A9D200D6FE07 /* ValorantShop */ = {
 			isa = PBXGroup;
 			children = (
+				9ED5095C2AB735D900149206 /* Info.plist */,
 				9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */,
 				9E2922952AB0AE0B00D6FE07 /* Views */,
 				9EB4C5612AB49D7B00AE4425 /* Models */,
@@ -107,6 +111,7 @@
 				9E2922972AB0AE2C00D6FE07 /* Managers */,
 				9E2922982AB0AE3300D6FE07 /* Extensions */,
 				9E2922992AB0AE4100D6FE07 /* Constants */,
+				9ED509592AB7356D00149206 /* Fonts */,
 				9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */,
 				9E29228D2AB0A9D200D6FE07 /* Preview Content */,
 			);
@@ -212,6 +217,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		9ED509592AB7356D00149206 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				9ED5095A2AB7358400149206 /* Valorant-Font.ttf */,
+			);
+			name = Fonts;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -280,6 +293,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E29228F2AB0A9D200D6FE07 /* Preview Assets.xcassets in Resources */,
+				9ED5095B2AB7358400149206 /* Valorant-Font.ttf in Resources */,
 				9E29228C2AB0A9D200D6FE07 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -441,6 +455,7 @@
 				DEVELOPMENT_TEAM = 4DQM269FVB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ValorantShop/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -470,6 +485,7 @@
 				DEVELOPMENT_TEAM = 4DQM269FVB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ValorantShop/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

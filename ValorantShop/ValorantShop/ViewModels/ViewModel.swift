@@ -17,6 +17,10 @@ struct ReAuthTokens {
     let puuid: String
 }
 
+struct StoreRotationWeaponkins {
+    var weaponSkins: [(skin: Skin, price: Int)] = []
+}
+
 // MARK: - VIEW MODEL
 
 @MainActor
@@ -29,6 +33,9 @@ final class ViewModel: ObservableObject {
     
     // MARK: - WRAPPER PROPERTIES
     
+    // For LaunchScreen
+    @Published var showLaunchScreenView: Bool = true
+    
     // For CustomTab
     @Published var selectedCustomTab: CustomTabType = .shop
     
@@ -37,7 +44,8 @@ final class ViewModel: ObservableObject {
     @Published var totalDownloadedImageCount: Int = 0
     
     // For Storefront
-    @Published var storeRotationWeaponSkins: [(skin: Skin, price: Int)] = []
+    @Published var storeRotationWeaponSkins: StoreRotationWeaponkins = StoreRotationWeaponkins()
+    @Published var rotationWeaponSkinsRemainingSeconds: Int = 0
     
     // MARK: - PROPERTIES
     
@@ -46,6 +54,21 @@ final class ViewModel: ObservableObject {
     let resourceManager = ResourceManager.shared
     
     let keychain = Keychain()
+    
+    var timer: Timer?
+    
+    // MARK: - INTIALIZER
+    
+    init() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
+            // self 키워드 옵셔널 바인딩하기
+            guard let self = self else { return }
+            // 다음 상점 로테이션까지 남은 초(sec)가 0 이상이라면
+            if self.rotationWeaponSkinsRemainingSeconds > 0 {
+                self.rotationWeaponSkinsRemainingSeconds -= 1
+            }
+        })
+    }
     
     // MARK: - FUNCTIONS
     
@@ -212,7 +235,7 @@ final class ViewModel: ObservableObject {
     
     func getStoreRotationWeaponSkins() async {
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
-        var storeRotationWeaponSkins: [(skin: Skin, price: Int)] = []
+        var storeRotationWeaponSkins: StoreRotationWeaponkins = StoreRotationWeaponkins()
         // Realm으로부터 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else { return }
         // Realm으로부터 가격 데이터 불러오기
@@ -227,6 +250,9 @@ final class ViewModel: ObservableObject {
                 riotEntitlement: reAuthTokens.riotEntitlement,
                 puuid: reAuthTokens.puuid
             ).get()
+            
+            // 다음 로테이션까지 남은 시간 정보 저장하기
+            self.rotationWeaponSkinsRemainingSeconds = storefront.skinsPanelLayout.singleItemOffersRemainingDurationInSeconds
             
             // 상점 로테이션 스킨 필터링하기
             for singleItemUUID in storefront.skinsPanelLayout.singleItemOffers {
@@ -250,8 +276,11 @@ final class ViewModel: ObservableObject {
                       let price = filteredPrice else {
                     continue
                 }
-                storeRotationWeaponSkins.append((skin, price))
+                storeRotationWeaponSkins.weaponSkins.append((skin, price))
             }
+            
+            // 런치 스크린 화면 끄기
+            self.showLaunchScreenView = false
 
             // 결과 업데이트하기
             self.storeRotationWeaponSkins = storeRotationWeaponSkins

@@ -18,7 +18,7 @@ struct ShopView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(viewModel.storeRotationWeaponSkins, id: \.skin.uuid) { weaponSkin in
+                ForEach(viewModel.storeRotationWeaponSkins.weaponSkins, id: \.skin.uuid) { weaponSkin in
                     VStack {
                         loadImage(of: ImageType.weaponSkins, uuid: weaponSkin.skin.uuid)
                             .resizable()
@@ -28,7 +28,17 @@ struct ShopView: View {
                         Text("\(weaponSkin.price)")
                     }
                 }
+                
+                Text("\(viewModel.rotationWeaponSkinsRemainingSeconds)")
             }
+        }
+        .onAppear {
+            for family: String in UIFont.familyNames {
+                            print(family)
+                            for names : String in UIFont.fontNames(forFamilyName: family){
+                                print("=== \(names)")
+                            }
+                        }
         }
     }
 }

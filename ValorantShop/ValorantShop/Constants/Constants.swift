@@ -49,3 +49,9 @@ struct ResourceURL {
     }
     
 }
+
+struct Fonts {
+    
+    // For Font
+    static var valorantFont: String = "VALORANT-Regular"
+}

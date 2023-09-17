@@ -22,6 +22,9 @@ struct LoginView: View {
     
     var body: some View {
         VStack {
+            Text("VALORANT SHOP")
+                .font(.custom(Fonts.valorantFont, size: 40))
+            
             Group {
                 TextField("아이디", text: $inputUsername)
                 SecureField("패스워드", text: $inputPassword)
@@ -52,9 +55,6 @@ struct LoginView: View {
                 Task {
                     await viewModel.getStoreRotationWeaponSkins()
                 }
-//                Task {
-//                    await viewModel.fetchReAuthTokens()
-//                }
             }
             .buttonStyle(.borderedProminent)
         }
