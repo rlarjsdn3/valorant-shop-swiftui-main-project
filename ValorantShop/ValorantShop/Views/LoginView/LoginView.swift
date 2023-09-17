@@ -47,6 +47,16 @@ struct LoginView: View {
                 isPresenetDownloadView = true
             }
             .buttonStyle(.borderedProminent)
+            
+            Button("오늘의 상점") {
+                Task {
+                    await viewModel.getStoreRotationWeaponSkins()
+                }
+//                Task {
+//                    await viewModel.fetchReAuthTokens()
+//                }
+            }
+            .buttonStyle(.borderedProminent)
         }
         .padding()
         .sheet(isPresented: $isPresenetDownloadView) {

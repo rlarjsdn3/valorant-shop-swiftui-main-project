@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct UserDefaultsKey {
+struct UserDefaults {
     
     // For Auth
     static var isLoggedIn: String = "isLoggedIn"
@@ -16,12 +16,19 @@ struct UserDefaultsKey {
     static var isDataDownloaded: String = "isDataDownloaded"
 }
 
+struct Keychains {
+    
+    // For Cookie
+    static var ssid: String = "SSID"
+    
+}
+
 struct OAuthURL {
     
     // For Auth
-    static var auth: String = "https://auth.riotgames.com/api/v1/authorization/"
-    static var reAuth: String = "https://auth.riotgames.com/api/v1/authorization/"
-    static var entitlement: String = "https://entitlements.auth.riotgames.com/api/token/v1/"
+    static var auth: String = "https://auth.riotgames.com/api/v1/authorization"
+    static var reAuth: String = "https://auth.riotgames.com/api/v1/authorization"
+    static var entitlement: String = "https://entitlements.auth.riotgames.com/api/token/v1"
     
     // For User
     static var userInfo: String = "https://auth.riotgames.com/userinfo"

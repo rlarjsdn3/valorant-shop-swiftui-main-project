@@ -24,8 +24,8 @@ final class ViewModel: ObservableObject {
     
     // MARK: - USER DEFAULTS
     
-    @AppStorage(UserDefaultsKey.isLoggedIn) var isLoggedIn: Bool = false
-    @AppStorage(UserDefaultsKey.isDataDownloaded) var isDataDownloaded: Bool = false
+    @AppStorage(UserDefaults.isLoggedIn) var isLoggedIn: Bool = false
+    @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -63,16 +63,17 @@ final class ViewModel: ObservableObject {
         self.isLoggedIn = false
     }
     
-    private func fetchReAuthTokens() async -> ReAuthTokens? {
+    private func fetchReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
         do {
             // 쿠키 정보를 통해 접근 토큰, 등록 정보 및 PUUID값 가져오기
             let accessToken: String = try await oauthManager.fetchReAuthCookies().get()
             let riotEntitlement: String = try await oauthManager.fetchRiotEntitlement(accessToken: accessToken).get()
             let puuid: String = try await oauthManager.fetchRiotAccountPUUID(accessToken: accessToken).get()
-            return ReAuthTokens(accessToken: accessToken, riotEntitlement: riotEntitlement, puuid: puuid)
+            let reAuthTokens = ReAuthTokens(accessToken: accessToken, riotEntitlement: riotEntitlement, puuid: puuid)
+            return .success(reAuthTokens)
         } catch {
-            // 토큰 정보 가져오기에 실패하면 nil 반환하기
-            return nil
+            // 토큰 정보 가져오기에 실패하면 예외 던지기
+            return .failure(.noTokenError)
         }
     }
     
@@ -97,8 +98,8 @@ final class ViewModel: ObservableObject {
     }
     
     private func downloadStorePricesData() async throws {
-        //  접근 토큰, 등록 정보 및 PUUID값 가져오기
-        guard let reAuthTokens = await self.fetchReAuthTokens() else { return }
+        // 접근 토큰, 등록 정보 및 PUUID값 가져오기
+        let reAuthTokens = try await self.fetchReAuthTokens().get()
         // 상점 가격 데이터 다운로드받기
         let storePrices = try await resourceManager.fetchStorePrices(
             accessToken: reAuthTokens.accessToken,
@@ -118,7 +119,7 @@ final class ViewModel: ObservableObject {
     
     private func downloadWeaponSkinImages() async throws {
         // Realm으로부터 스킨 데이터 불러오기
-        let weaponSkins = realmManager.read(of: WeaponSkins.self)
+        guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else { return }
         
         // 경로 접근을 위한 파일 매니저 선언하기
         let fileManager = FileManager.default
@@ -127,8 +128,6 @@ final class ViewModel: ObservableObject {
         // 경로에 이미지가 저장되지 않은 스킨 UUID값 저장하기
         var notDownloadedImages: [(imageType: ImageType, uuid: String)] = []
         
-        // 정상적으로 스킨 데이터를 불러왔는지 확인하기
-        guard let skins = weaponSkins.first?.skins else { return }
         // 스킨 데이터를 순회하며 저장되지 않은 스킨 이미지 UUID값 솎아내기
         for skin in skins {
             // UUID값 저장하기
@@ -196,6 +195,56 @@ final class ViewModel: ObservableObject {
     
     private func makeImageFileName(of type: ImageType, uuid: String) -> String {
         return "\(type.prefixFileName)-\(uuid).png"
+    }
+    
+    func getStoreRotationWeaponSkins() async -> [(skin: Skin, price: Int)]? {
+        // 스킨과 가격 정보를 저장할 배열 변수 선언하기
+        var storeRotationWeaponSkins: [(skin: Skin, price: Int)] = []
+        // Realm으로부터 스킨 데이터 불러오기
+        guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else { return nil }
+        // Realm으로부터 가격 데이터 불러오기
+        guard let prices = realmManager.read(of: StorePrices.self).first?.offers else { return nil }
+        
+        do {
+            // 접근 토큰, 등록 정보 및 PUUID값 가져오기
+            let reAuthTokens = try await self.fetchReAuthTokens().get()
+            // 오늘의 로테이션 상점 정보 가져오기
+            let storefront = try await resourceManager.fetchStorefront(
+                accessToken: reAuthTokens.accessToken,
+                riotEntitlement: reAuthTokens.riotEntitlement,
+                puuid: reAuthTokens.puuid
+            ).get()
+            
+            // 상점 로테이션 스킨 필터링하기
+            for singleItemUUID in storefront.skinsPanelLayout.singleItemOffers {
+                // 스킨 데이터를 저장할 변수 선언하기
+                var filteredSkin: Skin?
+                // 가격 데이터를 저장할 변수 선언하기
+                var filteredPrice: Int?
+                // 스킨 데이터 필터링하기
+                if let firstSkinIndex = skins.firstIndex(where: {
+                    $0.levels.first?.uuid == singleItemUUID }) {
+                    filteredSkin = skins[firstSkinIndex]
+                }
+                // 가격 데이터 필터링하기
+                if let firstPriceIndex = prices.firstIndex(where: {
+                    $0.offerID == singleItemUUID }) {
+                    filteredPrice = prices[firstPriceIndex].cost?.vp
+                }
+                
+                // 필터링한 스킨과 가격 데이터 옵셔날 바인딩하기
+                guard let skin = filteredSkin,
+                      let price = filteredPrice else {
+                    continue
+                }
+                storeRotationWeaponSkins.append((skin, price))
+            }
+
+            // 결과 반환하기
+            return storeRotationWeaponSkins
+        } catch {
+            return nil
+        }
     }
     
 }
