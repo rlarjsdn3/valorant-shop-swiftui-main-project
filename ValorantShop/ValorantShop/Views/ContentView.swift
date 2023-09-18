@@ -28,7 +28,7 @@ struct ContentView: View {
         // 로그인을 하지 않았다면
         } else {
             Group {
-                if viewModel.showLaunchScreenView {
+                if viewModel.isPresentLaunchScreenView {
                     VStack {
                         Text("VALORANT SHOP")
                             .font(.custom("VALORANT-Regular", size: 30))

@@ -63,6 +63,9 @@ struct LoginView: View {
         .sheet(isPresented: $isPresenetDownloadView) {
             DownloadView()
         }
+        .sheet(isPresented: $viewModel.isPresentMultifactorAuthView) {
+            MultifactorAuthView()
+        }
     }
 }
 
