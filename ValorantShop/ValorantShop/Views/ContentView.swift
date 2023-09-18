@@ -25,9 +25,6 @@ struct ContentView: View {
         // 로그인을 하였다면
         if !viewModel.isLoggedIn {
             LoginView()
-                .onAppear {
-                    print(viewModel.isLoggedIn)
-                }
         // 로그인을 하지 않았다면
         } else {
             Group {

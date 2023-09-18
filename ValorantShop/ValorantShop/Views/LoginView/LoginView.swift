@@ -22,8 +22,9 @@ struct LoginView: View {
     
     var body: some View {
         VStack {
-            Text("VALORANT SHOP")
+            Text("Valorant Shop")
                 .font(.custom(Fonts.valorantFont, size: 40))
+                .foregroundColor(Color.valorantThemeColor)
             
             Group {
                 TextField("아이디", text: $inputUsername)

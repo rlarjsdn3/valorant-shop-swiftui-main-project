@@ -13,10 +13,10 @@ import KeychainAccess
 enum OAuthError: Error {
     case urlError
     case statusCodeError
-    case needMultifactor
-    case encodeError
-    case decodeErorr
+    case networkError
+    case parsingError
     case noTokenError
+    case needMultifactor
 }
 
 // MARK: - HTTP BODY
@@ -97,7 +97,10 @@ final class OAuthManager {
         urlRequest.httpBody = self.encode(authCookiesBody)
         
         // 비동기 HTTP 통신하기
-        let (_, response) = try! await urlSession.data(for: urlRequest)
+        guard let (_, response) = try? await urlSession.data(for: urlRequest) else {
+            print("네트워크 에러: \(#function)")
+            return .failure(.networkError)
+        }
         // 상태 코드가 올바른지 확인하기
         guard let httpResponse = (response as? HTTPURLResponse),
               (200..<300) ~= httpResponse.statusCode else {
@@ -130,7 +133,10 @@ final class OAuthManager {
         self.setCookie(ssid, key: "ssid")
         
         // 비동기 HTTP 통신하기
-        let (data, response) = try! await urlSession.data(for: urlRequest)
+        guard let (data, response) = try? await urlSession.data(for: urlRequest) else {
+            print("네트워크 에러: \(#function)")
+            return .failure(.networkError)
+        }
         // 상태 코드가 올바른지 확인하기
         guard let httpResponse = (response as? HTTPURLResponse),
               (200..<300) ~= httpResponse.statusCode else {
@@ -141,7 +147,7 @@ final class OAuthManager {
         guard let authRequestResponse = decode(of: AuthRequestResponse.self, data),
               let uri = authRequestResponse.response?.parameters?.uri else {
             print("파싱 에러: \(#function)")
-            return .failure(.decodeErorr)
+            return .failure(.parsingError)
         }
         // 리다이렉트된 URI에서 Access Token 추출하기
         let tokenPattern: String = #"access_token=((?:[a-zA-Z]|\d|\.|-|_)*).*id_token=((?:[a-zA-Z]|\d|\.|-|_)*).*expires_in=(\d*)"#
@@ -175,7 +181,10 @@ final class OAuthManager {
         urlRequest.httpBody = self.encode(authRequestBody)
         
         // 비동기 HTTP 통신하기
-        let (data, response) = try! await urlSession.data(for: urlRequest)
+        guard let (data, response) = try? await urlSession.data(for: urlRequest) else {
+            print("네트워크 에러: \(#function)")
+            return .failure(.networkError)
+        }
         // 상태 코드가 올바른지 확인하기
         guard let httpResponse = (response as? HTTPURLResponse),
               (200..<300) ~= httpResponse.statusCode else {
@@ -186,7 +195,7 @@ final class OAuthManager {
         guard let authRequestResponse = decode(of: AuthRequestResponse.self, data),
               let uri = authRequestResponse.response?.parameters?.uri else {
             print("파싱 에러: \(#function)")
-            return .failure(.decodeErorr)
+            return .failure(.parsingError)
         }
         
         // 리다이렉트된 URI에서 Access Token 추출하기
@@ -196,9 +205,9 @@ final class OAuthManager {
             return .failure(.noTokenError)
         }
         let accessToken = String(uri[range].split(separator: "&")[0].split(separator: "=")[1])
-        print(accessToken) // ...
+
         // ReAuth를 위해 SSID와 TDID값을 키체인에 저장하기
-        saveSSIDToKeyChain(httpResponse)
+        saveSSIDToKeychain(httpResponse)
         
         // 결과 반환하기
         return .success(accessToken)
@@ -217,16 +226,21 @@ final class OAuthManager {
         urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         // 비동기 HTTP 통신하기
-        let (data, response) = try! await urlSession.data(for: urlRequest)
+        guard let (data, response) = try? await urlSession.data(for: urlRequest) else {
+            print("네트워크 에러: \(#function)")
+            return .failure(.networkError)
+        }
         // 상태 코드가 올바른지 확인하기
         guard let httpResponse = (response as? HTTPURLResponse),
               (200..<300) ~= httpResponse.statusCode else {
+            print("상태 코드 에러: \(#function)")
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
         guard let entitlementResponse = self.decode(of: EntitlementResponse.self, data),
               let riotEntitlement = entitlementResponse.entitlementToken else {
-            return .failure(.decodeErorr)
+            print("파싱 에러: \(#function)")
+            return .failure(.parsingError)
         }
         
         // 결과 반환하기
@@ -246,25 +260,27 @@ final class OAuthManager {
         urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         // 비동기 HTTP 통신하기
-        let (data, response) = try! await urlSession.data(for: urlRequest)
+        guard let (data, response) = try? await urlSession.data(for: urlRequest) else {
+            print("네트워크 에러: \(#function)")
+            return .failure(.networkError)
+        }
         // 상태 코드가 올바른지 확인하기
         guard let httpResponse = (response as? HTTPURLResponse),
               (200..<300) ~= httpResponse.statusCode else {
-            print("상태 코드 에러")
+            print("상태 코드 에러: \(#function)")
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
         guard let playerInfoResponse = self.decode(of: PlayerInfoResponse.self, data) else {
-            print("파싱 에러")
-            return .failure(.decodeErorr)
+            print("파싱 에러: \(#function)")
+            return .failure(.parsingError)
         }
-        print("puuid = \(playerInfoResponse.uuid)")
         
         // 결과 반환하기
         return .success(playerInfoResponse.uuid)
     }
     
-    private func saveSSIDToKeyChain(_ httpResponse: HTTPURLResponse) {
+    private func saveSSIDToKeychain(_ httpResponse: HTTPURLResponse) {
         // For Dubug
         print(#function)
         

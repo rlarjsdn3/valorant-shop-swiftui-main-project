@@ -23,7 +23,6 @@ struct StoreRotationWeaponkins {
 
 // MARK: - VIEW MODEL
 
-@MainActor
 final class ViewModel: ObservableObject {
     
     // MARK: - USER DEFAULTS
@@ -94,6 +93,9 @@ final class ViewModel: ObservableObject {
         
         // 로그인 여부 및 사용자 정보 삭제하기
         self.isLoggedIn = false
+        
+        // 커스탬 탭 선택 초기화하기
+        self.selectedCustomTab = .shop
     }
     
     private func fetchReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
@@ -143,13 +145,13 @@ final class ViewModel: ObservableObject {
     }
     
     private func saveStoreData<T: Object>(_ object: T) {
-        print(T.self)
         // 데이터를 저장하기 전, 기존 데이터 삭제하기
         realmManager.deleteAll(of: T.self)
         // 새로운 데이터 저장하기
         realmManager.create(object)
     }
     
+    @MainActor
     private func downloadWeaponSkinImages() async throws {
         // Realm으로부터 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else { return }
@@ -233,6 +235,7 @@ final class ViewModel: ObservableObject {
         return "\(type.prefixFileName)-\(uuid).png"
     }
     
+    @MainActor
     func getStoreRotationWeaponSkins() async {
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
         var storeRotationWeaponSkins: StoreRotationWeaponkins = StoreRotationWeaponkins()
@@ -279,25 +282,16 @@ final class ViewModel: ObservableObject {
                 storeRotationWeaponSkins.weaponSkins.append((skin, price))
             }
             
-            // 런치 스크린 화면 끄기
-            self.showLaunchScreenView = false
+            withAnimation(.easeInOut(duration: 0.2)) {
+                // 런치 스크린 화면 끄기
+                self.showLaunchScreenView = false
+            }
 
             // 결과 업데이트하기
             self.storeRotationWeaponSkins = storeRotationWeaponSkins
         } catch {
             return
         }
-    }
-    
-}
-
-
-
-// For Test
-extension ViewModel {
-    
-    func deleteAll() {
-        realmManager.deleteAll()
     }
     
 }

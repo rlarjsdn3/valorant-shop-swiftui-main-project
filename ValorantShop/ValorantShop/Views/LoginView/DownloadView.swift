@@ -29,10 +29,6 @@ struct DownloadView: View {
                 }
             }
             .buttonStyle(.bordered)
-            
-            Button("데이터 전부 삭제") {
-                viewModel.deleteAll()
-            }
         }
         .padding()
     }
