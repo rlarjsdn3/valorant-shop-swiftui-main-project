@@ -33,7 +33,10 @@ final class ViewModel: ObservableObject {
     // MARK: - WRAPPER PROPERTIES
     
     // For LaunchScreen
-    @Published var showLaunchScreenView: Bool = true
+    @Published var isPresentLaunchScreenView: Bool = true
+    
+    // For MultifactorAuth
+    @Published var isPresentMultifactorAuthView: Bool = false
     
     // For CustomTab
     @Published var selectedCustomTab: CustomTabType = .shop
@@ -77,6 +80,22 @@ final class ViewModel: ObservableObject {
             // ID와 패스워드로 로그인이 가능한지 확인하기
             let _ = try await oauthManager.fetchAuthCookies().get()
             let _ = try await oauthManager.fetchAccessToken(username: username, password: password).get()
+            // 로그인에 성공하면 성공 여부 수정하기
+            self.isLoggedIn = true
+        // 이중 인증이 필요하다면
+        } catch OAuthError.needMultifactor {
+            // 이중 인증 화면 보이게 하기
+            self.isPresentMultifactorAuthView = true
+        } catch {
+            // 로그인에 실패하면 예외 처리하기
+        }
+    }
+    
+    @MainActor
+    func login(authenticationCode code: String) async {
+        do {
+            // 이중 인증 코드로 로그인이 가능한지 확인하기
+            let _ = try await oauthManager.fetchMultifactorAuth(authenticationCode: code).get()
             // 로그인에 성공하면 성공 여부 수정하기
             self.isLoggedIn = true
         } catch {
@@ -285,7 +304,7 @@ final class ViewModel: ObservableObject {
             
             withAnimation(.easeInOut(duration: 0.2)) {
                 // 런치 스크린 화면 끄기
-                self.showLaunchScreenView = false
+                self.isPresentLaunchScreenView = false
             }
 
             // 결과 업데이트하기

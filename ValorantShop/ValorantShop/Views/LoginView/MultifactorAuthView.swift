@@ -8,13 +8,38 @@
 import SwiftUI
 
 struct MultifactorAuthView: View {
+    
+    // MARK: - WRAPPER PROPERTIES
+    
+    @EnvironmentObject var viewModel: ViewModel
+    
+    @State private var inputAuthenticationCode: String = ""
+    
+    // MARK: - BODY
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            Text("Login Code")
+                .font(.custom(Fonts.valorantFont, size: 40))
+            
+            TextField("로그인 코드", text: $inputAuthenticationCode)
+                .textFieldStyle(.roundedBorder)
+            
+            Button("확인") {
+                Task {
+                    await viewModel.login(authenticationCode: inputAuthenticationCode)
+                }
+            }
+        }
+        .padding()
     }
 }
+
+// MARK: - PREVIEW
 
 struct MultifactorAuthView_Previews: PreviewProvider {
     static var previews: some View {
         MultifactorAuthView()
+            .environmentObject(ViewModel())
     }
 }

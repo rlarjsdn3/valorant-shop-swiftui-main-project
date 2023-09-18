@@ -24,6 +24,7 @@
 		9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A12AB0B51D00D6FE07 /* ShopView.swift */; };
 		9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A32AB0B54400D6FE07 /* CollectionView.swift */; };
 		9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */; };
+		9E7638712AB894A600BD0AB4 /* MultifactorAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */; };
 		9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAA7D7B2AB57F460095A205 /* ResourceManager.swift */; };
 		9EB4C5632AB49DB500AE4425 /* WeaponSkins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */; };
 		9EB4C5652AB4A14700AE4425 /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5642AB4A14700AE4425 /* Version.swift */; };
@@ -50,6 +51,7 @@
 		9E2922A12AB0B51D00D6FE07 /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
 		9E2922A32AB0B54400D6FE07 /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
 		9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultifactorAuthView.swift; sourceTree = "<group>"; };
 		9EAA7D7B2AB57F460095A205 /* ResourceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResourceManager.swift; sourceTree = "<group>"; };
 		9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponSkins.swift; sourceTree = "<group>"; };
 		9EB4C5642AB4A14700AE4425 /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 			children = (
 				9E266EAD2AB34A7400178F25 /* LoginView.swift */,
 				9ED509552AB6A6F200149206 /* DownloadView.swift */,
+				9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */,
 			);
 			path = LoginView;
 			sourceTree = "<group>";
@@ -308,6 +311,7 @@
 				9ED509562AB6A6F200149206 /* DownloadView.swift in Sources */,
 				9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */,
 				9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */,
+				9E7638712AB894A600BD0AB4 /* MultifactorAuthView.swift in Sources */,
 				9ED509582AB71D8700149206 /* View+Extension.swift in Sources */,
 				9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */,
 				9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */,
