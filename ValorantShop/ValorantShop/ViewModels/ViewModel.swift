@@ -71,6 +71,7 @@ final class ViewModel: ObservableObject {
     
     // MARK: - FUNCTIONS
     
+    @MainActor
     func login(username: String, password: String) async {
         do {
             // ID와 패스워드로 로그인이 가능한지 확인하기

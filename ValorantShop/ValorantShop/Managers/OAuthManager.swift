@@ -39,6 +39,7 @@ struct AuthRequestBody: Encodable {
 struct AuthRequestResponse: Decodable {
     let type: String?
     let response: Response?
+    let multifactor: Multifactor?
 }
 
 struct Response: Decodable {
@@ -47,6 +48,10 @@ struct Response: Decodable {
 
 struct URI: Decodable {
     let uri: String?
+}
+
+struct Multifactor: Decodable {
+    let email: String?
 }
 
 struct EntitlementResponse: Decodable {
@@ -144,10 +149,15 @@ final class OAuthManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let authRequestResponse = decode(of: AuthRequestResponse.self, data),
-              let uri = authRequestResponse.response?.parameters?.uri else {
+        guard let authRequestResponse = decode(of: AuthRequestResponse.self, data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
+        }
+        
+        // 리다이렉트된 URI에서 Access Token 추출하기
+        guard let uri = authRequestResponse.response?.parameters?.uri else {
+            print("토큰 없음 에러: \(#function)")
+            return .failure(.noTokenError)
         }
         // 리다이렉트된 URI에서 Access Token 추출하기
         let tokenPattern: String = #"access_token=((?:[a-zA-Z]|\d|\.|-|_)*).*id_token=((?:[a-zA-Z]|\d|\.|-|_)*).*expires_in=(\d*)"#
@@ -192,13 +202,22 @@ final class OAuthManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let authRequestResponse = decode(of: AuthRequestResponse.self, data),
-              let uri = authRequestResponse.response?.parameters?.uri else {
+        guard let authRequestResponse = decode(of: AuthRequestResponse.self, data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
         
+        // 이중 인증이 필요한지 확인하기
+        guard authRequestResponse.type != "multifactor" else {
+            return .failure(.needMultifactor)
+        }
+        
         // 리다이렉트된 URI에서 Access Token 추출하기
+        guard let uri = authRequestResponse.response?.parameters?.uri else {
+            print("토큰 없음 에러: \(#function)")
+            return .failure(.noTokenError)
+        }
+        // 정규 표현식으로 AcessToken 솎아내기
         let tokenPattern: String = #"access_token=((?:[a-zA-Z]|\d|\.|-|_)*).*id_token=((?:[a-zA-Z]|\d|\.|-|_)*).*expires_in=(\d*)"#
         guard let range = uri.range(of: tokenPattern, options: .regularExpression) else {
             print("정규 표현식 에러: \(#function)")
