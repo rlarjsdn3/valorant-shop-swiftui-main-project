@@ -198,7 +198,7 @@ final class ViewModel: ObservableObject {
         // 스킨 데이터를 순회하며 저장되지 않은 스킨 이미지 UUID값 솎아내기
         for skin in skins {
             // UUID값 저장하기
-            let uuid = skin.uuid
+            guard let uuid = skin.chromas.first?.uuid else { return }
             // 경로 설정하기
             let skinPath = documents.appending(path: makeImageFileName(of: ImageType.weaponSkins, uuid: uuid)).path()
             // 파일 매니저의 경로에 해당 파일이 존재하지 않으면
@@ -208,7 +208,7 @@ final class ViewModel: ObservableObject {
             }
             
             // 스킨 속 크로마 데이터가 하나라면
-            if skin.chromas.count <= 1 { continue }
+            if skin.chromas.count <= 1 { continue /* 이미지를 저장하지 않고 건너뛰기 */ }
             
             // 크로마 데이터를 순회하며 저장되지 않은 스킨과 스와치 이미지 UUID값 솎아내기
             for chroma in skin.chromas {
@@ -229,6 +229,7 @@ final class ViewModel: ObservableObject {
                 }
             }
         }
+            
         
         // 총 다운로드할 이미지 개수를 프로퍼티 래퍼에 저장하기
         self.totalImageCountToDownload = notDownloadedImages.count

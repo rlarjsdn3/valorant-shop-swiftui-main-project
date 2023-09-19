@@ -17,7 +17,7 @@ enum ImageType: String {
     var path1: String {
         switch self {
         case .weaponSkins:
-            return "weaponskins"
+            fallthrough
         case .weaponSkinChromas:
             fallthrough
         case .weaponSkinSwatchs:
@@ -28,7 +28,7 @@ enum ImageType: String {
     var path2: String {
         switch self {
         case .weaponSkins:
-            return "displayicon"
+            return "fullrender"
         case .weaponSkinChromas:
             return "fullrender"
         case .weaponSkinSwatchs:
@@ -39,9 +39,9 @@ enum ImageType: String {
     var prefixFileName: String {
         switch self {
         case .weaponSkins:
-            return "displayicon"
+            return "thumbnail"
         case .weaponSkinChromas:
-            return "displayicon"
+            return "chroma"
         case .weaponSkinSwatchs:
             return "swatch"
         }

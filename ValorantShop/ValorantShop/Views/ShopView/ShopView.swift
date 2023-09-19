@@ -20,10 +20,12 @@ struct ShopView: View {
             List {
                 ForEach(viewModel.storeRotationWeaponSkins.weaponSkins, id: \.skin.uuid) { weaponSkin in
                     VStack {
-                        loadImage(of: ImageType.weaponSkins, uuid: weaponSkin.skin.uuid)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 300, height: 150)
+                        if let uuid = weaponSkin.skin.chromas.first?.uuid {
+                            loadImage(of: ImageType.weaponSkins, uuid: uuid)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 300, height: 150)
+                        }
                         Text(weaponSkin.skin.displayName)
                         Text("\(weaponSkin.price)")
                     }

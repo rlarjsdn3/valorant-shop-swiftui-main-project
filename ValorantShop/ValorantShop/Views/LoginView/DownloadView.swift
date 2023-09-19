@@ -24,7 +24,7 @@ struct DownloadView: View {
                 .font(.title)
             
             Button("다운로드 시작") {
-                Task {
+                Task(priority: .high) {
                     await viewModel.downloadStoreData(reload: true)
                 }
             }
