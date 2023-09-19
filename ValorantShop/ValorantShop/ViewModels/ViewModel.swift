@@ -36,6 +36,7 @@ final class ViewModel: ObservableObject {
     @Published var isPresentLaunchScreenView: Bool = true
     
     // For MultifactorAuth
+    @Published var multifactorAuthEmail: String = ""
     @Published var isPresentMultifactorAuthView: Bool = false
     
     // For CustomTab
@@ -84,7 +85,9 @@ final class ViewModel: ObservableObject {
             // 로그인에 성공하면 성공 여부 수정하기
             self.isLoggedIn = true
         // 이중 인증이 필요하다면
-        } catch OAuthError.needMultifactor {
+        } catch OAuthError.needMultifactor(let email) {
+            // 인증 이메일을 뷰에 표시하기
+            self.multifactorAuthEmail = email
             // 이중 인증 화면 보이게 하기
             self.isPresentMultifactorAuthView = true
         } catch {

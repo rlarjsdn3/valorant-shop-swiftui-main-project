@@ -16,7 +16,7 @@ enum OAuthError: Error {
     case networkError
     case parsingError
     case noTokenError
-    case needMultifactor
+    case needMultifactor(String)
 }
 
 // MARK: - HTTP BODY
@@ -262,7 +262,7 @@ final class OAuthManager {
         
         // 이중 인증이 필요한지 확인하기
         guard authRequestResponse.type != "multifactor" else {
-            return .failure(.needMultifactor)
+            return .failure(.needMultifactor(authRequestResponse.multifactor!.email!))
         }
         
         // 리다이렉트된 URI에서 Access Token 추출하기

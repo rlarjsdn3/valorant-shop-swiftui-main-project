@@ -22,6 +22,8 @@ struct MultifactorAuthView: View {
             Text("Login Code")
                 .font(.custom(Fonts.valorantFont, size: 40))
             
+            Text("로그인 인증 코드가 포함된 메시지가 \(viewModel.multifactorAuthEmail)로 전송되었습니다. 계속하려면 코드를 입력하십시오.")
+            
             TextField("로그인 코드", text: $inputAuthenticationCode)
                 .textFieldStyle(.roundedBorder)
             
