@@ -27,8 +27,6 @@ struct ContentView: View {
             LoginView()
         // 로그인을 하였다면
         } else {
-            
-            
             VStack(spacing: 0) {
                 TabView(selection: $viewModel.selectedCustomTab) {
                     ShopView()
@@ -43,12 +41,6 @@ struct ContentView: View {
                 
                 CustomTabView()
             }
-            .onAppear {
-                print(viewModel.isPresentLaunchScreenView)
-                Task {
-                    await viewModel.getStoreRotationWeaponSkins()
-                }
-            }
             .overlay {
                 if viewModel.isPresentLaunchScreenView {
                     VStack {
@@ -59,6 +51,11 @@ struct ContentView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.white)
+                }
+            }
+            .onAppear {
+                Task(priority: .high) {
+                    await viewModel.getStoreRotationWeaponSkins()
                 }
             }
         }

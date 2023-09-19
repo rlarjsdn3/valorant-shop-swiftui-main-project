@@ -9,15 +9,15 @@ import RealmSwift
 
 final class Version: Object, Codable {
     @Persisted var status: Int
-    @Persisted var valorant: ValorantVersion?
+    @Persisted var client: Client?
     
     enum CodingKeys: String, CodingKey {
         case status
-        case valorant = "data"
+        case client = "data"
     }
 }
 
-final class ValorantVersion: EmbeddedObject, Codable {
+final class Client: EmbeddedObject, Codable {
     @Persisted var riotClientVersion: String
     @Persisted var riotClientBuild: String
     @Persisted var buildDate: String
