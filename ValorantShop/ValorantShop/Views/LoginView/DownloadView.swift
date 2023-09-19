@@ -25,7 +25,7 @@ struct DownloadView: View {
             
             Button("다운로드 시작") {
                 Task {
-                    await viewModel.downloadStoreData()
+                    await viewModel.downloadStoreData(reload: true)
                 }
             }
             .buttonStyle(.bordered)

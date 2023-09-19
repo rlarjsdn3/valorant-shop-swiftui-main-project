@@ -19,12 +19,21 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section {
-                    Button("로그아웃", role: .destructive) {
+                    Button("데이터 다운로드", role: .destructive) {
+                        viewModel.isPresentDownloadView = true
+                    }
+                }
+                
+                Section {
+                    Button("로그아웃") {
                         viewModel.logout()
                     }
                 }
             }
             .navigationTitle("설정")
+        }
+        .sheet(isPresented: $viewModel.isPresentDownloadView) {
+            DownloadView()
         }
     }
 }

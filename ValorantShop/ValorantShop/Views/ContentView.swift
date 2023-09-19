@@ -23,7 +23,8 @@ struct ContentView: View {
     
     var body: some View {
         // 로그인을 하였다면
-        if !viewModel.isLoggedIn {
+//        if !viewModel.isLoggedIn {
+        if true {
             LoginView()
         // 로그인을 하지 않았다면
         } else {

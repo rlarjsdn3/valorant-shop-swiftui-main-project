@@ -42,6 +42,7 @@ final class ViewModel: ObservableObject {
     @Published var selectedCustomTab: CustomTabType = .shop
     
     // For Downlaod Data
+    @Published var isPresentDownloadView: Bool = false
     @Published var totalImageCountToDownload: Int = 0
     @Published var totalDownloadedImageCount: Int = 0
     
@@ -132,19 +133,29 @@ final class ViewModel: ObservableObject {
         }
     }
     
-    func downloadStoreData() async {
+    @MainActor
+    func downloadStoreData(reload: Bool = false) async {
         do {
+            // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
+            // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
+            self.storeRotationWeaponSkins.weaponSkins = []
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
             try await self.downloadWeaponSkinsData()
             // 가격 정보 데이터 다운로드받고, Realm에 저장하기
             try await self.downloadStorePricesData()
             // 스킨 이미지 데이터 다운로드받고, 로컬 Document 폴더에 저장하기
             try await self.downloadWeaponSkinImages()
+            // 새로운 스킨 데이터를 다운로드 받으면
+            if reload {
+                // 새로운 스킨 데이터로 상점 정보를 뷰에 로드하기
+                await self.getStoreRotationWeaponSkins()
+            }
         } catch {
             // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
     }
     
+    @MainActor
     private func downloadWeaponSkinsData() async throws {
         // 무기 스킨 데이터 다운로드받기
         let weaponSkins = try await resourceManager.fetchWeaponSkins().get()
@@ -152,6 +163,7 @@ final class ViewModel: ObservableObject {
         self.saveStoreData(weaponSkins)
     }
     
+    @MainActor
     private func downloadStorePricesData() async throws {
         // 접근 토큰, 등록 정보 및 PUUID값 가져오기
         let reAuthTokens = try await self.fetchReAuthTokens().get()
@@ -237,13 +249,13 @@ final class ViewModel: ObservableObject {
                     of: notDownloadedImage.imageType,
                     uuid: notDownloadedImage.uuid
                 ).get()
+                // 경로 설정하기
+                let saveUrl = documents.appending(path: makeImageFileName(of: imageType, uuid: uuid))
+                // 해당 경로에 이미지 파일 저장하기
+                try imageData.write(to: saveUrl)
             } catch {
                 continue
             }
-            // 경로 설정하기
-            let saveUrl = documents.appending(path: makeImageFileName(of: imageType, uuid: uuid))
-            // 해당 경로에 이미지 파일 저장하기
-            try imageData.write(to: saveUrl)
         }
         
         // 다운로드를 모두 마치면 성공 여부 수정하기

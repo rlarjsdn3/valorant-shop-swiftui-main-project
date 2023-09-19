@@ -16,8 +16,6 @@ struct LoginView: View {
     @State private var inputUsername: String = ""
     @State private var inputPassword: String = ""
     
-    @State private var isPresenetDownloadView: Bool = false
-    
     // MARK: - BODY
     
     var body: some View {
@@ -42,29 +40,18 @@ struct LoginView: View {
             }
             .buttonStyle(.borderedProminent)
             
-            Button("로그아웃") {
-                viewModel.logout()
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Button("데이터 다운로드") {
-                isPresenetDownloadView = true
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Button("오늘의 상점") {
-                Task {
-                    await viewModel.getStoreRotationWeaponSkins()
+            Section {
+                Button("데이터 다운로드", role: .destructive) {
+                    viewModel.isPresentDownloadView = true
                 }
             }
-            .buttonStyle(.borderedProminent)
         }
         .padding()
-        .sheet(isPresented: $isPresenetDownloadView) {
-            DownloadView()
-        }
         .sheet(isPresented: $viewModel.isPresentMultifactorAuthView) {
             MultifactorAuthView()
+        }
+        .sheet(isPresented: $viewModel.isPresentDownloadView) {
+            DownloadView()
         }
     }
 }
