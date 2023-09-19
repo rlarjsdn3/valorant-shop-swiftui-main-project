@@ -152,7 +152,7 @@ final class OAuthManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let authRequestResponse = decode(of: AuthRequestResponse.self, data) else {
+        guard let authRequestResponse = decode(of: AuthRequestResponse.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -201,7 +201,7 @@ final class OAuthManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let authRequestResponse = decode(of: AuthRequestResponse.self, data) else {
+        guard let authRequestResponse = decode(of: AuthRequestResponse.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -255,7 +255,7 @@ final class OAuthManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let authRequestResponse = decode(of: AuthRequestResponse.self, data) else {
+        guard let authRequestResponse = decode(of: AuthRequestResponse.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -309,7 +309,7 @@ final class OAuthManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let entitlementResponse = self.decode(of: EntitlementResponse.self, data),
+        guard let entitlementResponse = self.decode(of: EntitlementResponse.self, from: data),
               let riotEntitlement = entitlementResponse.entitlementToken else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
@@ -324,7 +324,7 @@ final class OAuthManager {
         print(#function)
         
         // URL 만들기
-        guard let url = URL(string: OAuthURL.userInfo) else { return .failure(.urlError) }
+        guard let url = URL(string: OAuthURL.puuid) else { return .failure(.urlError) }
         // URL Request 만들기
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "GET"
@@ -343,7 +343,7 @@ final class OAuthManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let playerInfoResponse = self.decode(of: PlayerInfoResponse.self, data) else {
+        guard let playerInfoResponse = self.decode(of: PlayerInfoResponse.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -390,7 +390,7 @@ final class OAuthManager {
         return try? encoder.encode(data)
     }
     
-    private func decode<T: Decodable>(of type: T.Type, _ data: Data) -> T? {
+    private func decode<T: Decodable>(of type: T.Type, from data: Data) -> T? {
         let decoder = JSONDecoder()
         return try? decoder.decode(type, from: data)
     }
