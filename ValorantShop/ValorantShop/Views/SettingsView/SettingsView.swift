@@ -19,6 +19,13 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section {
+                    Text("\(viewModel.gameName)")
+                    Text("\(viewModel.tagLine)")
+                } header: {
+                    Text("사용자 정보")
+                }
+                
+                Section {
                     Button("데이터 다운로드", role: .destructive) {
                         viewModel.isPresentDownloadView = true
                     }
@@ -43,5 +50,6 @@ struct SettingsView: View {
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView()
+            .environmentObject(ViewModel())
     }
 }

@@ -22,45 +22,48 @@ struct ContentView: View {
     // MARK: - BODY
     
     var body: some View {
-        // 로그인을 하지 않았다면
-        if !viewModel.isLoggedIn {
-            LoginView()
-        // 로그인을 하였다면
-        } else {
-            VStack(spacing: 0) {
-                TabView(selection: $viewModel.selectedCustomTab) {
-                    ShopView()
-                        .tag(CustomTabType.shop)
-                    
-                    CollectionView()
-                        .tag(CustomTabType.collection)
-                    
-                    SettingsView()
-                        .tag(CustomTabType.settings)
-                }
-                
-                CustomTabView()
-            }
-            .overlay {
-                if viewModel.isPresentLaunchScreenView {
-                    VStack {
-                        Text("VALORANT SHOP")
-                            .font(.custom("VALORANT-Regular", size: 30))
-                        ProgressView()
-                            .progressViewStyle(.circular)
+        Group {
+            // 로그인을 하지 않았다면
+            if !viewModel.isLoggedIn {
+                LoginView()
+                // 로그인을 하였다면
+            } else {
+                VStack(spacing: 0) {
+                    TabView(selection: $viewModel.selectedCustomTab) {
+                        ShopView()
+                            .tag(CustomTabType.shop)
+                        
+                        CollectionView()
+                            .tag(CustomTabType.collection)
+                        
+                        SettingsView()
+                            .tag(CustomTabType.settings)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.white)
+                    
+                    CustomTabView()
                 }
-            }
-            .onAppear {
-                Task(priority: .high) {
-                    await viewModel.fetchStoreRotationWeaponSkins()
-                    await viewModel.fetchPlayerID()
+                .overlay {
+                    if viewModel.isPresentLaunchScreenView {
+                        VStack {
+                            Text("VALORANT SHOP")
+                                .font(.custom("VALORANT-Regular", size: 30))
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.white)
+                    }
+                }
+                .onAppear {
+                    Task(priority: .high) {
+                        await viewModel.fetchPlayerData()
+                    }
                 }
             }
         }
-    }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willTerminateNotification), perform: { output in
+            viewModel.applicationDidEnterBackground()
+        })    }
 }
 
 // MARK: - PREVIEW
