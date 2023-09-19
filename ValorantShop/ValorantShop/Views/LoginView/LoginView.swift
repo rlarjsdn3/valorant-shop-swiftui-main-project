@@ -40,10 +40,8 @@ struct LoginView: View {
             }
             .buttonStyle(.borderedProminent)
             
-            Section {
-                Button("데이터 다운로드", role: .destructive) {
-                    viewModel.isPresentDownloadView = true
-                }
+            Button("다운로드") {
+                viewModel.isPresentDownloadView = true
             }
         }
         .padding()

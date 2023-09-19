@@ -20,9 +20,11 @@ final class Version: Object, Codable {
 final class ValorantVersion: EmbeddedObject, Codable {
     @Persisted var riotClientVersion: String
     @Persisted var riotClientBuild: String
+    @Persisted var buildDate: String
     
     enum CodingKeys: String, CodingKey {
         case riotClientVersion
         case riotClientBuild
+        case buildDate
     }
 }

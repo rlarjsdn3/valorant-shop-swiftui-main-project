@@ -22,13 +22,34 @@ struct ContentView: View {
     // MARK: - BODY
     
     var body: some View {
-        // 로그인을 하였다면
-        if !viewModel.isLoggedIn {
-//        if true {
-            LoginView()
         // 로그인을 하지 않았다면
+        if !viewModel.isLoggedIn {
+            LoginView()
+        // 로그인을 하였다면
         } else {
-            Group {
+            
+            
+            VStack(spacing: 0) {
+                TabView(selection: $viewModel.selectedCustomTab) {
+                    ShopView()
+                        .tag(CustomTabType.shop)
+                    
+                    CollectionView()
+                        .tag(CustomTabType.collection)
+                    
+                    SettingsView()
+                        .tag(CustomTabType.settings)
+                }
+                
+                CustomTabView()
+            }
+            .onAppear {
+                print(viewModel.isPresentLaunchScreenView)
+                Task {
+                    await viewModel.getStoreRotationWeaponSkins()
+                }
+            }
+            .overlay {
                 if viewModel.isPresentLaunchScreenView {
                     VStack {
                         Text("VALORANT SHOP")
@@ -36,26 +57,8 @@ struct ContentView: View {
                         ProgressView()
                             .progressViewStyle(.circular)
                     }
-                } else {
-                    VStack(spacing: 0) {
-                        TabView(selection: $viewModel.selectedCustomTab) {
-                            ShopView()
-                                .tag(CustomTabType.shop)
-                            
-                            CollectionView()
-                                .tag(CustomTabType.collection)
-                            
-                            SettingsView()
-                                .tag(CustomTabType.settings)
-                        }
-                        
-                        CustomTabView()
-                    }
-                }
-            }
-            .onAppear {
-                Task {
-                    await viewModel.getStoreRotationWeaponSkins()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.white)
                 }
             }
         }

@@ -48,7 +48,7 @@ final class ViewModel: ObservableObject {
     @Published var totalDownloadedImageCount: Int = 0
     
     // For Storefront
-    @Published var storeRotationWeaponSkins: StoreRotationWeaponkins = StoreRotationWeaponkins()
+    @Published var storeRotationWeaponSkins: StoreRotationWeaponkins = .init()
     @Published var rotationWeaponSkinsRemainingSeconds: Int = 0
     
     // MARK: - PROPERTIES
@@ -120,6 +120,10 @@ final class ViewModel: ObservableObject {
         
         // 커스탬 탭 선택 초기화하기
         self.selectedCustomTab = .shop
+        // 불러온 상점 데이터 삭제하기
+        self.storeRotationWeaponSkins = .init()
+        // 런치 스크린 표시 여부 수정하기
+        self.isPresentLaunchScreenView = true
     }
     
     private func fetchReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
@@ -310,7 +314,7 @@ final class ViewModel: ObservableObject {
                     filteredPrice = prices[firstPriceIndex].cost?.vp
                 }
                 
-                // 필터링한 스킨과 가격 데이터 옵셔날 바인딩하기
+                // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
                 guard let skin = filteredSkin,
                       let price = filteredPrice else {
                     continue
@@ -318,13 +322,14 @@ final class ViewModel: ObservableObject {
                 storeRotationWeaponSkins.weaponSkins.append((skin, price))
             }
             
+            // 결과 업데이트하기
+            self.storeRotationWeaponSkins = storeRotationWeaponSkins
+            
+            // 런치 스크린 화면 끄기
             withAnimation(.easeInOut(duration: 0.2)) {
-                // 런치 스크린 화면 끄기
                 self.isPresentLaunchScreenView = false
             }
 
-            // 결과 업데이트하기
-            self.storeRotationWeaponSkins = storeRotationWeaponSkins
         } catch {
             return
         }
