@@ -59,6 +59,16 @@ enum ResourceError: Error {
 
 // MARK: - HTTP RESPONSE
 
+struct PlayerIDResponse: Codable {
+    let gameName: String
+    let tagLine: String
+    
+    enum CodingKeys: String, CodingKey {
+        case gameName = "GameName"
+        case tagLine = "TagLine"
+    }
+}
+
 struct WalletResponse: Codable {
     let balances: Balance
 
@@ -133,13 +143,54 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let riotVersion = decode(of: Version.self, data) else {
+        guard let riotVersion = decode(of: Version.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
         
         // 결과 반환하기
         return .success(riotVersion)
+    }
+    
+    func fetchPlayerID(accessToken: String, riotEntitlement: String, puuid: String) async throws -> Result<PlayerIDResponse, ResourceError> {
+        // For Debug
+        print(#function)
+        
+        // URL 만들기
+        guard let url = URL(string: ResourceURL.playerId) else { return .failure(.urlError) }
+        // HTTP Body 만들기
+        let playerIDBody = [puuid]
+        // URL Request 만들기
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "PUT"
+        urlRequest.setValue("\(riotEntitlement)", forHTTPHeaderField: "X-Riot-Entitlements-JWT")
+        urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        urlRequest.httpBody = self.encode(playerIDBody)
+        
+        // 비동기 HTTP 통신하기
+        guard let (data, response) = try? await urlSession.data(for: urlRequest) else {
+            print("네트워크 에러: \(#function)")
+            return .failure(.networkError)
+        }
+        // 상태 코드가 올바른지 확인하기
+        guard let httpResponse = (response as? HTTPURLResponse),
+              (200..<300) ~= httpResponse.statusCode else {
+            print("상태 코드 에러: \(#function)")
+            return .failure(.statusCodeError)
+        }
+        // 받아온 데이터를 파싱하기
+        guard let playerIDResponse = decode(of: [PlayerIDResponse].self, from: data) else {
+            print("파싱 에러: \(#function)")
+            return .failure(.parsingError)
+        }
+        // 첫 번째 데이터 추출하기
+        guard let playerIDResponse = playerIDResponse.first else {
+            print("유저 정보 에러: \(#function)")
+            return .failure(.parsingError)
+        }
+        
+        // 결과 반환하기
+        return .success(playerIDResponse)
     }
     
     func fetchUserWallet(accessToken: String, riotEntitlement: String, puuid: String) async -> Result<WalletResponse, ResourceError> {
@@ -166,7 +217,7 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let walletResponse = decode(of: WalletResponse.self, data) else {
+        guard let walletResponse = decode(of: WalletResponse.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -199,7 +250,7 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let storefrontResponse = decode(of: StorefrontResponse.self, data) else {
+        guard let storefrontResponse = decode(of: StorefrontResponse.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -233,7 +284,7 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let weaponSkins = decode(of: WeaponSkins.self, data) else {
+        guard let weaponSkins = decode(of: WeaponSkins.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -266,7 +317,7 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let weaponPrices = decode(of: StorePrices.self, data) else {
+        guard let weaponPrices = decode(of: StorePrices.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -298,7 +349,12 @@ final class ResourceManager {
         return .success(data)
     }
     
-    private func decode<T: Decodable>(of type: T.Type, _ data: Data) -> T? {
+    private func encode<T: Encodable>(_ data: T) -> Data? {
+        let encoder = JSONEncoder()
+        return try? encoder.encode(data)
+    }
+    
+    private func decode<T: Decodable>(of type: T.Type, from data: Data) -> T? {
         let decoder = JSONDecoder()
         return try? decoder.decode(type, from: data)
     }

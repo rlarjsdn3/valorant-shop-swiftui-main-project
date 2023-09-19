@@ -55,7 +55,8 @@ struct ContentView: View {
             }
             .onAppear {
                 Task(priority: .high) {
-                    await viewModel.getStoreRotationWeaponSkins()
+                    await viewModel.fetchStoreRotationWeaponSkins()
+                    await viewModel.fetchPlayerID()
                 }
             }
         }

@@ -47,6 +47,9 @@ final class ViewModel: ObservableObject {
     @Published var totalImageCountToDownload: Int = 0
     @Published var totalDownloadedImageCount: Int = 0
     
+    // For PlayerID
+//    @Published var
+    
     // For Storefront
     @Published var storeRotationWeaponSkins: StoreRotationWeaponkins = .init()
     @Published var rotationWeaponSkinsRemainingSeconds: Int = 0
@@ -155,10 +158,12 @@ final class ViewModel: ObservableObject {
             // 새로운 스킨 데이터를 다운로드 받으면
             if reload {
                 // 새로운 스킨 데이터로 상점 정보를 뷰에 로드하기
-                await self.getStoreRotationWeaponSkins()
+                await self.fetchStoreRotationWeaponSkins()
             }
+            // 다운로드를 모두 마치면 성공 여부 수정하기
+            self.isDataDownloaded = true
         } catch {
-            // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+            return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
     }
     
@@ -265,10 +270,6 @@ final class ViewModel: ObservableObject {
                 continue
             }
         }
-        
-        // 다운로드를 모두 마치면 성공 여부 수정하기
-        self.isDataDownloaded = true
-        
     }
     
     private func makeImageFileName(of type: ImageType, uuid: String) -> String {
@@ -276,7 +277,24 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func getStoreRotationWeaponSkins() async {
+    func fetchPlayerID() async {
+        do {
+            // 접근 토큰, 등록 정보 및 PUUID값 가져오기
+            let reAuthTokens = try await self.fetchReAuthTokens().get()
+            // 닉네임, 태그 정보 다운로드하기
+            let playerId = try await resourceManager.fetchPlayerID(
+                accessToken: reAuthTokens.accessToken,
+                riotEntitlement: reAuthTokens.riotEntitlement,
+                puuid: reAuthTokens.puuid
+            )
+            print(playerId)
+        } catch {
+            return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+        }
+    }
+    
+    @MainActor
+    func fetchStoreRotationWeaponSkins() async {
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
         var storeRotationWeaponSkins: StoreRotationWeaponkins = StoreRotationWeaponkins()
         // Realm으로부터 스킨 데이터 불러오기
@@ -331,7 +349,7 @@ final class ViewModel: ObservableObject {
             }
 
         } catch {
-            return
+            return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
     }
     

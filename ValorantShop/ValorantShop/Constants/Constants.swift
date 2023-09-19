@@ -31,13 +31,14 @@ struct OAuthURL {
     static var entitlement: String = "https://entitlements.auth.riotgames.com/api/token/v1"
     
     // For User
-    static var userInfo: String = "https://auth.riotgames.com/userinfo"
+    static var puuid: String = "https://auth.riotgames.com/userinfo"
 }
 
 struct ResourceURL {
     
     // For Resource
     static var version: String = "https://valorant-api.com/v1/version/"
+    static var playerId: String = "https://pd.kr.a.pvp.net/name-service/v2/players"
     static var wallet: String = "https://pd.kr.a.pvp.net/store/v1/wallet/"
     static var skins: String = "https://valorant-api.com/v1/weapons/skins/"
     static var prices: String = "https://pd.kr.a.pvp.net/store/v1/offers/"
@@ -54,4 +55,5 @@ struct Fonts {
     
     // For Font
     static var valorantFont: String = "VALORANT-Regular"
+    
 }
