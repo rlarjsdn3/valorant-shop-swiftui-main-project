@@ -18,6 +18,11 @@ struct UserDefaults {
 
 struct Keychains {
     
+    // For Auth
+    static var accessToken: String = "AccessToken"
+    static var riotEntitlement: String = "RiotEntitlement"
+    static var puuid: String = "PUUID"
+    
     // For Cookie
     static var ssid: String = "SSID"
     

@@ -48,7 +48,8 @@ final class ViewModel: ObservableObject {
     @Published var totalDownloadedImageCount: Int = 0
     
     // For PlayerID
-//    @Published var
+    @Published var gameName: String = ""
+    @Published var tagLine: String = ""
     
     // For Storefront
     @Published var storeRotationWeaponSkins: StoreRotationWeaponkins = .init()
@@ -85,6 +86,8 @@ final class ViewModel: ObservableObject {
             // ID와 패스워드로 로그인이 가능한지 확인하기
             let _ = try await oauthManager.fetchAuthCookies().get()
             let _ = try await oauthManager.fetchAccessToken(username: username, password: password).get()
+            // 불러온 사용자 고유 정보를 키체인에 저장하기
+            let _ = try await self.fetchReAuthTokens().get()
             // 로그인에 성공하면 성공 여부 수정하기
             self.isLoggedIn = true
         // 이중 인증이 필요하다면
@@ -129,17 +132,45 @@ final class ViewModel: ObservableObject {
         self.isPresentLaunchScreenView = true
     }
     
-    private func fetchReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
-        do {
-            // 쿠키 정보를 통해 접근 토큰, 등록 정보 및 PUUID값 가져오기
-            let accessToken: String = try await oauthManager.fetchReAuthCookies().get()
-            let riotEntitlement: String = try await oauthManager.fetchRiotEntitlement(accessToken: accessToken).get()
-            let puuid: String = try await oauthManager.fetchRiotAccountPUUID(accessToken: accessToken).get()
-            let reAuthTokens = ReAuthTokens(accessToken: accessToken, riotEntitlement: riotEntitlement, puuid: puuid)
+    func fetchReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
+        // ⭐️ 앱을 최초 실행하면 처음 1번만 사용자 고유 정보를 불러온 후, 키체인에 저장함.
+        // ⭐️ 이후 HTTP 통신을 위해 사용자 고유 정보가 필요하다면 키체인에 저장된 데이터를 불러와 사용함.
+        // ⭐️ 이를 통해, 앱의 로딩 속도를 비약적으로 상승시킬 수 있었음.
+        
+        // 키체인에 저장된 사용자 고유 정보가 있다면
+        if let accessToken = try? keychain.get(Keychains.accessToken),
+           let riotEntitlement = try? keychain.get(Keychains.riotEntitlement),
+           let puuid = try? keychain.get(Keychains.puuid) {
+            // 저장된 사용자 고유 정보 반환하기
+            let reAuthTokens = ReAuthTokens(
+                accessToken: accessToken,
+                riotEntitlement: riotEntitlement,
+                puuid: puuid
+            )
             return .success(reAuthTokens)
-        } catch {
-            // 토큰 정보 가져오기에 실패하면 예외 던지기
-            return .failure(.noTokenError)
+            
+        // 키체인에 저장된 사용자 고유 정보가 없다면
+        } else {
+            do {
+                // 쿠키 정보를 통해 접근 토큰 등 사용자 고유 정보 가져오기
+                let accessToken: String = try await oauthManager.fetchReAuthCookies().get()
+                let riotEntitlement: String = try await oauthManager.fetchRiotEntitlement(accessToken: accessToken).get()
+                let puuid: String = try await oauthManager.fetchRiotAccountPUUID(accessToken: accessToken).get()
+                // 불러온 사용자 고유 정보를 키체인에 저장하기
+                keychain[Keychains.accessToken] = accessToken
+                keychain[Keychains.riotEntitlement] = riotEntitlement
+                keychain[Keychains.puuid] = puuid
+                // 저장된 사용자 고유 정보 반환하기
+                let reAuthTokens = ReAuthTokens(
+                    accessToken: accessToken,
+                    riotEntitlement: riotEntitlement,
+                    puuid: puuid
+                )
+                return .success(reAuthTokens)
+            } catch {
+                // 토큰 정보 가져오기에 실패하면 예외 던지기
+                return .failure(.noTokenError)
+            }
         }
     }
     
@@ -158,7 +189,7 @@ final class ViewModel: ObservableObject {
             // 새로운 스킨 데이터를 다운로드 받으면
             if reload {
                 // 새로운 스킨 데이터로 상점 정보를 뷰에 로드하기
-                await self.fetchStoreRotationWeaponSkins()
+                try await self.fetchStoreRotationWeaponSkins()
             }
             // 다운로드를 모두 마치면 성공 여부 수정하기
             self.isDataDownloaded = true
@@ -276,25 +307,35 @@ final class ViewModel: ObservableObject {
         return "\(type.prefixFileName)-\(uuid).png"
     }
     
-    @MainActor
-    func fetchPlayerID() async {
+    func fetchPlayerData() async {
+        // 사용자와 관련된 모든 데이터를 가져오기
         do {
-            // 접근 토큰, 등록 정보 및 PUUID값 가져오기
-            let reAuthTokens = try await self.fetchReAuthTokens().get()
-            // 닉네임, 태그 정보 다운로드하기
-            let playerId = try await resourceManager.fetchPlayerID(
-                accessToken: reAuthTokens.accessToken,
-                riotEntitlement: reAuthTokens.riotEntitlement,
-                puuid: reAuthTokens.puuid
-            )
-            print(playerId)
+            // 사용자의 닉네임, 태그 데이터 가져오기
+            try await fetchPlayerID()
+            // 사용자의 로테이션된 무기 스킨 데이터 가져오기
+            try await fetchStoreRotationWeaponSkins()
         } catch {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
     }
     
     @MainActor
-    func fetchStoreRotationWeaponSkins() async {
+    func fetchPlayerID() async throws {
+        // 접근 토큰, 등록 정보 및 PUUID값 가져오기
+        let reAuthTokens = try await self.fetchReAuthTokens().get()
+        // 닉네임, 태그 정보 다운로드하기
+        let playerId = try await resourceManager.fetchPlayerID(
+            accessToken: reAuthTokens.accessToken,
+            riotEntitlement: reAuthTokens.riotEntitlement,
+            puuid: reAuthTokens.puuid
+        ).get()
+        // 결과 업데이트하기
+        self.gameName = playerId.gameName
+        self.tagLine = playerId.tagLine
+    }
+    
+    @MainActor
+    func fetchStoreRotationWeaponSkins() async throws {
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
         var storeRotationWeaponSkins: StoreRotationWeaponkins = StoreRotationWeaponkins()
         // Realm으로부터 스킨 데이터 불러오기
@@ -302,54 +343,60 @@ final class ViewModel: ObservableObject {
         // Realm으로부터 가격 데이터 불러오기
         guard let prices = realmManager.read(of: StorePrices.self).first?.offers else { return }
         
+        // 접근 토큰, 등록 정보 및 PUUID값 가져오기
+        let reAuthTokens = try await self.fetchReAuthTokens().get()
+        // 오늘의 로테이션 상점 정보 가져오기
+        let storefront = try await resourceManager.fetchStorefront(
+            accessToken: reAuthTokens.accessToken,
+            riotEntitlement: reAuthTokens.riotEntitlement,
+            puuid: reAuthTokens.puuid
+        ).get()
+        
+        // 다음 로테이션까지 남은 시간 정보 저장하기
+        self.rotationWeaponSkinsRemainingSeconds = storefront.skinsPanelLayout.singleItemOffersRemainingDurationInSeconds
+        
+        // 상점 로테이션 스킨 필터링하기
+        for singleItemUUID in storefront.skinsPanelLayout.singleItemOffers {
+            // 스킨 데이터를 저장할 변수 선언하기
+            var filteredSkin: Skin?
+            // 가격 데이터를 저장할 변수 선언하기
+            var filteredPrice: Int?
+            // 스킨 데이터 필터링하기
+            if let firstSkinIndex = skins.firstIndex(where: {
+                $0.levels.first?.uuid == singleItemUUID }) {
+                filteredSkin = skins[firstSkinIndex]
+            }
+            // 가격 데이터 필터링하기
+            if let firstPriceIndex = prices.firstIndex(where: {
+                $0.offerID == singleItemUUID }) {
+                filteredPrice = prices[firstPriceIndex].cost?.vp
+            }
+            
+            // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
+            guard let skin = filteredSkin,
+                  let price = filteredPrice else {
+                continue
+            }
+            storeRotationWeaponSkins.weaponSkins.append((skin, price))
+        }
+        
+        // 결과 업데이트하기
+        self.storeRotationWeaponSkins = storeRotationWeaponSkins
+        
+        // 런치 스크린 화면 끄기
+        withAnimation(.easeInOut(duration: 0.2)) {
+            self.isPresentLaunchScreenView = false
+        }
+    }
+    
+    func applicationDidEnterBackground() {
+        // 키체인에 저장된 사용자 고유 정보 삭제하기
         do {
-            // 접근 토큰, 등록 정보 및 PUUID값 가져오기
-            let reAuthTokens = try await self.fetchReAuthTokens().get()
-            // 오늘의 로테이션 상점 정보 가져오기
-            let storefront = try await resourceManager.fetchStorefront(
-                accessToken: reAuthTokens.accessToken,
-                riotEntitlement: reAuthTokens.riotEntitlement,
-                puuid: reAuthTokens.puuid
-            ).get()
-            
-            // 다음 로테이션까지 남은 시간 정보 저장하기
-            self.rotationWeaponSkinsRemainingSeconds = storefront.skinsPanelLayout.singleItemOffersRemainingDurationInSeconds
-            
-            // 상점 로테이션 스킨 필터링하기
-            for singleItemUUID in storefront.skinsPanelLayout.singleItemOffers {
-                // 스킨 데이터를 저장할 변수 선언하기
-                var filteredSkin: Skin?
-                // 가격 데이터를 저장할 변수 선언하기
-                var filteredPrice: Int?
-                // 스킨 데이터 필터링하기
-                if let firstSkinIndex = skins.firstIndex(where: {
-                    $0.levels.first?.uuid == singleItemUUID }) {
-                    filteredSkin = skins[firstSkinIndex]
-                }
-                // 가격 데이터 필터링하기
-                if let firstPriceIndex = prices.firstIndex(where: {
-                    $0.offerID == singleItemUUID }) {
-                    filteredPrice = prices[firstPriceIndex].cost?.vp
-                }
-                
-                // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
-                guard let skin = filteredSkin,
-                      let price = filteredPrice else {
-                    continue
-                }
-                storeRotationWeaponSkins.weaponSkins.append((skin, price))
-            }
-            
-            // 결과 업데이트하기
-            self.storeRotationWeaponSkins = storeRotationWeaponSkins
-            
-            // 런치 스크린 화면 끄기
-            withAnimation(.easeInOut(duration: 0.2)) {
-                self.isPresentLaunchScreenView = false
-            }
-
+            try keychain.remove(Keychains.accessToken)
+            try keychain.remove(Keychains.riotEntitlement)
+            try keychain.remove(Keychains.puuid)
         } catch {
-            return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+            return // 토큰 삭제에 실패하면 예외 처리 코드 작성하기
         }
     }
     

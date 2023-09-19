@@ -40,6 +40,13 @@ struct LoginView: View {
             }
             .buttonStyle(.borderedProminent)
             
+            Button("로그아웃") {
+                Task {
+                    viewModel.logout()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            
             Button("다운로드") {
                 viewModel.isPresentDownloadView = true
             }
