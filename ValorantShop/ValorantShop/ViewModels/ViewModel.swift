@@ -31,6 +31,7 @@ final class ViewModel: ObservableObject {
     @AppStorage(UserDefaults.isLoggedIn) var isLoggedIn: Bool = false
     @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
     @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = 0.0
+    @AppStorage(UserDefaults.rotatedWeaponSkinsExpiryDate) var rotatedWeaponSkinsExpiryDate: Double = 0.0
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -60,7 +61,12 @@ final class ViewModel: ObservableObject {
     
     // For Storefront
     @Published var storeRotationWeaponSkins: StoreRotationWeaponkins = .init()
-    @Published var rotationWeaponSkinsRemainingSeconds: Int = 0
+    var rotationWeaponSkinsRemainingSeconds: Date {
+        let calendar = Calendar.current
+        let rotatedWeaponSkinsExpiryDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsExpiryDate)
+        let dateComponents = calendar.dateComponents([.second], from: Date.now, to: rotatedWeaponSkinsExpiryDate)
+        return calendar.date(from: dateComponents) ?? Date()
+    }
     
     // MARK: - PROPERTIES
     
@@ -76,14 +82,14 @@ final class ViewModel: ObservableObject {
     // MARK: - INTIALIZER
     
     init() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
-            // self 키워드 옵셔널 바인딩하기
-            guard let self = self else { return }
-            // 다음 상점 로테이션까지 남은 초(sec)가 0 이상이라면
-            if self.rotationWeaponSkinsRemainingSeconds > 0 {
-                self.rotationWeaponSkinsRemainingSeconds -= 1
-            }
-        })
+//        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
+//            // self 키워드 옵셔널 바인딩하기
+//            guard let self = self else { return }
+//            // 다음 상점 로테이션까지 남은 초(sec)가 0 이상이라면
+//            if self.rotationWeaponSkinsRemainingSeconds > 0 {
+//                self.rotationWeaponSkinsRemainingSeconds -= 1
+//            }
+//        })
     }
     
     // MARK: - FUNCTIONS
@@ -270,7 +276,7 @@ final class ViewModel: ObservableObject {
             // 새로운 스킨 데이터를 다운로드 받으면
             if reload {
                 // 새로운 스킨 데이터로 상점 정보를 뷰에 로드하기
-                try await self.fetchStoreRotationWeaponSkins()
+                await self.fetchStoreRotationWeaponSkins()
             }
             // 다운로드를 모두 마치면 성공 여부 수정하기
             self.isDataDownloaded = true
@@ -437,52 +443,106 @@ final class ViewModel: ObservableObject {
     
     @MainActor
     func fetchStoreRotationWeaponSkins() async {
+        
+        // 현재 날짜 불러오기
+        let currentDate = Date().timeIntervalSinceReferenceDate
+        print("현재 닐짜: \(Date(timeIntervalSinceReferenceDate: currentDate))")
+        print("다음 갱신 날짜: \(Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsExpiryDate))")
+        
+        
+        // Realm에 저장된 로테이션 스킨 데이터 불러오기
+        let rotatedWeaponSkins = realmManager.read(of: RotatedWeaponSkins.self)
+        // Realm에 저장된 로테이션 스킨 데이터가 있다면
+        if !rotatedWeaponSkins.isEmpty {
+            print("스킨 데이터 있음")
+            // 현재 날짜 불러오기
+            let currentDate = Date().timeIntervalSinceReferenceDate
+            // 로테이션 갱신 시간이 지났다면
+            if currentDate > rotatedWeaponSkinsExpiryDate {
+                print("스킨 데이터 갱신 필요!")
+                // 로테이션 스킨 데이터 초기화하기
+                self.storeRotationWeaponSkins = .init()
+                do {
+                    // 접근 토큰 등 사용자 고유 정보 가져오기
+                    let reAuthTokens = try await self.getReAuthTokens().get()
+                    // 새롭게 로테이션 스킨 데이터 불러오기
+                    let rotatedWeaponSkins = try await resourceManager.fetchStorefront(
+                        accessToken: reAuthTokens.accessToken,
+                        riotEntitlement: reAuthTokens.riotEntitlement,
+                        puuid: reAuthTokens.puuid
+                    ).get().skinsPanelLayout
+                    // 로테이션 갱신 시간을 UserDefaults에 저장하기
+                    self.rotatedWeaponSkinsExpiryDate = Date().addingTimeInterval(
+                        Double(rotatedWeaponSkins.singleItemOffersRemainingDurationInSeconds)
+                    ).timeIntervalSinceReferenceDate
+                    // Realm에 새로운 로테이션 스킨 데이터 저장하기 (스킨의 첫 번째 레벨의 UUID)
+                    for uuid in rotatedWeaponSkins.singleItemOffers {
+                        let rotatedWeaponSkins = RotatedWeaponSkins(value: ["uuid": "\(uuid)"])
+                    }
+                } catch {
+                    return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                }
+            }
+        // Realm에 로테이션 스킨 데이터가 없다면
+        } else {
+            print("스킨 데이터 없음!")
+            do {
+                // 접근 토큰 등 사용자 고유 정보 가져오기
+                let reAuthTokens = try await self.getReAuthTokens().get()
+                // 새롭게 로테이션 스킨 데이터 불러오기
+                let rotatedWeaponSkins = try await resourceManager.fetchStorefront(
+                    accessToken: reAuthTokens.accessToken,
+                    riotEntitlement: reAuthTokens.riotEntitlement,
+                    puuid: reAuthTokens.puuid
+                ).get().skinsPanelLayout
+                // 로테이션 갱신 시간을 UserDefaults에 저장하기
+                self.rotatedWeaponSkinsExpiryDate = Date().addingTimeInterval(
+                    Double(rotatedWeaponSkins.singleItemOffersRemainingDurationInSeconds)
+                ).timeIntervalSinceReferenceDate
+                // Realm에 새로운 로테이션 스킨 데이터 저장하기 (스킨의 첫 번째 레벨의 UUID)
+                for uuid in rotatedWeaponSkins.singleItemOffers {
+                    let rotatedWeaponSkins = RotatedWeaponSkins(value: ["uuid": "\(uuid)"])
+                    realmManager.create(rotatedWeaponSkins)
+                }
+            } catch {
+                return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+            }
+        }
+        
+        print("스킨 필터링 시작!")
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
         var storeRotationWeaponSkins: StoreRotationWeaponkins = StoreRotationWeaponkins()
-        // Realm으로부터 스킨 데이터 불러오기
+        // Realm으로부터 로테이션 스킨 데이터 불러오기
+        let weaponSkinUUIDs = realmManager.read(of: RotatedWeaponSkins.self)
+        // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else { return }
         // Realm으로부터 가격 데이터 불러오기
         guard let prices = realmManager.read(of: StorePrices.self).first?.offers else { return }
         
-        do {
-            // 접근 토큰, 등록 정보 및 PUUID값 가져오기
-            let reAuthTokens = try await self.getReAuthTokens().get()
-            // 오늘의 로테이션 상점 정보 가져오기
-            let storefront = try await resourceManager.fetchStorefront(
-                accessToken: reAuthTokens.accessToken,
-                riotEntitlement: reAuthTokens.riotEntitlement,
-                puuid: reAuthTokens.puuid
-            ).get()
-            
-            // 다음 로테이션까지 남은 시간 정보 저장하기
-            self.rotationWeaponSkinsRemainingSeconds = storefront.skinsPanelLayout.singleItemOffersRemainingDurationInSeconds
         
-            // 상점 로테이션 스킨 필터링하기
-            for singleItemUUID in storefront.skinsPanelLayout.singleItemOffers {
-                // 스킨 데이터를 저장할 변수 선언하기
-                var filteredSkin: Skin?
-                // 가격 데이터를 저장할 변수 선언하기
-                var filteredPrice: Int?
-                // 스킨 데이터 필터링하기
-                if let firstSkinIndex = skins.firstIndex(where: {
-                    $0.levels.first?.uuid == singleItemUUID }) {
-                    filteredSkin = skins[firstSkinIndex]
-                }
-                // 가격 데이터 필터링하기
-                if let firstPriceIndex = prices.firstIndex(where: {
-                    $0.offerID == singleItemUUID }) {
-                    filteredPrice = prices[firstPriceIndex].cost?.vp
-                }
-                
-                // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
-                guard let skin = filteredSkin,
-                      let price = filteredPrice else {
-                    continue
-                }
-                storeRotationWeaponSkins.weaponSkins.append((skin, price))
+        // 상점 로테이션 스킨 필터링하기
+        for weaponSkinUUID in weaponSkinUUIDs {
+            // 스킨 데이터를 저장할 변수 선언하기
+            var filteredSkin: Skin?
+            // 가격 데이터를 저장할 변수 선언하기
+            var filteredPrice: Int?
+            // 스킨 데이터 필터링하기
+            if let firstSkinIndex = skins.firstIndex(where: {
+                $0.levels.first?.uuid == weaponSkinUUID.uuid }) {
+                filteredSkin = skins[firstSkinIndex]
             }
-        } catch {
-            return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+            // 가격 데이터 필터링하기
+            if let firstPriceIndex = prices.firstIndex(where: {
+                $0.offerID == weaponSkinUUID.uuid }) {
+                filteredPrice = prices[firstPriceIndex].cost?.vp
+            }
+            
+            // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
+            guard let skin = filteredSkin,
+                  let price = filteredPrice else {
+                continue
+            }
+            storeRotationWeaponSkins.weaponSkins.append((skin, price))
         }
         
         // 결과 업데이트하기

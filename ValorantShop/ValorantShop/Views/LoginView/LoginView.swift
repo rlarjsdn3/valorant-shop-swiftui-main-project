@@ -138,13 +138,19 @@ struct LoginView: View {
             .offset(y: mainTextAnimation ? 0 : -screenSize.height)
         }
         .overlay(alignment: .bottom) {
-            Link(destination: URL(string: "https://recovery.riotgames.com/ko")!) {
-                Text("로그인이 안되시나요?")
-                    .font(.callout)
+            HStack {
+                Link(destination: URL(string: "https://recovery.riotgames.com/ko")!) {
+                    Text("로그인이 안되시나요?")
+                        .font(.callout)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 20)
+                .opacity(helpButtonAnimation ? 1 : 0)
+                
+                Button("다운로드") {
+                    viewModel.isPresentDownloadView = true
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.top, 20)
-            .opacity(helpButtonAnimation ? 1 : 0)
         }
         .padding(20)
         .sheet(isPresented: $viewModel.isPresentMultifactorAuthView) {
