@@ -18,6 +18,7 @@ struct LoginView: View {
     @State private var inputPassword: String = ""
     
     // For Animation
+    @State private var viewAnimation: Bool = false
     @State private var mainTextAnimation: Bool = false
     @State private var loginTextAnimation: Bool = false
     @State private var userNameTextFieldAnimation: Bool = false
@@ -110,6 +111,14 @@ struct LoginView: View {
             
             Spacer()
         }
+        .background {
+            Color.clear
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    dismissKeyboard()
+                }
+        }
         .overlay(alignment: .top) {
             VStack {
                 Text("Valorant")
@@ -136,6 +145,7 @@ struct LoginView: View {
             DownloadView()
         }
         .onAppear {
+            print("스크린 높이: \(screenSize.height)")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 withAnimation(.spring()) {
                     mainTextAnimation = true
@@ -156,7 +166,7 @@ struct LoginView: View {
                                 withAnimation(.spring()) {
                                     loginButtonAnimation = true
                                 }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                                     withAnimation(.spring()) {
                                         helpButtonAnimation = true
                                     }
@@ -166,11 +176,21 @@ struct LoginView: View {
                     }
                 }
             }
-            
-            
-            
-        
         }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillShowNotification)) { _ in
+            withAnimation(.spring()) {
+                mainTextAnimation = false
+                viewAnimation = true
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillHideNotification)) { _ in
+            withAnimation(.spring()) {
+                mainTextAnimation = true
+                viewAnimation = false
+            }
+        }
+        .offset(y: viewAnimation ? -(screenSize.height * 0.1) : 0)
+        .ignoresSafeArea(.keyboard)
     }
 }
 

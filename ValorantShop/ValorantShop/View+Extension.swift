@@ -36,6 +36,12 @@ extension View {
 
 extension View {
     
+    func dismissKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
+        )
+    }
+    
     var screenSize: CGRect {
         guard let screenSize = UIApplication.shared.connectedScenes.compactMap({ scene -> UIWindow? in
             (scene as? UIWindowScene)?.keyWindow}).first?.frame else {

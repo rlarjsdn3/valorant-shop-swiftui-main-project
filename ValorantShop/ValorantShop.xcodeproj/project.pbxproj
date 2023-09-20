@@ -81,8 +81,8 @@
 			isa = PBXGroup;
 			children = (
 				9E266EAD2AB34A7400178F25 /* LoginView.swift */,
-				9ED509552AB6A6F200149206 /* DownloadView.swift */,
 				9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */,
+				9ED509552AB6A6F200149206 /* DownloadView.swift */,
 			);
 			path = LoginView;
 			sourceTree = "<group>";
