@@ -136,6 +136,7 @@ final class OAuthManager {
         urlRequest.httpBody = self.encode(reAuthCookiesBody)
         // 키체인으로부터 SSID를 가져와 쿠키로 설정하기
         guard let ssid = keychain[Keychains.ssid] else {
+            print("SSID 없음 에러: \(#function)")
             return .failure(.noTokenError)
         }
         self.setCookie(ssid, key: "ssid")
