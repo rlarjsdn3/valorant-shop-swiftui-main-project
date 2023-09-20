@@ -97,7 +97,7 @@ final class ViewModel: ObservableObject {
             // 이중 인증 화면 보이게 하기
             self.isPresentMultifactorAuthView = true
         } catch {
-            // 로그인에 실패하면 예외 처리하기
+            return // 로그인에 실패하면 예외 처리하기
         }
     }
     

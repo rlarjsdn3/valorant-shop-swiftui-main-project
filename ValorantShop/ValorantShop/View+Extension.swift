@@ -31,4 +31,17 @@ extension View {
     private func makeImageFileName(of type: ImageType, uuid: String) -> String {
         return "\(type.prefixFileName)-\(uuid).png"
     }
+    
+}
+
+extension View {
+    
+    var screenSize: CGRect {
+        guard let screenSize = UIApplication.shared.connectedScenes.compactMap({ scene -> UIWindow? in
+            (scene as? UIWindowScene)?.keyWindow}).first?.frame else {
+            return UIScreen.main.bounds
+        }
+        return screenSize
+    }
+    
 }
