@@ -55,7 +55,7 @@ struct CustomTabView: View {
                 } label: {
                     Image(systemName: type.imageName)
                         .fontWeight(.bold)
-                        .foregroundColor(type == viewModel.selectedCustomTab ? Color.valorantThemeColor : Color.black)
+                        .foregroundColor(type == viewModel.selectedCustomTab ? Color.valorant : Color.black)
                         .padding()
                 }
 
@@ -73,5 +73,6 @@ struct CustomTabView: View {
 struct CustomTabView_Previews: PreviewProvider {
     static var previews: some View {
         CustomTabView()
+            .environmentObject(ViewModel())
     }
 }

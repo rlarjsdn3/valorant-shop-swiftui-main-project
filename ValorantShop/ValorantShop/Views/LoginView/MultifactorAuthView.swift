@@ -43,5 +43,6 @@ struct MultifactorAuthView_Previews: PreviewProvider {
     static var previews: some View {
         MultifactorAuthView()
             .environmentObject(ViewModel())
+            .previewLayout(.sizeThatFits)
     }
 }
