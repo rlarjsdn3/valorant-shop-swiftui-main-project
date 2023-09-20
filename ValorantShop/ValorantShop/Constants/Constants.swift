@@ -11,6 +11,7 @@ struct UserDefaults {
     
     // For Auth
     static var isLoggedIn: String = "isLoggedIn"
+    static var accessTokenExpiryDate: String = "AccessTokenExpiryDate"
     
     // For Resource
     static var isDataDownloaded: String = "isDataDownloaded"
