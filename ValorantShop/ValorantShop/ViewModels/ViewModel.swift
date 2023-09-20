@@ -106,6 +106,8 @@ final class ViewModel: ObservableObject {
         do {
             // 이중 인증 코드로 로그인이 가능한지 확인하기
             let _ = try await oauthManager.fetchMultifactorAuth(authenticationCode: code).get()
+            // 불러온 사용자 고유 정보를 키체인에 저장하기
+            let _ = try await self.fetchReAuthTokens().get()
             // 로그인에 성공하면 성공 여부 수정하기
             self.isLoggedIn = true
         } catch {
@@ -132,7 +134,7 @@ final class ViewModel: ObservableObject {
         self.isPresentLaunchScreenView = true
     }
     
-    func fetchReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
+    private func fetchReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
         // ⭐️ 앱을 최초 실행하면 처음 1번만 사용자 고유 정보를 불러온 후, 키체인에 저장함.
         // ⭐️ 이후 HTTP 통신을 위해 사용자 고유 정보가 필요하다면 키체인에 저장된 데이터를 불러와 사용함.
         // ⭐️ 이를 통해, 앱의 로딩 속도를 비약적으로 상승시킬 수 있었음.
@@ -175,11 +177,13 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func downloadStoreData(reload: Bool = false) async {
+    func downloadValorantData(reload: Bool = false) async {
         do {
             // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
             // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
             self.storeRotationWeaponSkins.weaponSkins = []
+            // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
+            try await self.downloadValorantVersion()
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
             try await self.downloadWeaponSkinsData()
             // 가격 정보 데이터 다운로드받고, Realm에 저장하기
@@ -196,6 +200,14 @@ final class ViewModel: ObservableObject {
         } catch {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
+    }
+    
+    @MainActor
+    private func downloadValorantVersion() async throws {
+        // 발로란트 버전 데이터 다운로드받기
+        let valorantVersion = try await resourceManager.fetchValorantVersion().get()
+        // 발로란트 버전 데이터를 Realm에 저장하기
+        self.saveStoreData(valorantVersion)
     }
     
     @MainActor
@@ -308,12 +320,32 @@ final class ViewModel: ObservableObject {
     }
     
     func fetchPlayerData() async {
-        // 사용자와 관련된 모든 데이터를 가져오기
+        // 사용자와 관련된 모든 데이터를 불러오기
         do {
-            // 사용자의 닉네임, 태그 데이터 가져오기
+            // 사용자의 닉네임, 태그 데이터 불러오기
             try await fetchPlayerID()
-            // 사용자의 로테이션된 무기 스킨 데이터 가져오기
+            // 사용자의 로테이션된 무기 스킨 데이터 불러오기
             try await fetchStoreRotationWeaponSkins()
+        } catch {
+            return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+        }
+    }
+    
+    @MainActor
+    func checkValorantVersion() async {
+        do {
+            // DB에 저장되어 있는 (구)버전 데이터 불러오기
+            guard let oldVersion = realmManager.read(of: Version.self).first else { return }
+            // 서버에 저장되어 있는 (신)버전 데이터 불러오기
+            let newVersion = try await resourceManager.fetchValorantVersion().get()
+            // 버전을 비교한 결과 서로 다르다면
+            if oldVersion.client?.riotClientVersion != newVersion.client?.riotClientVersion ||
+               oldVersion.client?.riotClientBuild != newVersion.client?.riotClientBuild ||
+               oldVersion.client?.buildDate != newVersion.client?.buildDate
+            {
+                // 다운로드 화면이 보이게 하기
+                self.isPresentDownloadView = true
+            }
         } catch {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
@@ -389,7 +421,10 @@ final class ViewModel: ObservableObject {
         }
     }
     
-    func applicationDidEnterBackground() {
+    func deleteAllAuthTokens() {
+        // ⭐️ 앱이 꺼지거나, 백그라운드 상태에 진입하면 모든 사용자 고유 정보를 삭제함.
+        // ⭐️ 사용자 고유 정보의 유효 시간은 1시간(3600초)이기에, 나중에 사용자가 다시 앱을 켜더라도 해당 정보는 별 의미가 없기 때문임.
+        
         // 키체인에 저장된 사용자 고유 정보 삭제하기
         do {
             try keychain.remove(Keychains.accessToken)
