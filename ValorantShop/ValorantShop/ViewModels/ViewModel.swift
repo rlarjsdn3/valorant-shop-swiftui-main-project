@@ -35,6 +35,11 @@ final class ViewModel: ObservableObject {
     // For LaunchScreen
     @Published var isPresentLaunchScreenView: Bool = true
     
+    // For Login
+    @Published var isLoadingLogin: Bool = false
+    @Published var loginErrorText: String = ""
+    @Published var loginButtonShakeAnimation: CGFloat = 0.0
+    
     // For MultifactorAuth
     @Published var multifactorAuthEmail: String = ""
     @Published var isPresentMultifactorAuthView: Bool = false
@@ -60,6 +65,7 @@ final class ViewModel: ObservableObject {
     let oauthManager = OAuthManager.shared
     let realmManager = RealmManager.shared
     let resourceManager = ResourceManager.shared
+    let hapticManager = HapticManager.shared
     
     let keychain = Keychain()
     
@@ -83,21 +89,54 @@ final class ViewModel: ObservableObject {
     @MainActor
     func login(username: String, password: String) async {
         do {
+            // 로딩 버튼 보이게 하기
+            withAnimation(.spring()) { self.isLoadingLogin = true }
+            
             // ID와 패스워드로 로그인이 가능한지 확인하기
             let _ = try await oauthManager.fetchAuthCookies().get()
             let _ = try await oauthManager.fetchAccessToken(username: username, password: password).get()
             // 불러온 사용자 고유 정보를 키체인에 저장하기
             let _ = try await self.fetchReAuthTokens().get()
-            // 로그인에 성공하면 성공 여부 수정하기
-            self.isLoggedIn = true
+            
+            withAnimation(.spring()) {
+                // 로그인에 성공하면 성공 여부 수정하기
+                self.isLoggedIn = true
+                // 로그인에 성공하면 로딩 버튼 가리기
+                self.isLoadingLogin = false
+            }
         // 이중 인증이 필요하다면
         } catch OAuthError.needMultifactor(let email) {
             // 인증 이메일을 뷰에 표시하기
             self.multifactorAuthEmail = email
             // 이중 인증 화면 보이게 하기
             self.isPresentMultifactorAuthView = true
+            // 로그인에 성공하면 로딩 버튼 가리기
+            withAnimation(.spring()) { self.isLoadingLogin = false }
+        } catch OAuthError.statusCodeError {
+            // 에러 메시지 출력하기
+            self.loginErrorText = "서버에 연결하는 데 문제가 발생하였습니다."
+            // 에러 햅틱 피드백 전달하기
+            hapticManager.notify(.error)
+            // 로그인에 성공하면 로딩 버튼 가리기
+            withAnimation(.spring()) { self.isLoadingLogin = false }
+            // 로그인 버튼에 흔들기 애니메이션 적용하기
+            withAnimation(.spring()) { self.loginButtonShakeAnimation += 1.0 }
+        } catch OAuthError.noTokenError {
+            // 에러 메시지 출력하기
+            self.loginErrorText = "계정이름과 비밀번호가 일치하지 않습니다."
+            // 에러 햅틱 피드백 전달하기
+            hapticManager.notify(.error)
+            // 로그인에 성공하면 로딩 버튼 가리기
+            withAnimation(.spring()) { self.isLoadingLogin = false }
+            // 로그인 버튼에 흔들기 애니메이션 적용하기
+            withAnimation(.spring()) { self.loginButtonShakeAnimation += 1.0 }
         } catch {
-            return // 로그인에 실패하면 예외 처리하기
+            // 에러 햅틱 피드백 전달하기
+            hapticManager.notify(.error)
+            // 로그인에 성공하면 로딩 버튼 가리기
+            withAnimation(.spring()) { self.isLoadingLogin = false }
+            // 로그인 버튼에 흔들기 애니메이션 적용하기
+            withAnimation(.spring()) { self.loginButtonShakeAnimation += 1.0 }
         }
     }
     
@@ -111,6 +150,7 @@ final class ViewModel: ObservableObject {
             // 로그인에 성공하면 성공 여부 수정하기
             self.isLoggedIn = true
         } catch {
+            print(error)
             // 로그인에 실패하면 예외 처리하기
         }
     }
@@ -427,9 +467,10 @@ final class ViewModel: ObservableObject {
         
         // 키체인에 저장된 사용자 고유 정보 삭제하기
         do {
-            try keychain.remove(Keychains.accessToken)
-            try keychain.remove(Keychains.riotEntitlement)
-            try keychain.remove(Keychains.puuid)
+//            try keychain.remove(Keychains.accessToken)
+//            try keychain.remove(Keychains.riotEntitlement)
+//            try keychain.remove(Keychains.puuid)
+            // ReAuth를 위해 SSID와 TDID값을 키체인에 저장하기
         } catch {
             return // 토큰 삭제에 실패하면 예외 처리 코드 작성하기
         }

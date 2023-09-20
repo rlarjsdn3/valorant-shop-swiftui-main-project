@@ -84,13 +84,15 @@ struct LoginView: View {
                 .offset(y: passwordTextFieldAnimation ? 0 : screenSize.height)
             }
             
-            Text("계정이름과 비밀번호가 일치하지 않습니다.")
+            Text("\(viewModel.loginErrorText)")
                 .font(.caption)
                 .foregroundColor(Color.valorant)
-                .opacity(0)
+                .frame(height: 10)
+                .opacity(viewModel.loginErrorText.isEmpty ? 0.0 : 1.0)
                 .offset(y: passwordTextFieldAnimation ? 0 : screenSize.height)
             
             Button {
+                self.dismissKeyboard()
                 Task {
                     await viewModel.login(
                         username: inputUsername,
@@ -98,16 +100,23 @@ struct LoginView: View {
                     )
                 }
             } label: {
-                Text("로그인")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.valorant, in: RoundedRectangle(cornerRadius: 15))
+                Group {
+                    if viewModel.isLoadingLogin {
+                        ProgressView()
+                    } else {
+                        Text("로그인")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color.white)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 53)
+                .background(Color.valorant, in: RoundedRectangle(cornerRadius: 15))
             }
             .padding(.top, 1)
             .offset(y: loginButtonAnimation ? 0 : screenSize.height)
+            .modifier(ShakeEffect(animatableData: viewModel.loginButtonShakeAnimation))
             
             Spacer()
         }
@@ -116,7 +125,7 @@ struct LoginView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    dismissKeyboard()
+                    self.dismissKeyboard()
                 }
         }
         .overlay(alignment: .top) {
@@ -145,7 +154,8 @@ struct LoginView: View {
             DownloadView()
         }
         .onAppear {
-            print("스크린 높이: \(screenSize.height)")
+            viewModel.loginErrorText = ""
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 withAnimation(.spring()) {
                     mainTextAnimation = true

@@ -25,6 +25,7 @@
 		9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A32AB0B54400D6FE07 /* CollectionView.swift */; };
 		9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */; };
 		9E7638712AB894A600BD0AB4 /* MultifactorAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */; };
+		9E7638742ABAF9B000BD0AB4 /* ShakeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */; };
 		9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAA7D7B2AB57F460095A205 /* ResourceManager.swift */; };
 		9EB4C5632AB49DB500AE4425 /* WeaponSkins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */; };
 		9EB4C5652AB4A14700AE4425 /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5642AB4A14700AE4425 /* Version.swift */; };
@@ -52,6 +53,7 @@
 		9E2922A32AB0B54400D6FE07 /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
 		9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultifactorAuthView.swift; sourceTree = "<group>"; };
+		9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeEffect.swift; sourceTree = "<group>"; };
 		9EAA7D7B2AB57F460095A205 /* ResourceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResourceManager.swift; sourceTree = "<group>"; };
 		9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponSkins.swift; sourceTree = "<group>"; };
 		9EB4C5642AB4A14700AE4425 /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 				9E2922962AB0AE2200D6FE07 /* ViewModels */,
 				9EB4C5612AB49D7B00AE4425 /* Models */,
 				9E2922972AB0AE2C00D6FE07 /* Managers */,
+				9E7638722ABAF9A100BD0AB4 /* Modifier */,
 				9E2922982AB0AE3300D6FE07 /* Extensions */,
 				9E2922992AB0AE4100D6FE07 /* Constants */,
 				9ED509592AB7356D00149206 /* Fonts */,
@@ -208,6 +211,14 @@
 				9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */,
 			);
 			path = SettingsView;
+			sourceTree = "<group>";
+		};
+		9E7638722ABAF9A100BD0AB4 /* Modifier */ = {
+			isa = PBXGroup;
+			children = (
+				9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */,
+			);
+			path = Modifier;
 			sourceTree = "<group>";
 		};
 		9EB4C5612AB49D7B00AE4425 /* Models */ = {
@@ -325,6 +336,7 @@
 				9EB4C5632AB49DB500AE4425 /* WeaponSkins.swift in Sources */,
 				9EB4C5672AB4A68500AE4425 /* StorePrices.swift in Sources */,
 				9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */,
+				9E7638742ABAF9B000BD0AB4 /* ShakeEffect.swift in Sources */,
 				9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */,
 				9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */,
 				9E266E722AB208C700178F25 /* Color+Extension.swift in Sources */,
