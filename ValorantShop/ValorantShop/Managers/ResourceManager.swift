@@ -59,26 +59,6 @@ enum ResourceError: Error {
 
 // MARK: - HTTP RESPONSE
 
-struct WalletResponse: Codable {
-    let balances: Balance
-
-    enum CodingKeys: String, CodingKey {
-        case balances = "Balances"
-    }
-}
-
-struct Balance: Codable {
-    let vp: Int
-    let rp: Int
-    let kp: Int
-    
-    enum CodingKeys: String, CodingKey {
-        case vp = "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741"
-        case rp = "e59aa87c-4cbf-517a-5983-6e81511be9b7"
-        case kp = "85ca954a-41f2-ce94-9b45-8ca3dd39a00d"
-    }
-}
-
 struct StorefrontResponse: Codable {
     let skinsPanelLayout: SkinsPanelLayout
     
@@ -169,7 +149,7 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let playerID = decode(of: [PlayerID].self, from: data) else {
+        guard let playerID = self.decode(of: [PlayerID].self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -183,7 +163,7 @@ final class ResourceManager {
         return .success(playerID)
     }
     
-    func fetchUserWallet(accessToken: String, riotEntitlement: String, puuid: String) async -> Result<WalletResponse, ResourceError> {
+    func fetchUserWallet(accessToken: String, riotEntitlement: String, puuid: String) async -> Result<PlayerWallet, ResourceError> {
         // For Debug
         print(#function)
         
@@ -207,13 +187,13 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let walletResponse = decode(of: WalletResponse.self, from: data) else {
+        guard let playerWallet = self.decode(of: PlayerWallet.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
         
         // 결과 반환하기
-        return .success(walletResponse)
+        return .success(playerWallet)
     }
     
     func fetchStorefront(accessToken: String, riotEntitlement: String, puuid: String) async -> Result<StorefrontResponse, ResourceError> {
@@ -240,7 +220,7 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let storefrontResponse = decode(of: StorefrontResponse.self, from: data) else {
+        guard let storefrontResponse = self.decode(of: StorefrontResponse.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -274,7 +254,7 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let weaponSkins = decode(of: WeaponSkins.self, from: data) else {
+        guard let weaponSkins = self.decode(of: WeaponSkins.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
@@ -307,7 +287,7 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let weaponPrices = decode(of: StorePrices.self, from: data) else {
+        guard let weaponPrices = self.decode(of: StorePrices.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }

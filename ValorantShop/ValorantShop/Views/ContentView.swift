@@ -62,7 +62,7 @@ struct ContentView: View {
                     Task {
                         await viewModel.checkValorantVersion()
                         await viewModel.getPlayerID()
-                        // + 사용자 VP 정보
+                        await viewModel.getPlayerWallet()
                         await viewModel.getStoreRotationWeaponSkins()
                     }
                 }

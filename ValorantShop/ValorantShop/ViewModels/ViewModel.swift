@@ -59,6 +59,11 @@ final class ViewModel: ObservableObject {
     @Published var gameName: String = ""
     @Published var tagLine: String = ""
     
+    // For PlayerWallet
+    @Published var rp: Int = 0
+    @Published var vp: Int = 0
+    @Published var kp: Int = 0
+    
     // For Storefront
     @Published var storeRotationWeaponSkins: StoreRotationWeaponkins = .init()
     @Published var storeRotationWeaponSkinsRemainingSeconds: String = ""
@@ -439,11 +444,23 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func getPlayerID() async {
+    func getPlayerID(reload: Bool = false) async {
         // Realm에 저장된 사용자ID 데이터 불러오기
         var playerID = realmManager.read(of: PlayerID.self)
-        // Realm에 저장된 로테이션 스킨 데이터가 있다면
-        if playerID.isEmpty {
+        // 강제로 다시 불러오지 안는다면
+        if !reload {
+            // Realm에 저장된 로테이션 스킨 데이터가 있다면
+            if playerID.isEmpty {
+                do {
+                    try await self.fetchPlayerID()
+                    // Realm에 저장된 사용자ID 데이터 다시 불러오기
+                    playerID = realmManager.read(of: PlayerID.self)
+                } catch {
+                    return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                }
+            }
+        // 강제로 다시 불러온다면
+        } else {
             do {
                 try await self.fetchPlayerID()
                 // Realm에 저장된 사용자ID 데이터 다시 불러오기
@@ -463,8 +480,10 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func fetchPlayerID() async throws {
-        // 접근 토큰, 등록 정보 및 PUUID값 가져오기
+    private func fetchPlayerID() async throws {
+        // Realm에 저장되어 있는 기존 사용자ID 데이터 삭제하기
+        realmManager.deleteAll(of: RotatedWeaponSkins.self)
+        // 접근 토큰 등 사용자 고유 정보 가져오기
         let reAuthTokens = try await self.getReAuthTokens().get()
         // 닉네임, 태그 정보 다운로드하기
         let id = try await resourceManager.fetchPlayerID(
@@ -473,31 +492,101 @@ final class ViewModel: ObservableObject {
             puuid: reAuthTokens.puuid
         ).get()
         // Realm에 새로운 사용자ID 데이터 저장하기
-        let playerID = PlayerID(value: ["gameName": "\(id.gameName)", "tagLine": "#\(id.tagLine)"])
-        realmManager.create(playerID)
+        realmManager.create(id)
     }
     
     @MainActor
-    func getStoreRotationWeaponSkins() async {
+    func getPlayerWallet(reload: Bool = false) async {
+        // Realm에 저장된 사용자 지갑 데이터 불러오기
+        var playerWallet = realmManager.read(of: PlayerWallet.self)
+        // 강제로 다시 불러오지 안는다면
+        if !reload {
+            // Realm에 저장된 사용자 지갑 데이터가 없다면
+            if playerWallet.isEmpty {
+                do {
+                    // 사용자 지갑 데이터를 불러와 Realm에 저장하기
+                    try await self.fetchPlayerWallet()
+                    // Realm에 저장된 사용자 지갑 데이터 다시 불러오기
+                    playerWallet = realmManager.read(of: PlayerWallet.self)
+                } catch {
+                    return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                }
+            }
+        // 강제로 다시 불러온다면
+        } else {
+            do {
+                // 사용자 지갑 데이터를 불러와 Realm에 저장하기
+                try await self.fetchPlayerWallet()
+                // Realm에 저장된 사용자 지갑 데이터 다시 불러오기
+                playerWallet = realmManager.read(of: PlayerWallet.self)
+            } catch {
+                return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+            }
+        }
+        
+        // 발로란트 포인트(VP) 불러오기
+        guard let vp = playerWallet.first?.balances?.vp else { return }
+        // 레디어나이트 포인트(RP) 불러오기
+        guard let rp = playerWallet.first?.balances?.rp else { return }
+        // 킹덤 포인트(KP) 불러오기
+        guard let kp = playerWallet.first?.balances?.kp else { return }
+        
+        // 결과 업데이트
+        self.vp = vp
+        self.rp = rp
+        self.kp = kp
+    }
+    
+    @MainActor
+    private func fetchPlayerWallet() async throws {
+        // Realm에 저장되어 있는 기존 사용자 지갑 데이터 삭제하기
+        realmManager.deleteAll(of: PlayerWallet.self)
+        // 접근 토큰 등 사용자 고유 정보 가져오기
+        let reAuthTokens = try await self.getReAuthTokens().get()
+        // 사용자 지갑 정보 다운로드하기
+        let wallet = try await resourceManager.fetchUserWallet(
+            accessToken: reAuthTokens.accessToken,
+            riotEntitlement: reAuthTokens.riotEntitlement,
+            puuid: reAuthTokens.puuid
+        ).get()
+        // Realm에 새로운 사용자 지갑 데이터 저장하기
+        realmManager.create(wallet)
+    }
+    
+    @MainActor
+    func getStoreRotationWeaponSkins(reload: Bool = false) async {
         print(#function)
         
         // Realm에 저장된 로테이션 스킨 데이터 불러오기
         let rotatedWeaponSkins = realmManager.read(of: RotatedWeaponSkins.self)
-        // Realm에 저장된 로테이션 스킨 데이터가 있다면
-        if !rotatedWeaponSkins.isEmpty {
-            // 현재 날짜 불러오기
-            let currentDate = Date().timeIntervalSinceReferenceDate
-            // 로테이션 갱신 시간이 지났다면
-            if currentDate > rotatedWeaponSkinsExpiryDate {
+        // 강제로 다시 불러오지 안는다면
+        if !reload {
+            // Realm에 저장된 로테이션 스킨 데이터가 있다면
+            if !rotatedWeaponSkins.isEmpty {
+                // 현재 날짜 불러오기
+                let currentDate = Date().timeIntervalSinceReferenceDate
+                // 로테이션 갱신 시간이 지났다면
+                if currentDate > rotatedWeaponSkinsExpiryDate {
+                    do {
+                        // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
+                        try await self.fetchStoreRotationWeaponSkins()
+                    } catch {
+                        return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                    }
+                }
+            // Realm에 로테이션 스킨 데이터가 없다면
+            } else {
                 do {
+                    // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                     try await self.fetchStoreRotationWeaponSkins()
                 } catch {
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                 }
             }
-        // Realm에 로테이션 스킨 데이터가 없다면
+        // 강제로 다시 불러온다면
         } else {
             do {
+                // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                 try await self.fetchStoreRotationWeaponSkins()
             } catch {
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
@@ -549,7 +638,7 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func fetchStoreRotationWeaponSkins() async throws {
+    private func fetchStoreRotationWeaponSkins() async throws {
         // Realm에 저장되어 있는 기존 로테이션 스킨 데이터 삭제하기
         realmManager.deleteAll(of: RotatedWeaponSkins.self)
         // 접근 토큰 등 사용자 고유 정보 가져오기
@@ -598,9 +687,11 @@ final class ViewModel: ObservableObject {
             
             // 로테이션 스킨 갱신 날짜에 다다르면
             if currentDate > expiryDate {
-                // 로테이션 스킨 갱신하기 (새로고침)
+                // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터 강제 갱신하기 (새로고침)
                 Task {
-                    await self.getStoreRotationWeaponSkins()
+                    await self.getPlayerID(reload: true)
+                    await self.getPlayerWallet(reload: true)
+                    await self.getStoreRotationWeaponSkins(reload: true)
                 }
             }
             
