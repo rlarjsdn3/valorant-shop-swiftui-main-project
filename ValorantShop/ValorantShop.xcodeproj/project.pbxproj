@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9E064C332ABB34E1004A5D96 /* RotatedWeaponSkins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E064C322ABB34E1004A5D96 /* RotatedWeaponSkins.swift */; };
+		9E064C352ABC0D04004A5D96 /* PlayerID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E064C342ABC0D04004A5D96 /* PlayerID.swift */; };
 		9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266E6F2AB201DD00178F25 /* HapticManager.swift */; };
 		9E266E722AB208C700178F25 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266E712AB208C700178F25 /* Color+Extension.swift */; };
 		9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EA62AB342DC00178F25 /* OAuthManager.swift */; };
@@ -39,6 +40,7 @@
 
 /* Begin PBXFileReference section */
 		9E064C322ABB34E1004A5D96 /* RotatedWeaponSkins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotatedWeaponSkins.swift; sourceTree = "<group>"; };
+		9E064C342ABC0D04004A5D96 /* PlayerID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerID.swift; sourceTree = "<group>"; };
 		9E266E6F2AB201DD00178F25 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		9E266E712AB208C700178F25 /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		9E266EA62AB342DC00178F25 /* OAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthManager.swift; sourceTree = "<group>"; };
@@ -230,6 +232,7 @@
 				9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */,
 				9EB4C5662AB4A68500AE4425 /* StorePrices.swift */,
 				9E064C322ABB34E1004A5D96 /* RotatedWeaponSkins.swift */,
+				9E064C342ABC0D04004A5D96 /* PlayerID.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -344,6 +347,7 @@
 				9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */,
 				9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */,
 				9E266E722AB208C700178F25 /* Color+Extension.swift in Sources */,
+				9E064C352ABC0D04004A5D96 /* PlayerID.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

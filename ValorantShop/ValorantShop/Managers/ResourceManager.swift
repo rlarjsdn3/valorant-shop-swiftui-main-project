@@ -59,16 +59,6 @@ enum ResourceError: Error {
 
 // MARK: - HTTP RESPONSE
 
-struct PlayerIDResponse: Codable {
-    let gameName: String
-    let tagLine: String
-    
-    enum CodingKeys: String, CodingKey {
-        case gameName = "GameName"
-        case tagLine = "TagLine"
-    }
-}
-
 struct WalletResponse: Codable {
     let balances: Balance
 
@@ -143,16 +133,16 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let riotVersion = decode(of: Version.self, from: data) else {
+        guard let version = decode(of: Version.self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
         
         // 결과 반환하기
-        return .success(riotVersion)
+        return .success(version)
     }
     
-    func fetchPlayerID(accessToken: String, riotEntitlement: String, puuid: String) async throws -> Result<PlayerIDResponse, ResourceError> {
+    func fetchPlayerID(accessToken: String, riotEntitlement: String, puuid: String) async throws -> Result<PlayerID, ResourceError> {
         // For Debug
         print(#function)
         
@@ -179,18 +169,18 @@ final class ResourceManager {
             return .failure(.statusCodeError)
         }
         // 받아온 데이터를 파싱하기
-        guard let playerIDResponse = decode(of: [PlayerIDResponse].self, from: data) else {
+        guard let playerID = decode(of: [PlayerID].self, from: data) else {
             print("파싱 에러: \(#function)")
             return .failure(.parsingError)
         }
         // 첫 번째 데이터 추출하기
-        guard let playerIDResponse = playerIDResponse.first else {
+        guard let playerID = playerID.first else {
             print("유저 정보 에러: \(#function)")
             return .failure(.parsingError)
         }
         
         // 결과 반환하기
-        return .success(playerIDResponse)
+        return .success(playerID)
     }
     
     func fetchUserWallet(accessToken: String, riotEntitlement: String, puuid: String) async -> Result<WalletResponse, ResourceError> {
