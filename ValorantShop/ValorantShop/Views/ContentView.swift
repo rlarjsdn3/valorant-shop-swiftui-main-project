@@ -61,7 +61,7 @@ struct ContentView: View {
                     print("OnAppear")
                     Task {
                         await viewModel.checkValorantVersion()
-                        await viewModel.fetchStoreRotationWeaponSkins()
+                        await viewModel.getStoreRotationWeaponSkins()
                         await viewModel.fetchPlayerID()
                     }
                 }

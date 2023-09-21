@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9E064C332ABB34E1004A5D96 /* RotatedWeaponSkins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E064C322ABB34E1004A5D96 /* RotatedWeaponSkins.swift */; };
 		9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266E6F2AB201DD00178F25 /* HapticManager.swift */; };
 		9E266E722AB208C700178F25 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266E712AB208C700178F25 /* Color+Extension.swift */; };
 		9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EA62AB342DC00178F25 /* OAuthManager.swift */; };
@@ -37,6 +38,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9E064C322ABB34E1004A5D96 /* RotatedWeaponSkins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotatedWeaponSkins.swift; sourceTree = "<group>"; };
 		9E266E6F2AB201DD00178F25 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		9E266E712AB208C700178F25 /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		9E266EA62AB342DC00178F25 /* OAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthManager.swift; sourceTree = "<group>"; };
@@ -227,6 +229,7 @@
 				9EB4C5642AB4A14700AE4425 /* Version.swift */,
 				9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */,
 				9EB4C5662AB4A68500AE4425 /* StorePrices.swift */,
+				9E064C322ABB34E1004A5D96 /* RotatedWeaponSkins.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -323,6 +326,7 @@
 				9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */,
 				9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */,
 				9E7638712AB894A600BD0AB4 /* MultifactorAuthView.swift in Sources */,
+				9E064C332ABB34E1004A5D96 /* RotatedWeaponSkins.swift in Sources */,
 				9ED509582AB71D8700149206 /* View+Extension.swift in Sources */,
 				9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */,
 				9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */,

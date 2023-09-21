@@ -18,7 +18,7 @@ struct LoginView: View {
     @State private var inputPassword: String = ""
     
     // For Animation
-    @State private var viewAnimation: Bool = false
+    @State private var keyboardAnimation: Bool = false
     @State private var mainTextAnimation: Bool = false
     @State private var loginTextAnimation: Bool = false
     @State private var userNameTextFieldAnimation: Bool = false
@@ -138,13 +138,19 @@ struct LoginView: View {
             .offset(y: mainTextAnimation ? 0 : -screenSize.height)
         }
         .overlay(alignment: .bottom) {
-            Link(destination: URL(string: "https://recovery.riotgames.com/ko")!) {
-                Text("로그인이 안되시나요?")
-                    .font(.callout)
+            HStack {
+                Link(destination: URL(string: "https://recovery.riotgames.com/ko")!) {
+                    Text("로그인이 안되시나요?")
+                        .font(.callout)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 20)
+                .opacity(helpButtonAnimation ? 1 : 0)
+                
+                Button("다운로드") {
+                    viewModel.isPresentDownloadView = true
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.top, 20)
-            .opacity(helpButtonAnimation ? 1 : 0)
         }
         .padding(20)
         .sheet(isPresented: $viewModel.isPresentMultifactorAuthView) {
@@ -190,16 +196,16 @@ struct LoginView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillShowNotification)) { _ in
             withAnimation(.spring()) {
                 mainTextAnimation = false
-                viewAnimation = true
+                keyboardAnimation = true
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillHideNotification)) { _ in
             withAnimation(.spring()) {
                 mainTextAnimation = true
-                viewAnimation = false
+                keyboardAnimation = false
             }
         }
-        .offset(y: viewAnimation ? -(screenSize.height * 0.1) : 0)
+        .offset(y: keyboardAnimation ? -(screenSize.height * 0.1) : 0)
         .ignoresSafeArea(.keyboard)
     }
 }

@@ -13,6 +13,10 @@ struct ShopView: View {
     
     @EnvironmentObject var viewModel: ViewModel
     
+    // MARK: - PROPERTIES
+    
+    
+    
     // MARK: - BODY
     
     var body: some View {
@@ -31,11 +35,11 @@ struct ShopView: View {
                     }
                 }
                 
-                Text("\(viewModel.rotationWeaponSkinsRemainingSeconds)")
+                Text("\(viewModel.storeRotationWeaponSkinsRemainingSeconds)")
                 
                 Button("리로드") {
                     Task {
-                        try? await viewModel.fetchStoreRotationWeaponSkins()
+                        await viewModel.getStoreRotationWeaponSkins()
                     }
                 }
             }
