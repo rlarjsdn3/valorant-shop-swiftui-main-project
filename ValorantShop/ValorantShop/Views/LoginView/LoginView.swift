@@ -18,7 +18,7 @@ struct LoginView: View {
     @State private var inputPassword: String = ""
     
     // For Animation
-    @State private var viewAnimation: Bool = false
+    @State private var keyboardAnimation: Bool = false
     @State private var mainTextAnimation: Bool = false
     @State private var loginTextAnimation: Bool = false
     @State private var userNameTextFieldAnimation: Bool = false
@@ -196,16 +196,16 @@ struct LoginView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillShowNotification)) { _ in
             withAnimation(.spring()) {
                 mainTextAnimation = false
-                viewAnimation = true
+                keyboardAnimation = true
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillHideNotification)) { _ in
             withAnimation(.spring()) {
                 mainTextAnimation = true
-                viewAnimation = false
+                keyboardAnimation = false
             }
         }
-        .offset(y: viewAnimation ? -(screenSize.height * 0.1) : 0)
+        .offset(y: keyboardAnimation ? -(screenSize.height * 0.1) : 0)
         .ignoresSafeArea(.keyboard)
     }
 }

@@ -35,11 +35,11 @@ struct ShopView: View {
                     }
                 }
                 
-                Text("\(viewModel.rotationWeaponSkinsRemainingSeconds.description)")
+                Text("\(viewModel.storeRotationWeaponSkinsRemainingSeconds)")
                 
                 Button("리로드") {
                     Task {
-                        await viewModel.fetchStoreRotationWeaponSkins()
+                        await viewModel.getStoreRotationWeaponSkins()
                     }
                 }
             }

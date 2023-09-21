@@ -61,12 +61,7 @@ final class ViewModel: ObservableObject {
     
     // For Storefront
     @Published var storeRotationWeaponSkins: StoreRotationWeaponkins = .init()
-    var rotationWeaponSkinsRemainingSeconds: Date {
-        let calendar = Calendar.current
-        let rotatedWeaponSkinsExpiryDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsExpiryDate)
-        let dateComponents = calendar.dateComponents([.second], from: Date.now, to: rotatedWeaponSkinsExpiryDate)
-        return calendar.date(from: dateComponents) ?? Date()
-    }
+    @Published var storeRotationWeaponSkinsRemainingSeconds: String = ""
     
     // MARK: - PROPERTIES
     
@@ -77,19 +72,19 @@ final class ViewModel: ObservableObject {
     
     let keychain = Keychain()
     
-    var timer: Timer?
+    weak var timer: Timer?
+    let calendar = Calendar.current
     
     // MARK: - INTIALIZER
     
     init() {
-//        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
-//            // self 키워드 옵셔널 바인딩하기
-//            guard let self = self else { return }
-//            // 다음 상점 로테이션까지 남은 초(sec)가 0 이상이라면
-//            if self.rotationWeaponSkinsRemainingSeconds > 0 {
-//                self.rotationWeaponSkinsRemainingSeconds -= 1
-//            }
-//        })
+        // Timer가 흐르기 전에 최초 1번만 시간 계산하기
+        calculateRotationWeaponSkinsRemainingTime()
+        timer = Timer.scheduledTimer(
+            withTimeInterval: 1.0,
+            repeats: true,
+            block: calculateRotationWeaponSkinsRemainingTime(_:)
+        )
     }
     
     // MARK: - FUNCTIONS
@@ -276,7 +271,7 @@ final class ViewModel: ObservableObject {
             // 새로운 스킨 데이터를 다운로드 받으면
             if reload {
                 // 새로운 스킨 데이터로 상점 정보를 뷰에 로드하기
-                await self.fetchStoreRotationWeaponSkins()
+                await self.getStoreRotationWeaponSkins()
             }
             // 다운로드를 모두 마치면 성공 여부 수정하기
             self.isDataDownloaded = true
@@ -442,74 +437,30 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func fetchStoreRotationWeaponSkins() async {
-        
-        // 현재 날짜 불러오기
-        let currentDate = Date().timeIntervalSinceReferenceDate
-        print("현재 닐짜: \(Date(timeIntervalSinceReferenceDate: currentDate))")
-        print("다음 갱신 날짜: \(Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsExpiryDate))")
-        
-        
+    func getStoreRotationWeaponSkins() async {
         // Realm에 저장된 로테이션 스킨 데이터 불러오기
         let rotatedWeaponSkins = realmManager.read(of: RotatedWeaponSkins.self)
         // Realm에 저장된 로테이션 스킨 데이터가 있다면
         if !rotatedWeaponSkins.isEmpty {
-            print("스킨 데이터 있음")
             // 현재 날짜 불러오기
             let currentDate = Date().timeIntervalSinceReferenceDate
             // 로테이션 갱신 시간이 지났다면
             if currentDate > rotatedWeaponSkinsExpiryDate {
-                print("스킨 데이터 갱신 필요!")
-                // 로테이션 스킨 데이터 초기화하기
-                self.storeRotationWeaponSkins = .init()
                 do {
-                    // 접근 토큰 등 사용자 고유 정보 가져오기
-                    let reAuthTokens = try await self.getReAuthTokens().get()
-                    // 새롭게 로테이션 스킨 데이터 불러오기
-                    let rotatedWeaponSkins = try await resourceManager.fetchStorefront(
-                        accessToken: reAuthTokens.accessToken,
-                        riotEntitlement: reAuthTokens.riotEntitlement,
-                        puuid: reAuthTokens.puuid
-                    ).get().skinsPanelLayout
-                    // 로테이션 갱신 시간을 UserDefaults에 저장하기
-                    self.rotatedWeaponSkinsExpiryDate = Date().addingTimeInterval(
-                        Double(rotatedWeaponSkins.singleItemOffersRemainingDurationInSeconds)
-                    ).timeIntervalSinceReferenceDate
-                    // Realm에 새로운 로테이션 스킨 데이터 저장하기 (스킨의 첫 번째 레벨의 UUID)
-                    for uuid in rotatedWeaponSkins.singleItemOffers {
-                        let rotatedWeaponSkins = RotatedWeaponSkins(value: ["uuid": "\(uuid)"])
-                    }
+                    try await self.fetchStoreRotationWeaponSkins()
                 } catch {
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                 }
             }
         // Realm에 로테이션 스킨 데이터가 없다면
         } else {
-            print("스킨 데이터 없음!")
             do {
-                // 접근 토큰 등 사용자 고유 정보 가져오기
-                let reAuthTokens = try await self.getReAuthTokens().get()
-                // 새롭게 로테이션 스킨 데이터 불러오기
-                let rotatedWeaponSkins = try await resourceManager.fetchStorefront(
-                    accessToken: reAuthTokens.accessToken,
-                    riotEntitlement: reAuthTokens.riotEntitlement,
-                    puuid: reAuthTokens.puuid
-                ).get().skinsPanelLayout
-                // 로테이션 갱신 시간을 UserDefaults에 저장하기
-                self.rotatedWeaponSkinsExpiryDate = Date().addingTimeInterval(
-                    Double(rotatedWeaponSkins.singleItemOffersRemainingDurationInSeconds)
-                ).timeIntervalSinceReferenceDate
-                // Realm에 새로운 로테이션 스킨 데이터 저장하기 (스킨의 첫 번째 레벨의 UUID)
-                for uuid in rotatedWeaponSkins.singleItemOffers {
-                    let rotatedWeaponSkins = RotatedWeaponSkins(value: ["uuid": "\(uuid)"])
-                    realmManager.create(rotatedWeaponSkins)
-                }
+                try await self.fetchStoreRotationWeaponSkins()
             } catch {
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
             }
         }
         
-        print("스킨 필터링 시작!")
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
         var storeRotationWeaponSkins: StoreRotationWeaponkins = StoreRotationWeaponkins()
         // Realm으로부터 로테이션 스킨 데이터 불러오기
@@ -552,6 +503,65 @@ final class ViewModel: ObservableObject {
         withAnimation(.easeInOut(duration: 0.2)) {
             self.isPresentLaunchScreenView = false
         }
+    }
+    
+    @MainActor
+    func fetchStoreRotationWeaponSkins() async throws {
+        // Realm에 저장되어 있는 기존 로테이션 스킨 데이터 삭제하기
+        realmManager.deleteAll(of: RotatedWeaponSkins.self)
+        // 접근 토큰 등 사용자 고유 정보 가져오기
+        let reAuthTokens = try await self.getReAuthTokens().get()
+        // 새롭게 로테이션 스킨 데이터 불러오기
+        let rotatedWeaponSkins = try await resourceManager.fetchStorefront(
+            accessToken: reAuthTokens.accessToken,
+            riotEntitlement: reAuthTokens.riotEntitlement,
+            puuid: reAuthTokens.puuid
+        ).get().skinsPanelLayout
+        // 로테이션 갱신 시간을 UserDefaults에 저장하기
+        self.rotatedWeaponSkinsExpiryDate = Date().addingTimeInterval(
+            Double(rotatedWeaponSkins.singleItemOffersRemainingDurationInSeconds)
+        ).timeIntervalSinceReferenceDate
+        // Realm에 새로운 로테이션 스킨 데이터 저장하기 (스킨의 첫 번째 레벨의 UUID)
+        for uuid in rotatedWeaponSkins.singleItemOffers {
+            let rotatedWeaponSkins = RotatedWeaponSkins(value: ["uuid": "\(uuid)"])
+            realmManager.create(rotatedWeaponSkins)
+        }
+    }
+    
+    func calculateRotationWeaponSkinsRemainingTime(_ timer: Timer? = nil) {
+        // 현재 날짜 불러오기
+        let currentDate = Date().timeIntervalSinceReferenceDate
+        // 로테이션 스킨 갱신 날짜 불러오기
+        let expiryDate = Date(timeIntervalSinceReferenceDate: self.rotatedWeaponSkinsExpiryDate).timeIntervalSinceReferenceDate
+        
+        // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
+        let dateComponents = self.calendar.dateComponents(
+            [.hour, .minute, .second],
+            from: Date(timeIntervalSinceReferenceDate: currentDate),
+            to: Date(timeIntervalSinceReferenceDate: expiryDate)
+        )
+        let hour = dateComponents.hour ?? 0
+        let minute = dateComponents.minute ?? 0
+        let second = dateComponents.second ?? 0
+        
+        // 남은 시간 문자열 출력을 위한 숫자 포맷 설정하기
+        let formatter = NumberFormatter()
+        formatter.minimumIntegerDigits = 2
+        // 각 날짜 요소를 숫자 포맷으로 변환하기
+        let formattedHour = formatter.string(for: hour) ?? "00"
+        let formattedMinute = formatter.string(for: minute) ?? "00"
+        let formattedSecond = formatter.string(for: second) ?? "00"
+        
+        // 로테이션 스킨 갱신 날짜에 다다르면
+        if currentDate > expiryDate {
+            // 로테이션 스킨 갱신하기 (새로고침)
+            Task {
+                await self.getStoreRotationWeaponSkins()
+            }
+        }
+        
+        // 결과 업데이트하기
+        self.storeRotationWeaponSkinsRemainingSeconds = "\(formattedHour):\(formattedMinute):\(formattedSecond)"
     }
     
 }
