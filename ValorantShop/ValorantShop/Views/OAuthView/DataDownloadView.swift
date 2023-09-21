@@ -16,6 +16,7 @@ struct DataDownloadView: View {
     // MARK: - BODY
     
     var body: some View {
+        // For Test
         VStack {
             ProgressView(value: Float(viewModel.totalDownloadedImageCount) / Float(viewModel.totalImageCountToDownload))
                 .progressViewStyle(.linear)

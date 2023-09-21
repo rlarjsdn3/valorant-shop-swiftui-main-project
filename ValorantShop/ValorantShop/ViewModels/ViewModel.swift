@@ -36,7 +36,7 @@ final class ViewModel: ObservableObject {
     // MARK: - WRAPPER PROPERTIES
     
     // For LaunchScreen
-    @Published var isPresentLaunchScreenView: Bool = true
+    @Published var isPresentLoadingScreenView: Bool = true
     
     // For Login
     @Published var isLoadingLogin: Bool = false
@@ -54,7 +54,7 @@ final class ViewModel: ObservableObject {
     @Published var selectedCustomTab: CustomTabType = .shop
     
     // For Downlaod Data
-    @Published var isPresentDownloadView: Bool = false
+    @Published var isPresentDataDownloadView: Bool = false
     @Published var totalImageCountToDownload: Int = 0
     @Published var totalDownloadedImageCount: Int = 0
     
@@ -99,6 +99,9 @@ final class ViewModel: ObservableObject {
     
     @MainActor
     func login(username: String, password: String) async {
+        // 로그아웃으로 캐시와 세션 초기화하기
+        self.logout()
+        
         // 계정이름과 비밀번호가 입력되었는지 확인하기
         guard !username.isEmpty, !password.isEmpty else {
             // 에러 메시지 출력하기
@@ -121,10 +124,17 @@ final class ViewModel: ObservableObject {
             let _ = try await self.getReAuthTokens().get()
             
             withAnimation(.spring()) {
-                // 로그인에 성공하면 성공 여부 수정하기
-                self.isLoggedIn = true
                 // 로그인에 성공하면 로딩 버튼 가리기
                 self.isLoadingLogin = false
+                // 데이터 다운로드를 이미 했다면
+                if isDataDownloaded {
+                    // 로그인에 성공하면 성공 여부 수정하기
+                    self.isLoggedIn = true
+                // 데이터 다운로드를 해야 한다면
+                } else {
+                    // 다운로드 화면 보이게 하기
+                    self.isPresentDataDownloadView = true
+                }
             }
         // 이중 인증이 필요하다면
         } catch OAuthError.needMultifactor(let email) {
@@ -132,8 +142,6 @@ final class ViewModel: ObservableObject {
             self.multifactorAuthEmail = email
             // 이중 인증 화면 보이게 하기
             withAnimation(.spring()) { self.isPresentMultifactorAuthView = true }
-//            // 로그인에 성공하면 로딩 버튼 가리기
-//            withAnimation(.spring()) { self.isLoadingLogin = false }
         // HTTP 통신에 실패한다면
         } catch OAuthError.statusCodeError {
             // 에러 메시지 출력하기
@@ -176,17 +184,24 @@ final class ViewModel: ObservableObject {
             let _ = try await self.getReAuthTokens().get()
             
             withAnimation(.spring()) {
+                // 로그인에 성공하면 로딩 버튼 가리기
+                self.isLoadingLogin = false
+                // 이중 인증 로딩 가리기
+                self.isLoadingMultifactor = false
                 // 이중 인증 화면 안 보이게 하기
                 self.isPresentMultifactorAuthView = false
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
                     withAnimation(.spring()) {
-                        // 로그인에 성공하면 성공 여부 수정하기
-                        self.isLoggedIn = true
-                        // 로그인에 성공하면 로딩 버튼 가리기
-                        withAnimation(.spring()) { self.isLoadingLogin = false }
-                        // 이중 인증에 성공하면 로딩 버튼 가리기
-                        withAnimation(.spring()) { self.isLoadingLogin = false }
+                        // 데이터 다운로드를 이미 했다면
+                        if self.isDataDownloaded {
+                            // 로그인에 성공하면 성공 여부 수정하기
+                            self.isLoggedIn = true
+                        // 데이터 다운로드를 해야 한다면
+                        } else {
+                            // 다운로드 화면 보이게 하기
+                            self.isPresentDataDownloadView = true
+                        }
                     }
                 }
             }
@@ -195,7 +210,7 @@ final class ViewModel: ObservableObject {
             self.multifactorErrorText = "로그인 코드가 일치하지 않습니다."
             // 에러 햅틱 피드백 전달하기
             hapticManager.notify(.error)
-            // 로딩 가리기
+            // 이중 인증 로딩 가리기
             withAnimation(.spring()) { self.isLoadingMultifactor = false }
             // 텍스트 필드에 흔들기 애니메이션 적용하기
             withAnimation(.spring()) { self.codeBoxShakeAnimation += 1.0 }
@@ -216,14 +231,15 @@ final class ViewModel: ObservableObject {
         self.accessTokenExpiryDate = 0.0
         self.rotatedWeaponSkinsExpiryDate = 0.0
         self.realmManager.deleteAll(of: PlayerID.self)
-        // + 사용자 VP 정보도 삭제
+        self.realmManager.deleteAll(of: PlayerWallet.self)
+        self.realmManager.deleteAll(of: RotatedWeaponSkins.self)
         
         // 커스탬 탭 선택 초기화하기
         self.selectedCustomTab = .shop
         // 불러온 상점 데이터 삭제하기
         self.storeRotationWeaponSkins = .init()
         // 런치 스크린 표시 여부 수정하기
-        self.isPresentLaunchScreenView = true
+        self.isPresentLoadingScreenView = true
     }
     
     private func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
@@ -314,13 +330,20 @@ final class ViewModel: ObservableObject {
             try await self.downloadStorePricesData()
             // 스킨 이미지 데이터 다운로드받고, 로컬 Document 폴더에 저장하기
             try await self.downloadWeaponSkinImages()
-            // 새로운 스킨 데이터를 다운로드 받으면
+            
+            // 
             if reload {
                 // 새로운 스킨 데이터로 상점 정보를 뷰에 로드하기
-                await self.getStoreRotationWeaponSkins()
+                await self.getStoreRotationWeaponSkins(reload: true)
             }
+            
             // 다운로드를 모두 마치면 성공 여부 수정하기
             self.isDataDownloaded = true
+            // 로그인에 성공하면 성공 여부 수정하기
+            self.isLoggedIn = true
+            // 다운로드 화면 보기를 false로 수정하기
+            self.isPresentDataDownloadView = false
+            // ✏️ false로 수정해주지 않으면 상점 화면에서 다운로드 시트가 나타남.
         } catch {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
@@ -462,7 +485,7 @@ final class ViewModel: ObservableObject {
         // 버전을 비교한 결과 서로 다르다면
         } catch ResourceError.urlError {
             // 다운로드 화면이 보이게 하기
-            self.isPresentDownloadView = true
+            self.isPresentDataDownloadView = true
         } catch {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
@@ -474,7 +497,7 @@ final class ViewModel: ObservableObject {
         var playerID = realmManager.read(of: PlayerID.self)
         // 강제로 다시 불러오지 안는다면
         if !reload {
-            // Realm에 저장된 로테이션 스킨 데이터가 있다면
+            // Realm에 저장된 로테이션 스킨 데이터가 없다면
             if playerID.isEmpty {
                 do {
                     try await self.fetchPlayerID()
@@ -580,13 +603,11 @@ final class ViewModel: ObservableObject {
     
     @MainActor
     func getStoreRotationWeaponSkins(reload: Bool = false) async {
-        print(#function)
-        
         // Realm에 저장된 로테이션 스킨 데이터 불러오기
         let rotatedWeaponSkins = realmManager.read(of: RotatedWeaponSkins.self)
         // 강제로 다시 불러오지 안는다면
         if !reload {
-            // Realm에 저장된 로테이션 스킨 데이터가 있다면
+            // Realm에 저장된 로테이션 스킨 데이터가 없다면
             if !rotatedWeaponSkins.isEmpty {
                 // 현재 날짜 불러오기
                 let currentDate = Date().timeIntervalSinceReferenceDate
@@ -596,6 +617,7 @@ final class ViewModel: ObservableObject {
                         // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                         try await self.fetchStoreRotationWeaponSkins()
                     } catch {
+                        self.isPresentLoadingScreenView = false
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                     }
                 }
@@ -605,6 +627,7 @@ final class ViewModel: ObservableObject {
                     // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                     try await self.fetchStoreRotationWeaponSkins()
                 } catch {
+                    self.isPresentLoadingScreenView = false
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                 }
             }
@@ -614,6 +637,7 @@ final class ViewModel: ObservableObject {
                 // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                 try await self.fetchStoreRotationWeaponSkins()
             } catch {
+                self.isPresentLoadingScreenView = false
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
             }
         }
@@ -623,9 +647,15 @@ final class ViewModel: ObservableObject {
         // Realm으로부터 로테이션 스킨 데이터 불러오기
         let weaponSkinUUIDs = realmManager.read(of: RotatedWeaponSkins.self)
         // Realm으로부터 전체 스킨 데이터 불러오기
-        guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else { return }
+        guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else {
+            self.isPresentLoadingScreenView = false
+            return
+        }
         // Realm으로부터 가격 데이터 불러오기
-        guard let prices = realmManager.read(of: StorePrices.self).first?.offers else { return }
+        guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
+            self.isPresentLoadingScreenView = false
+            return
+        }
         
         
         // 상점 로테이션 스킨 필터링하기
@@ -658,7 +688,7 @@ final class ViewModel: ObservableObject {
         
         // 런치 스크린 화면 끄기
         withAnimation(.easeInOut(duration: 0.2)) {
-            self.isPresentLaunchScreenView = false
+            self.isPresentLoadingScreenView = false
         }
     }
     

@@ -27,7 +27,7 @@ struct SettingsView: View {
                 
                 Section {
                     Button("데이터 다운로드", role: .destructive) {
-                        viewModel.isPresentDownloadView = true
+                        viewModel.isPresentDataDownloadView = true
                     }
                 }
                 
@@ -39,7 +39,7 @@ struct SettingsView: View {
             }
             .navigationTitle("설정")
         }
-        .sheet(isPresented: $viewModel.isPresentDownloadView) {
+        .sheet(isPresented: $viewModel.isPresentDataDownloadView) {
             DataDownloadView()
         }
     }

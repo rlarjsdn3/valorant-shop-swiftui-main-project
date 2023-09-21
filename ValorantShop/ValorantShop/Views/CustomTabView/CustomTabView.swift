@@ -55,7 +55,8 @@ struct CustomTabView: View {
                 } label: {
                     Image(systemName: type.imageName)
                         .fontWeight(.bold)
-                        .foregroundColor(type == viewModel.selectedCustomTab ? Color.valorant : Color.black)
+                    // ✏️ Color.black로 한다면, 다크 모드가 원하는대로 적용되지 않음.
+                        .foregroundColor(type == viewModel.selectedCustomTab ? Color.valorant : Color.primary)
                         .padding()
                 }
 
