@@ -77,7 +77,7 @@ struct ContentView: View {
                     }
                 }
                 .sheet(isPresented: $viewModel.isPresentDownloadView) {
-                    DownloadView()
+                    DataDownloadView()
                 }
             }
         }

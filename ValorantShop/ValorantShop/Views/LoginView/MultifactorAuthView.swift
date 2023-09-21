@@ -36,19 +36,17 @@ struct MultifactorAuthView: View {
     
     var body: some View {
         ZStack {
-                Color.clear
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .ignoresSafeArea()
-                    .background(.ultraThinMaterial)
-                    .opacity(materialAnimation ? 1 : 0)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(.spring()) {
-                            dismissKeyboard()
-                            viewModel.isPresentMultifactorAuthView = false
-                            viewModel.multifactorErrorText = ""
-                        }
+            Color.clear
+                .ignoresSafeArea()
+                .background(.ultraThinMaterial)
+                .opacity(materialAnimation ? 1 : 0)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.spring()) {
+                        dismissKeyboard()
+                        viewModel.isPresentMultifactorAuthView = false
                     }
+                }
             
             VStack(alignment: .leading) {
                 Text("Login Code")
@@ -69,15 +67,14 @@ struct MultifactorAuthView: View {
                             inputCode = String(inputCode.prefix(codeLimit))
                         }
                     }
-                    .keyboardType(.numberPad)
-                    .offset(x: 2)
-                    .focused($focusField, equals: .code)
                     .overlay {
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(lineWidth: 1.0)
                             .foregroundColor(Color.secondary)
                     }
                     .modifier(ShakeEffect(animatableData: viewModel.codeBoxShakeAnimation))
+                    .keyboardType(.numberPad)
+                    .focused($focusField, equals: .code)
                 
                 Text("\(viewModel.multifactorErrorText)")
                     .font(.caption)
@@ -86,12 +83,13 @@ struct MultifactorAuthView: View {
                     .foregroundColor(Color.valorant)
             }
             .onChange(of: inputCode) { input in
-                if input.count == 6 {
+                if input.count >= 6 {
                     Task {
                         await viewModel.login(authenticationCode: inputCode)
                     }
                 }
             }
+            // 에러가 발생했다면 텍스트필드 클리어하기
             .onChange(of: viewModel.codeBoxShakeAnimation) { _ in
                 inputCode = ""
             }
@@ -104,14 +102,16 @@ struct MultifactorAuthView: View {
             .padding(.horizontal)
             .padding(.top, 30)
             .padding(.bottom, 15)
-            .background(Color.white, in: RoundedRectangle(cornerRadius: 15))
+            // ✏️ Color.white로 한다면, 다크 모드가 원하는대로 적용되지 않음.
+            .background(Color(UIColor.systemBackground), in: RoundedRectangle(cornerRadius: 15))
             .offset(y: codeBoxAnimation ? -(screenSize.height * 0.2) : -screenSize.height)
             .padding()
         }
         .onAppear {
-            withAnimation(.easeInOut(duration: 0.3)) {
+            viewModel.multifactorErrorText = ""
+            withAnimation(.spring()) {
                 materialAnimation = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     withAnimation(.spring()) {
                         focusField = .code
                         codeBoxAnimation = true
