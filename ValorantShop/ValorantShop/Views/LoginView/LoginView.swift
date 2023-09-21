@@ -218,6 +218,12 @@ struct LoginView: View {
                     viewModel.logoutForDeveloper()
                 }
                 
+                Button("다운로드") {
+                    Task {
+                        await viewModel.checkValorantVersion()
+                    }
+                }
+                
                 Button("모든 데이터 삭제하기") {
                     viewModel.DeleteAllApplicationDataForDeveloper()
                 }

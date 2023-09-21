@@ -111,6 +111,8 @@ final class ViewModel: ObservableObject {
             let _ = try await oauthManager.fetchAccessToken(username: username, password: password).get()
             // 불러온 사용자 고유 정보를 키체인에 저장하기
             let _ = try await self.getReAuthTokens().get()
+            // 사용자 ID 데이터 불러오기
+            await self.getPlayerID()
             
             withAnimation(.spring()) {
                 // 로그인에 성공하면 성공 여부 수정하기
@@ -183,6 +185,8 @@ final class ViewModel: ObservableObject {
         self.isLoggedIn = false
         self.accessTokenExpiryDate = 0.0
         self.rotatedWeaponSkinsExpiryDate = 0.0
+        self.realmManager.deleteAll(of: PlayerID.self)
+        // + 사용자 VP 정보도 삭제
         
         // 커스탬 탭 선택 초기화하기
         self.selectedCustomTab = .shop
@@ -422,7 +426,7 @@ final class ViewModel: ObservableObject {
                oldVersion.client?.riotClientBuild != newVersion.client?.riotClientBuild ||
                oldVersion.client?.buildDate != newVersion.client?.buildDate
             {
-                // ⭐️
+                // ⭐️ 링크 에러는 아니지만 편의를 위해 임시로 링크 에러를 던짐.
                 throw ResourceError.urlError
             }
         // 버전을 비교한 결과 서로 다르다면
@@ -435,22 +439,42 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func fetchPlayerID() async {
-        do {
-            // 접근 토큰, 등록 정보 및 PUUID값 가져오기
-            let reAuthTokens = try await self.getReAuthTokens().get()
-            // 닉네임, 태그 정보 다운로드하기
-            let playerId = try await resourceManager.fetchPlayerID(
-                accessToken: reAuthTokens.accessToken,
-                riotEntitlement: reAuthTokens.riotEntitlement,
-                puuid: reAuthTokens.puuid
-            ).get()
-            // 결과 업데이트하기
-            self.gameName = playerId.gameName
-            self.tagLine = playerId.tagLine
-        } catch {
-            return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+    func getPlayerID() async {
+        // Realm에 저장된 사용자ID 데이터 불러오기
+        var playerID = realmManager.read(of: PlayerID.self)
+        // Realm에 저장된 로테이션 스킨 데이터가 있다면
+        if playerID.isEmpty {
+            do {
+                try await self.fetchPlayerID()
+                // Realm에 저장된 사용자ID 데이터 다시 불러오기
+                playerID = realmManager.read(of: PlayerID.self)
+            } catch {
+                return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+            }
         }
+        
+        // 사용자 닉네임 불러오기
+        guard let gameName = playerID.first?.gameName else { return }
+        // 사용자 태그 불러오기
+        guard let tagLine = playerID.first?.tagLine else { return }
+        // 결과 업데이트
+        self.gameName = gameName
+        self.tagLine = tagLine
+    }
+    
+    @MainActor
+    func fetchPlayerID() async throws {
+        // 접근 토큰, 등록 정보 및 PUUID값 가져오기
+        let reAuthTokens = try await self.getReAuthTokens().get()
+        // 닉네임, 태그 정보 다운로드하기
+        let id = try await resourceManager.fetchPlayerID(
+            accessToken: reAuthTokens.accessToken,
+            riotEntitlement: reAuthTokens.riotEntitlement,
+            puuid: reAuthTokens.puuid
+        ).get()
+        // Realm에 새로운 사용자ID 데이터 저장하기
+        let playerID = PlayerID(value: ["gameName": "\(id.gameName)", "tagLine": "#\(id.tagLine)"])
+        realmManager.create(playerID)
     }
     
     @MainActor
@@ -515,7 +539,6 @@ final class ViewModel: ObservableObject {
             storeRotationWeaponSkins.weaponSkins.append((skin, price))
         }
         
-        print("스킨 결과 업데이트")
         // 결과 업데이트하기
         self.storeRotationWeaponSkins = storeRotationWeaponSkins
         
