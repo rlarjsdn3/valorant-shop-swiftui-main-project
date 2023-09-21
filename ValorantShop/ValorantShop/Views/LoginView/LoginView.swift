@@ -9,14 +9,14 @@ import SwiftUI
 
 struct LoginView: View {
     
-    // MARK: - TEXTFIELD FOCUS
+    // MARK: - FOCUS
     
-    private enum LoginTextFieldFocus {
+    private enum FocusField {
         case username
         case password
     }
     
-    @FocusState private var focusField: LoginTextFieldFocus?
+    @FocusState private var focusField: FocusField?
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -54,7 +54,7 @@ struct LoginView: View {
                     .onSubmit {
                         focusField = .password
                     }
-                    .focused($focusField, equals: LoginTextFieldFocus.username)
+                    .focused($focusField, equals: .username)
                 if !inputUsername.isEmpty {
                     Button {
                         inputUsername = ""
@@ -81,7 +81,7 @@ struct LoginView: View {
                     .onSubmit {
                         focusField = nil
                     }
-                    .focused($focusField, equals: LoginTextFieldFocus.password)
+                    .focused($focusField, equals: .password)
                 if !inputPassword.isEmpty {
                     Button {
                         inputPassword = ""
@@ -104,7 +104,6 @@ struct LoginView: View {
                 .font(.caption)
                 .foregroundColor(Color.valorant)
                 .frame(height: 10)
-                .opacity(viewModel.loginErrorText.isEmpty ? 0.0 : 1.0)
                 .offset(y: passwordTextFieldAnimation ? 0 : screenSize.height)
             
             Button {
@@ -135,6 +134,19 @@ struct LoginView: View {
             
             Spacer()
         }
+        .onChange(of: focusField, perform: { newValue in
+            if newValue == .username || newValue == .password {
+                withAnimation(.spring()) {
+                    mainTextAnimation = false
+                    keyboardAnimation = true
+                }
+            } else if newValue == nil {
+                withAnimation(.spring()) {
+                    mainTextAnimation = true
+                    keyboardAnimation = false
+                }
+            }
+        })
         .onAppear {
             viewModel.loginErrorText = ""
             
@@ -195,23 +207,7 @@ struct LoginView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .opacity(helpButtonAnimation ? 1 : 0)
         }
-        .onChange(of: focusField, perform: { newValue in
-            if newValue == .username || newValue == .password {
-                withAnimation(.spring()) {
-                    mainTextAnimation = false
-                    keyboardAnimation = true
-                }
-            } else if newValue == nil {
-                withAnimation(.spring()) {
-                    mainTextAnimation = true
-                    keyboardAnimation = false
-                }
-            }
-        })
-        .sheet(isPresented: $viewModel.isPresentMultifactorAuthView) {
-            MultifactorAuthView()
-        }
-        // For Debug
+        // - For Debug --
         .overlay(alignment: .bottomTrailing) {
             Menu {
                 Button("로그아웃") {
@@ -221,6 +217,12 @@ struct LoginView: View {
                 Button("다운로드") {
                     Task {
                         await viewModel.checkValorantVersion()
+                    }
+                }
+                
+                Button("이중인증") {
+                    withAnimation {
+                        viewModel.isPresentMultifactorAuthView = true
                     }
                 }
                 

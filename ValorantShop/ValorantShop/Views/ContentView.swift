@@ -27,9 +27,13 @@ struct ContentView: View {
         Group {
             // 로그인을 하지 않았다면
             if !viewModel.isLoggedIn {
-//            if true {
                 LoginView()
-                // 로그인을 하였다면
+                    .overlay {
+                        if viewModel.isPresentMultifactorAuthView {
+                            MultifactorAuthView()
+                        }
+                    }
+            // 로그인을 하였다면
             } else {
                 VStack(spacing: 0) {
                     TabView(selection: $viewModel.selectedCustomTab) {
