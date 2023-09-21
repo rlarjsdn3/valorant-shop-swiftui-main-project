@@ -52,7 +52,7 @@ struct ContentView: View {
                 .overlay {
                     if viewModel.isPresentLaunchScreenView {
                         VStack {
-                            Text("VALORANT SHOP")
+                            Text("Valorant Shop")
                                 .font(.custom("VALORANT-Regular", size: 30))
                             ProgressView()
                                 .progressViewStyle(.circular)

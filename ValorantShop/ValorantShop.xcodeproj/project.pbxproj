@@ -28,6 +28,7 @@
 		9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A32AB0B54400D6FE07 /* CollectionView.swift */; };
 		9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */; };
 		9E611CD22ABC58E400D1A310 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */; };
+		9E611CD52ABC7B4400D1A310 /* OAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611CD42ABC7B4400D1A310 /* OAuthView.swift */; };
 		9E7638712AB894A600BD0AB4 /* MultifactorAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */; };
 		9E7638742ABAF9B000BD0AB4 /* ShakeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */; };
 		9E8A86BF2ABC37A6006A61FA /* CodeBoxModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8A86BE2ABC37A6006A61FA /* CodeBoxModifier.swift */; };
@@ -61,6 +62,7 @@
 		9E2922A32AB0B54400D6FE07 /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
 		9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		9E611CD42ABC7B4400D1A310 /* OAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthView.swift; sourceTree = "<group>"; };
 		9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultifactorAuthView.swift; sourceTree = "<group>"; };
 		9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeEffect.swift; sourceTree = "<group>"; };
 		9E8A86BE2ABC37A6006A61FA /* CodeBoxModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeBoxModifier.swift; sourceTree = "<group>"; };
@@ -89,16 +91,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		9E266EAC2AB34A6800178F25 /* LoginView */ = {
-			isa = PBXGroup;
-			children = (
-				9E266EAD2AB34A7400178F25 /* LoginView.swift */,
-				9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */,
-				9ED509552AB6A6F200149206 /* DataDownloadView.swift */,
-			);
-			path = LoginView;
-			sourceTree = "<group>";
-		};
 		9E29227B2AB0A9D200D6FE07 = {
 			isa = PBXGroup;
 			children = (
@@ -147,7 +139,7 @@
 			isa = PBXGroup;
 			children = (
 				9E2922892AB0A9D200D6FE07 /* ContentView.swift */,
-				9E266EAC2AB34A6800178F25 /* LoginView */,
+				9E611CD32ABC7B2C00D1A310 /* OAuthView */,
 				9E29229E2AB0B50000D6FE07 /* ShopView */,
 				9E29229F2AB0B50700D6FE07 /* CollectionView */,
 				9E2922A02AB0B51300D6FE07 /* SettingsView */,
@@ -222,6 +214,17 @@
 				9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */,
 			);
 			path = SettingsView;
+			sourceTree = "<group>";
+		};
+		9E611CD32ABC7B2C00D1A310 /* OAuthView */ = {
+			isa = PBXGroup;
+			children = (
+				9E611CD42ABC7B4400D1A310 /* OAuthView.swift */,
+				9E266EAD2AB34A7400178F25 /* LoginView.swift */,
+				9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */,
+				9ED509552AB6A6F200149206 /* DataDownloadView.swift */,
+			);
+			path = OAuthView;
 			sourceTree = "<group>";
 		};
 		9E7638722ABAF9A100BD0AB4 /* Modifier */ = {
@@ -351,6 +354,7 @@
 				9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */,
 				9E266EAE2AB34A7400178F25 /* LoginView.swift in Sources */,
 				9E266EA92AB3436600178F25 /* Constants.swift in Sources */,
+				9E611CD52ABC7B4400D1A310 /* OAuthView.swift in Sources */,
 				9EB4C5692AB4A85D00AE4425 /* RealmManager.swift in Sources */,
 				9EB4C5632AB49DB500AE4425 /* WeaponSkins.swift in Sources */,
 				9EB4C5672AB4A68500AE4425 /* StorePrices.swift in Sources */,
