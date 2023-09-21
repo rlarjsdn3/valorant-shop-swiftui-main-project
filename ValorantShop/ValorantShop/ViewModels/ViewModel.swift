@@ -91,6 +91,17 @@ final class ViewModel: ObservableObject {
     
     @MainActor
     func login(username: String, password: String) async {
+        // 계정이름과 비밀번호가 입력되었는지 확인하기
+        guard !username.isEmpty, !password.isEmpty else {
+            // 에러 메시지 출력하기
+            self.loginErrorText = "계정이름과 비밀번호를 입력해주세요."
+            // 에러 햅틱 피드백 전달하기
+            hapticManager.notify(.error)
+            // 로그인 버튼에 흔들기 애니메이션 적용하기
+            withAnimation(.spring()) { self.loginButtonShakeAnimation += 1.0 }
+            return
+        }
+        
         do {
             // 로딩 버튼 보이게 하기
             withAnimation(.spring()) { self.isLoadingLogin = true }
@@ -171,6 +182,7 @@ final class ViewModel: ObservableObject {
         // 로그인 여부 및 사용자 정보 삭제하기
         self.isLoggedIn = false
         self.accessTokenExpiryDate = 0.0
+        self.rotatedWeaponSkinsExpiryDate = 0.0
         
         // 커스탬 탭 선택 초기화하기
         self.selectedCustomTab = .shop
@@ -572,6 +584,23 @@ final class ViewModel: ObservableObject {
             // 결과 업데이트하기
             self.storeRotationWeaponSkinsRemainingSeconds = "\(formattedHour):\(formattedMinute):\(formattedSecond)"
         }
+    }
+    
+}
+
+
+// MARK: - DEVELOPER MENU
+
+extension ViewModel {
+    
+    func logoutForDeveloper() {
+        self.logout()
+    }
+    
+    func DeleteAllApplicationDataForDeveloper() {
+        self.logoutForDeveloper()
+        realmManager.deleteAll()
+        self.isDataDownloaded = false
     }
     
 }

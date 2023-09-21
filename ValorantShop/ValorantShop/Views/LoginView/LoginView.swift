@@ -213,14 +213,16 @@ struct LoginView: View {
         }
         // For Debug
         .overlay(alignment: .bottomTrailing) {
-            VStack {
+            Menu {
                 Button("로그아웃") {
-                    viewModel.logout()
+                    viewModel.logoutForDeveloper()
                 }
                 
-                Button("다운로드") {
-                    viewModel.isPresentDownloadView = true
+                Button("모든 데이터 삭제하기") {
+                    viewModel.DeleteAllApplicationDataForDeveloper()
                 }
+            } label: {
+                Text("개발자")
             }
         }
         .sheet(isPresented: $viewModel.isPresentDownloadView) {
