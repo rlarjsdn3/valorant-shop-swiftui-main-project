@@ -27,6 +27,7 @@ struct ContentView: View {
         Group {
             // 로그인을 하지 않았다면
             if !viewModel.isLoggedIn {
+//            if true {
                 LoginView()
                 // 로그인을 하였다면
             } else {
@@ -58,21 +59,19 @@ struct ContentView: View {
                 }
                 // 로그아웃했다가 다시 들어오는 상황도 고려
                 .onAppear {
-                    print("OnAppear")
                     Task {
                         await viewModel.checkValorantVersion()
+                        await viewModel.getPlayerID()
+                        // + 사용자 VP 정보
                         await viewModel.getStoreRotationWeaponSkins()
-                        await viewModel.fetchPlayerID()
                     }
                 }
                 // 앱을 완전히 나갔다 다시 들어오면 다시 로드
-//                .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { output in
-//                    print("didBecomeActive")
-//                    Task {
-//                        await viewModel.checkValorantVersion()
-//                        await viewModel.fetchStoreRotationWeaponSkins()
-//                    }
-//                }
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { output in
+                    Task {
+                        await viewModel.checkValorantVersion()
+                    }
+                }
                 .sheet(isPresented: $viewModel.isPresentDownloadView) {
                     DownloadView()
                 }

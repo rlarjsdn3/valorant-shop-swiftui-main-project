@@ -9,6 +9,15 @@ import SwiftUI
 
 struct LoginView: View {
     
+    // MARK: - TEXTFIELD FOCUS
+    
+    private enum LoginTextFieldFocus {
+        case username
+        case password
+    }
+    
+    @FocusState private var focusField: LoginTextFieldFocus?
+    
     // MARK: - WRAPPER PROPERTIES
     
     @EnvironmentObject var viewModel: ViewModel
@@ -34,55 +43,62 @@ struct LoginView: View {
             Spacer()
             
             Text("로그인")
-                .font(.title3)
-                .fontWeight(.bold)
+                .font(.system(.title2, weight: .bold))
                 .offset(y: loginTextAnimation ? 0 : screenSize.height)
             
-            Group {
-                HStack {
-                    Image(systemName: "person")
-                        .foregroundColor(Color.secondary)
-                    TextField("계정이름", text: $inputUsername)
-                    if !inputUsername.isEmpty {
-                        Button {
-                            inputUsername = ""
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(Color.secondary)
-                        }
+            HStack {
+                Image(systemName: "person")
+                    .foregroundColor(Color.secondary)
+                TextField("계정이름", text: $inputUsername)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        focusField = .password
+                    }
+                    .focused($focusField, equals: LoginTextFieldFocus.username)
+                if !inputUsername.isEmpty {
+                    Button {
+                        inputUsername = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(Color.secondary)
                     }
                 }
-                .frame(height: 55)
-                .padding(.horizontal)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 15)
-                        .stroke(lineWidth: 1)
-                        .foregroundColor(Color.secondary)
-                }
-                .offset(y: userNameTextFieldAnimation ? 0 : screenSize.height)
-                
-                HStack {
-                    Image(systemName: "lock")
-                        .foregroundColor(Color.secondary)
-                    SecureField("비밀번호", text: $inputPassword)
-                    if !inputPassword.isEmpty {
-                        Button {
-                            inputPassword = ""
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(Color.secondary)
-                        }
-                    }
-                }
-                .frame(height: 55)
-                .padding(.horizontal)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 15)
-                        .stroke(lineWidth: 1)
-                        .foregroundColor(Color.secondary)
-                }
-                .offset(y: passwordTextFieldAnimation ? 0 : screenSize.height)
             }
+            .frame(height: 55)
+            .padding(.horizontal)
+            .overlay {
+                RoundedRectangle(cornerRadius: 15)
+                    .stroke(lineWidth: 1)
+                    .foregroundColor(Color.secondary)
+            }
+            .offset(y: userNameTextFieldAnimation ? 0 : screenSize.height)
+            
+            HStack {
+                Image(systemName: "lock")
+                    .foregroundColor(Color.secondary)
+                SecureField("비밀번호", text: $inputPassword)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        focusField = nil
+                    }
+                    .focused($focusField, equals: LoginTextFieldFocus.password)
+                if !inputPassword.isEmpty {
+                    Button {
+                        inputPassword = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(Color.secondary)
+                    }
+                }
+            }
+            .frame(height: 55)
+            .padding(.horizontal)
+            .overlay {
+                RoundedRectangle(cornerRadius: 15)
+                    .stroke(lineWidth: 1)
+                    .foregroundColor(Color.secondary)
+            }
+            .offset(y: passwordTextFieldAnimation ? 0 : screenSize.height)
             
             Text("\(viewModel.loginErrorText)")
                 .font(.caption)
@@ -92,7 +108,7 @@ struct LoginView: View {
                 .offset(y: passwordTextFieldAnimation ? 0 : screenSize.height)
             
             Button {
-                self.dismissKeyboard()
+                dismissKeyboard()
                 Task {
                     await viewModel.login(
                         username: inputUsername,
@@ -105,8 +121,7 @@ struct LoginView: View {
                         ProgressView()
                     } else {
                         Text("로그인")
-                            .font(.title2)
-                            .fontWeight(.bold)
+                            .font(.system(.title2, weight: .bold))
                             .foregroundColor(Color.white)
                     }
                 }
@@ -119,45 +134,6 @@ struct LoginView: View {
             .modifier(ShakeEffect(animatableData: viewModel.loginButtonShakeAnimation))
             
             Spacer()
-        }
-        .background {
-            Color.clear
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    self.dismissKeyboard()
-                }
-        }
-        .overlay(alignment: .top) {
-            VStack {
-                Text("Valorant")
-                Text("Store")
-            }
-            .font(.custom(Fonts.valorantFont, size: 50))
-            .padding(.top, 100)
-            .offset(y: mainTextAnimation ? 0 : -screenSize.height)
-        }
-        .overlay(alignment: .bottom) {
-            HStack {
-                Link(destination: URL(string: "https://recovery.riotgames.com/ko")!) {
-                    Text("로그인이 안되시나요?")
-                        .font(.callout)
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 20)
-                .opacity(helpButtonAnimation ? 1 : 0)
-                
-                Button("다운로드") {
-                    viewModel.isPresentDownloadView = true
-                }
-            }
-        }
-        .padding(20)
-        .sheet(isPresented: $viewModel.isPresentMultifactorAuthView) {
-            MultifactorAuthView()
-        }
-        .sheet(isPresented: $viewModel.isPresentDownloadView) {
-            DownloadView()
         }
         .onAppear {
             viewModel.loginErrorText = ""
@@ -193,19 +169,74 @@ struct LoginView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillShowNotification)) { _ in
-            withAnimation(.spring()) {
-                mainTextAnimation = false
-                keyboardAnimation = true
+        .background {
+            // ⭐️ 흰색 바탕의 뷰를 클릭하면 키보드가 사라지게 함.
+            Color.clear
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    dismissKeyboard()
+                }
+        }
+        .overlay(alignment: .top) {
+            VStack {
+                Text("Valorant")
+                Text("Store")
+            }
+            .font(.custom(Fonts.valorantFont, size: 50))
+            .padding(.top, screenSize.height * 0.1)
+            .offset(y: mainTextAnimation ? 0 : -screenSize.height)
+        }
+        .overlay(alignment: .bottom) {
+            Link(destination: URL(string: RiotURL.canNotLogin)!) {
+                Text("로그인이 안되시나요?")
+                    .font(.callout)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .opacity(helpButtonAnimation ? 1 : 0)
+        }
+        .onChange(of: focusField, perform: { newValue in
+            if newValue == .username || newValue == .password {
+                withAnimation(.spring()) {
+                    mainTextAnimation = false
+                    keyboardAnimation = true
+                }
+            } else if newValue == nil {
+                withAnimation(.spring()) {
+                    mainTextAnimation = true
+                    keyboardAnimation = false
+                }
+            }
+        })
+        .sheet(isPresented: $viewModel.isPresentMultifactorAuthView) {
+            MultifactorAuthView()
+        }
+        // For Debug
+        .overlay(alignment: .bottomTrailing) {
+            Menu {
+                Button("로그아웃") {
+                    viewModel.logoutForDeveloper()
+                }
+                
+                Button("다운로드") {
+                    Task {
+                        await viewModel.checkValorantVersion()
+                    }
+                }
+                
+                Button("모든 데이터 삭제하기") {
+                    viewModel.DeleteAllApplicationDataForDeveloper()
+                }
+            } label: {
+                Text("개발자")
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.keyboardWillHideNotification)) { _ in
-            withAnimation(.spring()) {
-                mainTextAnimation = true
-                keyboardAnimation = false
-            }
+        .sheet(isPresented: $viewModel.isPresentDownloadView) {
+            DownloadView()
         }
+        // ----------
         .offset(y: keyboardAnimation ? -(screenSize.height * 0.1) : 0)
+        .padding(20)
         .ignoresSafeArea(.keyboard)
     }
 }

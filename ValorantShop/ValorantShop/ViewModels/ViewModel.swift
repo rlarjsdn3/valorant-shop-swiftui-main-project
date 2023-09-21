@@ -91,6 +91,17 @@ final class ViewModel: ObservableObject {
     
     @MainActor
     func login(username: String, password: String) async {
+        // 계정이름과 비밀번호가 입력되었는지 확인하기
+        guard !username.isEmpty, !password.isEmpty else {
+            // 에러 메시지 출력하기
+            self.loginErrorText = "계정이름과 비밀번호를 입력해주세요."
+            // 에러 햅틱 피드백 전달하기
+            hapticManager.notify(.error)
+            // 로그인 버튼에 흔들기 애니메이션 적용하기
+            withAnimation(.spring()) { self.loginButtonShakeAnimation += 1.0 }
+            return
+        }
+        
         do {
             // 로딩 버튼 보이게 하기
             withAnimation(.spring()) { self.isLoadingLogin = true }
@@ -100,6 +111,8 @@ final class ViewModel: ObservableObject {
             let _ = try await oauthManager.fetchAccessToken(username: username, password: password).get()
             // 불러온 사용자 고유 정보를 키체인에 저장하기
             let _ = try await self.getReAuthTokens().get()
+            // 사용자 ID 데이터 불러오기
+            await self.getPlayerID()
             
             withAnimation(.spring()) {
                 // 로그인에 성공하면 성공 여부 수정하기
@@ -171,6 +184,9 @@ final class ViewModel: ObservableObject {
         // 로그인 여부 및 사용자 정보 삭제하기
         self.isLoggedIn = false
         self.accessTokenExpiryDate = 0.0
+        self.rotatedWeaponSkinsExpiryDate = 0.0
+        self.realmManager.deleteAll(of: PlayerID.self)
+        // + 사용자 VP 정보도 삭제
         
         // 커스탬 탭 선택 초기화하기
         self.selectedCustomTab = .shop
@@ -404,40 +420,67 @@ final class ViewModel: ObservableObject {
             guard let oldVersion = realmManager.read(of: Version.self).first else { return }
             // 서버에 저장되어 있는 (신)버전 데이터 불러오기
             let newVersion = try await resourceManager.fetchValorantVersion().get()
+            
             // 버전을 비교한 결과 서로 다르다면
             if oldVersion.client?.riotClientVersion != newVersion.client?.riotClientVersion ||
                oldVersion.client?.riotClientBuild != newVersion.client?.riotClientBuild ||
                oldVersion.client?.buildDate != newVersion.client?.buildDate
             {
-                // 다운로드 화면이 보이게 하기
-                self.isPresentDownloadView = true
+                // ⭐️ 링크 에러는 아니지만 편의를 위해 임시로 링크 에러를 던짐.
+                throw ResourceError.urlError
             }
+        // 버전을 비교한 결과 서로 다르다면
+        } catch ResourceError.urlError {
+            // 다운로드 화면이 보이게 하기
+            self.isPresentDownloadView = true
         } catch {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
     }
     
     @MainActor
-    func fetchPlayerID() async {
-        do {
-            // 접근 토큰, 등록 정보 및 PUUID값 가져오기
-            let reAuthTokens = try await self.getReAuthTokens().get()
-            // 닉네임, 태그 정보 다운로드하기
-            let playerId = try await resourceManager.fetchPlayerID(
-                accessToken: reAuthTokens.accessToken,
-                riotEntitlement: reAuthTokens.riotEntitlement,
-                puuid: reAuthTokens.puuid
-            ).get()
-            // 결과 업데이트하기
-            self.gameName = playerId.gameName
-            self.tagLine = playerId.tagLine
-        } catch {
-            return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+    func getPlayerID() async {
+        // Realm에 저장된 사용자ID 데이터 불러오기
+        var playerID = realmManager.read(of: PlayerID.self)
+        // Realm에 저장된 로테이션 스킨 데이터가 있다면
+        if playerID.isEmpty {
+            do {
+                try await self.fetchPlayerID()
+                // Realm에 저장된 사용자ID 데이터 다시 불러오기
+                playerID = realmManager.read(of: PlayerID.self)
+            } catch {
+                return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+            }
         }
+        
+        // 사용자 닉네임 불러오기
+        guard let gameName = playerID.first?.gameName else { return }
+        // 사용자 태그 불러오기
+        guard let tagLine = playerID.first?.tagLine else { return }
+        // 결과 업데이트
+        self.gameName = gameName
+        self.tagLine = tagLine
+    }
+    
+    @MainActor
+    func fetchPlayerID() async throws {
+        // 접근 토큰, 등록 정보 및 PUUID값 가져오기
+        let reAuthTokens = try await self.getReAuthTokens().get()
+        // 닉네임, 태그 정보 다운로드하기
+        let id = try await resourceManager.fetchPlayerID(
+            accessToken: reAuthTokens.accessToken,
+            riotEntitlement: reAuthTokens.riotEntitlement,
+            puuid: reAuthTokens.puuid
+        ).get()
+        // Realm에 새로운 사용자ID 데이터 저장하기
+        let playerID = PlayerID(value: ["gameName": "\(id.gameName)", "tagLine": "#\(id.tagLine)"])
+        realmManager.create(playerID)
     }
     
     @MainActor
     func getStoreRotationWeaponSkins() async {
+        print(#function)
+        
         // Realm에 저장된 로테이션 스킨 데이터 불러오기
         let rotatedWeaponSkins = realmManager.read(of: RotatedWeaponSkins.self)
         // Realm에 저장된 로테이션 스킨 데이터가 있다면
@@ -529,39 +572,58 @@ final class ViewModel: ObservableObject {
     }
     
     func calculateRotationWeaponSkinsRemainingTime(_ timer: Timer? = nil) {
-        // 현재 날짜 불러오기
-        let currentDate = Date().timeIntervalSinceReferenceDate
-        // 로테이션 스킨 갱신 날짜 불러오기
-        let expiryDate = Date(timeIntervalSinceReferenceDate: self.rotatedWeaponSkinsExpiryDate).timeIntervalSinceReferenceDate
-        
-        // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
-        let dateComponents = self.calendar.dateComponents(
-            [.hour, .minute, .second],
-            from: Date(timeIntervalSinceReferenceDate: currentDate),
-            to: Date(timeIntervalSinceReferenceDate: expiryDate)
-        )
-        let hour = dateComponents.hour ?? 0
-        let minute = dateComponents.minute ?? 0
-        let second = dateComponents.second ?? 0
-        
-        // 남은 시간 문자열 출력을 위한 숫자 포맷 설정하기
-        let formatter = NumberFormatter()
-        formatter.minimumIntegerDigits = 2
-        // 각 날짜 요소를 숫자 포맷으로 변환하기
-        let formattedHour = formatter.string(for: hour) ?? "00"
-        let formattedMinute = formatter.string(for: minute) ?? "00"
-        let formattedSecond = formatter.string(for: second) ?? "00"
-        
-        // 로테이션 스킨 갱신 날짜에 다다르면
-        if currentDate > expiryDate {
-            // 로테이션 스킨 갱신하기 (새로고침)
-            Task {
-                await self.getStoreRotationWeaponSkins()
+        if self.isLoggedIn {
+            // 현재 날짜 불러오기
+            let currentDate = Date().timeIntervalSinceReferenceDate
+            // 로테이션 스킨 갱신 날짜 불러오기
+            let expiryDate = Date(timeIntervalSinceReferenceDate: self.rotatedWeaponSkinsExpiryDate).timeIntervalSinceReferenceDate
+            
+            // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
+            let dateComponents = self.calendar.dateComponents(
+                [.hour, .minute, .second],
+                from: Date(timeIntervalSinceReferenceDate: currentDate),
+                to: Date(timeIntervalSinceReferenceDate: expiryDate)
+            )
+            let hour = dateComponents.hour ?? 0
+            let minute = dateComponents.minute ?? 0
+            let second = dateComponents.second ?? 0
+            
+            // 남은 시간 문자열 출력을 위한 숫자 포맷 설정하기
+            let formatter = NumberFormatter()
+            formatter.minimumIntegerDigits = 2
+            // 각 날짜 요소를 숫자 포맷으로 변환하기
+            let formattedHour = formatter.string(for: hour) ?? "00"
+            let formattedMinute = formatter.string(for: minute) ?? "00"
+            let formattedSecond = formatter.string(for: second) ?? "00"
+            
+            // 로테이션 스킨 갱신 날짜에 다다르면
+            if currentDate > expiryDate {
+                // 로테이션 스킨 갱신하기 (새로고침)
+                Task {
+                    await self.getStoreRotationWeaponSkins()
+                }
             }
+            
+            // 결과 업데이트하기
+            self.storeRotationWeaponSkinsRemainingSeconds = "\(formattedHour):\(formattedMinute):\(formattedSecond)"
         }
-        
-        // 결과 업데이트하기
-        self.storeRotationWeaponSkinsRemainingSeconds = "\(formattedHour):\(formattedMinute):\(formattedSecond)"
+    }
+    
+}
+
+
+// MARK: - DEVELOPER MENU
+
+extension ViewModel {
+    
+    func logoutForDeveloper() {
+        self.logout()
+    }
+    
+    func DeleteAllApplicationDataForDeveloper() {
+        self.logoutForDeveloper()
+        realmManager.deleteAll()
+        self.isDataDownloaded = false
     }
     
 }
