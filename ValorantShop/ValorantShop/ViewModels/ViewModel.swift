@@ -44,8 +44,11 @@ final class ViewModel: ObservableObject {
     @Published var loginButtonShakeAnimation: CGFloat = 0.0
     
     // For MultifactorAuth
-    @Published var multifactorAuthEmail: String = ""
+    @Published var isLoadingMultifactor: Bool = false
     @Published var isPresentMultifactorAuthView: Bool = false
+    @Published var multifactorAuthEmail: String = ""
+    @Published var multifactorErrorText: String = ""
+    @Published var codeBoxShakeAnimation: CGFloat = 0.0
     
     // For CustomTab
     @Published var selectedCustomTab: CustomTabType = .shop
@@ -116,8 +119,6 @@ final class ViewModel: ObservableObject {
             let _ = try await oauthManager.fetchAccessToken(username: username, password: password).get()
             // 불러온 사용자 고유 정보를 키체인에 저장하기
             let _ = try await self.getReAuthTokens().get()
-            // 사용자 ID 데이터 불러오기
-            await self.getPlayerID()
             
             withAnimation(.spring()) {
                 // 로그인에 성공하면 성공 여부 수정하기
@@ -130,9 +131,9 @@ final class ViewModel: ObservableObject {
             // 인증 이메일을 뷰에 표시하기
             self.multifactorAuthEmail = email
             // 이중 인증 화면 보이게 하기
-            self.isPresentMultifactorAuthView = true
-            // 로그인에 성공하면 로딩 버튼 가리기
-            withAnimation(.spring()) { self.isLoadingLogin = false }
+            withAnimation(.spring()) { self.isPresentMultifactorAuthView = true }
+//            // 로그인에 성공하면 로딩 버튼 가리기
+//            withAnimation(.spring()) { self.isLoadingLogin = false }
         // HTTP 통신에 실패한다면
         } catch OAuthError.statusCodeError {
             // 에러 메시지 출력하기
@@ -166,15 +167,39 @@ final class ViewModel: ObservableObject {
     @MainActor
     func login(authenticationCode code: String) async {
         do {
+            // 로딩 보이게 하기
+            withAnimation(.spring()) { self.isLoadingMultifactor = true }
+            
             // 이중 인증 코드로 로그인이 가능한지 확인하기
             let _ = try await oauthManager.fetchMultifactorAuth(authenticationCode: code).get()
             // 불러온 사용자 고유 정보를 키체인에 저장하기
             let _ = try await self.getReAuthTokens().get()
-            // 로그인에 성공하면 성공 여부 수정하기
-            self.isLoggedIn = true
+            
+            withAnimation(.spring()) {
+                // 이중 인증 화면 안 보이게 하기
+                self.isPresentMultifactorAuthView = false
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    withAnimation(.spring()) {
+                        // 로그인에 성공하면 성공 여부 수정하기
+                        self.isLoggedIn = true
+                        // 로그인에 성공하면 로딩 버튼 가리기
+                        withAnimation(.spring()) { self.isLoadingLogin = false }
+                        // 이중 인증에 성공하면 로딩 버튼 가리기
+                        withAnimation(.spring()) { self.isLoadingLogin = false }
+                    }
+                }
+            }
         } catch {
-            print(error)
-            // 로그인에 실패하면 예외 처리하기
+            // 에러 메시지 출력하기
+            self.multifactorErrorText = "로그인 코드가 일치하지 않습니다."
+            // 에러 햅틱 피드백 전달하기
+            hapticManager.notify(.error)
+            // 로딩 가리기
+            withAnimation(.spring()) { self.isLoadingMultifactor = false }
+            // 텍스트 필드에 흔들기 애니메이션 적용하기
+            withAnimation(.spring()) { self.codeBoxShakeAnimation += 1.0 }
+            
         }
     }
     

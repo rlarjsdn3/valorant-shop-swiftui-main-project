@@ -27,14 +27,16 @@
 		9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A12AB0B51D00D6FE07 /* ShopView.swift */; };
 		9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A32AB0B54400D6FE07 /* CollectionView.swift */; };
 		9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */; };
+		9E611CD22ABC58E400D1A310 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */; };
 		9E7638712AB894A600BD0AB4 /* MultifactorAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */; };
 		9E7638742ABAF9B000BD0AB4 /* ShakeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */; };
+		9E8A86BF2ABC37A6006A61FA /* CodeBoxModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8A86BE2ABC37A6006A61FA /* CodeBoxModifier.swift */; };
 		9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAA7D7B2AB57F460095A205 /* ResourceManager.swift */; };
 		9EB4C5632AB49DB500AE4425 /* WeaponSkins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */; };
 		9EB4C5652AB4A14700AE4425 /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5642AB4A14700AE4425 /* Version.swift */; };
 		9EB4C5672AB4A68500AE4425 /* StorePrices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5662AB4A68500AE4425 /* StorePrices.swift */; };
 		9EB4C5692AB4A85D00AE4425 /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */; };
-		9ED509562AB6A6F200149206 /* DownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509552AB6A6F200149206 /* DownloadView.swift */; };
+		9ED509562AB6A6F200149206 /* DataDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509552AB6A6F200149206 /* DataDownloadView.swift */; };
 		9ED509582AB71D8700149206 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509572AB71D8700149206 /* View+Extension.swift */; };
 		9ED5095B2AB7358400149206 /* Valorant-Font.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ED5095A2AB7358400149206 /* Valorant-Font.ttf */; };
 /* End PBXBuildFile section */
@@ -58,14 +60,16 @@
 		9E2922A12AB0B51D00D6FE07 /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
 		9E2922A32AB0B54400D6FE07 /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
 		9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultifactorAuthView.swift; sourceTree = "<group>"; };
 		9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeEffect.swift; sourceTree = "<group>"; };
+		9E8A86BE2ABC37A6006A61FA /* CodeBoxModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeBoxModifier.swift; sourceTree = "<group>"; };
 		9EAA7D7B2AB57F460095A205 /* ResourceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResourceManager.swift; sourceTree = "<group>"; };
 		9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponSkins.swift; sourceTree = "<group>"; };
 		9EB4C5642AB4A14700AE4425 /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 		9EB4C5662AB4A68500AE4425 /* StorePrices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePrices.swift; sourceTree = "<group>"; };
 		9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
-		9ED509552AB6A6F200149206 /* DownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadView.swift; sourceTree = "<group>"; };
+		9ED509552AB6A6F200149206 /* DataDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataDownloadView.swift; sourceTree = "<group>"; };
 		9ED509572AB71D8700149206 /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
 		9ED5095A2AB7358400149206 /* Valorant-Font.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Valorant-Font.ttf"; sourceTree = "<group>"; };
 		9ED5095C2AB735D900149206 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -90,7 +94,7 @@
 			children = (
 				9E266EAD2AB34A7400178F25 /* LoginView.swift */,
 				9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */,
-				9ED509552AB6A6F200149206 /* DownloadView.swift */,
+				9ED509552AB6A6F200149206 /* DataDownloadView.swift */,
 			);
 			path = LoginView;
 			sourceTree = "<group>";
@@ -115,6 +119,7 @@
 			isa = PBXGroup;
 			children = (
 				9ED5095C2AB735D900149206 /* Info.plist */,
+				9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */,
 				9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */,
 				9E2922952AB0AE0B00D6FE07 /* Views */,
 				9E2922962AB0AE2200D6FE07 /* ViewModels */,
@@ -223,6 +228,7 @@
 			isa = PBXGroup;
 			children = (
 				9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */,
+				9E8A86BE2ABC37A6006A61FA /* CodeBoxModifier.swift */,
 			);
 			path = Modifier;
 			sourceTree = "<group>";
@@ -234,8 +240,8 @@
 				9EB4C5622AB49DB500AE4425 /* WeaponSkins.swift */,
 				9EB4C5662AB4A68500AE4425 /* StorePrices.swift */,
 				9E064C342ABC0D04004A5D96 /* PlayerID.swift */,
-				9E064C322ABB34E1004A5D96 /* RotatedWeaponSkins.swift */,
 				9E064C362ABC1F5E004A5D96 /* PlayerWallet.swift */,
+				9E064C322ABB34E1004A5D96 /* RotatedWeaponSkins.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -317,6 +323,7 @@
 			files = (
 				9E29228F2AB0A9D200D6FE07 /* Preview Assets.xcassets in Resources */,
 				9ED5095B2AB7358400149206 /* Valorant-Font.ttf in Resources */,
+				9E611CD22ABC58E400D1A310 /* Launch Screen.storyboard in Resources */,
 				9E29228C2AB0A9D200D6FE07 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -328,7 +335,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9ED509562AB6A6F200149206 /* DownloadView.swift in Sources */,
+				9ED509562AB6A6F200149206 /* DataDownloadView.swift in Sources */,
+				9E8A86BF2ABC37A6006A61FA /* CodeBoxModifier.swift in Sources */,
 				9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */,
 				9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */,
 				9E7638712AB894A600BD0AB4 /* MultifactorAuthView.swift in Sources */,
@@ -487,8 +495,9 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -496,9 +505,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.kunwoo-kim.ValorantShop";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -517,8 +529,9 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -526,9 +539,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.kunwoo-kim.ValorantShop";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

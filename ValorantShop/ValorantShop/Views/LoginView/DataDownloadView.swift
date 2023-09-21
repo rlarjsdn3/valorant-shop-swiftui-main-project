@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct DownloadView: View {
+struct DataDownloadView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -36,9 +36,9 @@ struct DownloadView: View {
 
 // MARK: - PREVIEW
 
-struct DownloadView_Previews: PreviewProvider {
+struct DataDownloadView_Previews: PreviewProvider {
     static var previews: some View {
-        DownloadView()
+        DataDownloadView()
             .environmentObject(ViewModel())
     }
 }

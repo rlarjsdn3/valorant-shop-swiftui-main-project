@@ -20,7 +20,7 @@ struct SettingsView: View {
             List {
                 Section {
                     Text("\(viewModel.gameName)")
-                    Text("\(viewModel.tagLine)")
+                    Text("#\(viewModel.tagLine)")
                 } header: {
                     Text("사용자 정보")
                 }
@@ -40,7 +40,7 @@ struct SettingsView: View {
             .navigationTitle("설정")
         }
         .sheet(isPresented: $viewModel.isPresentDownloadView) {
-            DownloadView()
+            DataDownloadView()
         }
     }
 }
