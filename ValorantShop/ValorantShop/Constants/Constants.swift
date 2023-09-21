@@ -58,6 +58,12 @@ struct ResourceURL {
     
 }
 
+struct RiotURL {
+    
+    // For Help
+    static var canNotLogin = "https://recovery.riotgames.com/ko"
+}
+
 struct Fonts {
     
     // For Font

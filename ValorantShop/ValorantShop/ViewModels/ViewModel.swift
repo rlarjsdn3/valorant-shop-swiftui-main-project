@@ -404,14 +404,19 @@ final class ViewModel: ObservableObject {
             guard let oldVersion = realmManager.read(of: Version.self).first else { return }
             // 서버에 저장되어 있는 (신)버전 데이터 불러오기
             let newVersion = try await resourceManager.fetchValorantVersion().get()
+            
             // 버전을 비교한 결과 서로 다르다면
             if oldVersion.client?.riotClientVersion != newVersion.client?.riotClientVersion ||
                oldVersion.client?.riotClientBuild != newVersion.client?.riotClientBuild ||
                oldVersion.client?.buildDate != newVersion.client?.buildDate
             {
-                // 다운로드 화면이 보이게 하기
-                self.isPresentDownloadView = true
+                // ⭐️
+                throw ResourceError.urlError
             }
+        // 버전을 비교한 결과 서로 다르다면
+        } catch ResourceError.urlError {
+            // 다운로드 화면이 보이게 하기
+            self.isPresentDownloadView = true
         } catch {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
@@ -438,6 +443,8 @@ final class ViewModel: ObservableObject {
     
     @MainActor
     func getStoreRotationWeaponSkins() async {
+        print(#function)
+        
         // Realm에 저장된 로테이션 스킨 데이터 불러오기
         let rotatedWeaponSkins = realmManager.read(of: RotatedWeaponSkins.self)
         // Realm에 저장된 로테이션 스킨 데이터가 있다면
@@ -496,6 +503,7 @@ final class ViewModel: ObservableObject {
             storeRotationWeaponSkins.weaponSkins.append((skin, price))
         }
         
+        print("스킨 결과 업데이트")
         // 결과 업데이트하기
         self.storeRotationWeaponSkins = storeRotationWeaponSkins
         
@@ -529,39 +537,41 @@ final class ViewModel: ObservableObject {
     }
     
     func calculateRotationWeaponSkinsRemainingTime(_ timer: Timer? = nil) {
-        // 현재 날짜 불러오기
-        let currentDate = Date().timeIntervalSinceReferenceDate
-        // 로테이션 스킨 갱신 날짜 불러오기
-        let expiryDate = Date(timeIntervalSinceReferenceDate: self.rotatedWeaponSkinsExpiryDate).timeIntervalSinceReferenceDate
-        
-        // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
-        let dateComponents = self.calendar.dateComponents(
-            [.hour, .minute, .second],
-            from: Date(timeIntervalSinceReferenceDate: currentDate),
-            to: Date(timeIntervalSinceReferenceDate: expiryDate)
-        )
-        let hour = dateComponents.hour ?? 0
-        let minute = dateComponents.minute ?? 0
-        let second = dateComponents.second ?? 0
-        
-        // 남은 시간 문자열 출력을 위한 숫자 포맷 설정하기
-        let formatter = NumberFormatter()
-        formatter.minimumIntegerDigits = 2
-        // 각 날짜 요소를 숫자 포맷으로 변환하기
-        let formattedHour = formatter.string(for: hour) ?? "00"
-        let formattedMinute = formatter.string(for: minute) ?? "00"
-        let formattedSecond = formatter.string(for: second) ?? "00"
-        
-        // 로테이션 스킨 갱신 날짜에 다다르면
-        if currentDate > expiryDate {
-            // 로테이션 스킨 갱신하기 (새로고침)
-            Task {
-                await self.getStoreRotationWeaponSkins()
+        if self.isLoggedIn {
+            // 현재 날짜 불러오기
+            let currentDate = Date().timeIntervalSinceReferenceDate
+            // 로테이션 스킨 갱신 날짜 불러오기
+            let expiryDate = Date(timeIntervalSinceReferenceDate: self.rotatedWeaponSkinsExpiryDate).timeIntervalSinceReferenceDate
+            
+            // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
+            let dateComponents = self.calendar.dateComponents(
+                [.hour, .minute, .second],
+                from: Date(timeIntervalSinceReferenceDate: currentDate),
+                to: Date(timeIntervalSinceReferenceDate: expiryDate)
+            )
+            let hour = dateComponents.hour ?? 0
+            let minute = dateComponents.minute ?? 0
+            let second = dateComponents.second ?? 0
+            
+            // 남은 시간 문자열 출력을 위한 숫자 포맷 설정하기
+            let formatter = NumberFormatter()
+            formatter.minimumIntegerDigits = 2
+            // 각 날짜 요소를 숫자 포맷으로 변환하기
+            let formattedHour = formatter.string(for: hour) ?? "00"
+            let formattedMinute = formatter.string(for: minute) ?? "00"
+            let formattedSecond = formatter.string(for: second) ?? "00"
+            
+            // 로테이션 스킨 갱신 날짜에 다다르면
+            if currentDate > expiryDate {
+                // 로테이션 스킨 갱신하기 (새로고침)
+                Task {
+                    await self.getStoreRotationWeaponSkins()
+                }
             }
+            
+            // 결과 업데이트하기
+            self.storeRotationWeaponSkinsRemainingSeconds = "\(formattedHour):\(formattedMinute):\(formattedSecond)"
         }
-        
-        // 결과 업데이트하기
-        self.storeRotationWeaponSkinsRemainingSeconds = "\(formattedHour):\(formattedMinute):\(formattedSecond)"
     }
     
 }
