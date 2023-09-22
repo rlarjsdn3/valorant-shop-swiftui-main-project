@@ -38,7 +38,11 @@ struct DataDownloadView: View {
         
         var progressString: String = ""
         if downloadedImages != 0 && imagesToDownload != 0 {
-            progressString = "\(downloadedImages)/\(imagesToDownload)"
+            if downloadedImages > imagesToDownload {
+                progressString = "\(imagesToDownload)/\(imagesToDownload)"
+            } else {
+                progressString = "\(downloadedImages)/\(imagesToDownload)"
+            }
         }
         return progressString
     }
@@ -46,12 +50,12 @@ struct DataDownloadView: View {
     var progressPercentage: Double {
         let downloadedImages = Double(viewModel.imagesDownloadedCount)
         let imagesToDownload = Double(viewModel.totalImagesToDownload)
-        let progressPercentage = (downloadedImages / imagesToDownload) * 100.0
-        return progressPercentage
+        let progressPercentage = downloadedImages / imagesToDownload
+        return progressPercentage >= 1.0 ? 1.0 : progressPercentage
     }
     
     var progressPercentageValue: String {
-        return progressPercentage.isNaN ? "" : "\(String(format: "%.1f", progressPercentage))%"
+        return progressPercentage.isNaN ? "" : "\(String(format: "%d", progressPercentage * 100.0))%"
     }
     
     // MARK: - INTILAIZER
@@ -129,7 +133,12 @@ struct DataDownloadView: View {
             
             Button {
                 Task {
-                    await viewModel.downloadValorantData()
+                    switch type {
+                    case .update:
+                        await viewModel.downloadValorantData(update: true)
+                    case .download:
+                        await viewModel.downloadValorantData()
+                    }
                 }
             } label: {
                 Group {

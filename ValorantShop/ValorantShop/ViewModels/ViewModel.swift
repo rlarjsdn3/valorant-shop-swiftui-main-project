@@ -30,8 +30,8 @@ final class ViewModel: ObservableObject {
     
     @AppStorage(UserDefaults.isLoggedIn) var isLoggedIn: Bool = false
     @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
-    @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = 0.0
-    @AppStorage(UserDefaults.rotatedWeaponSkinsRenewalDate) var rotatedWeaponSkinsRenewalDate: Double = 0.0
+    @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
+    @AppStorage(UserDefaults.rotatedWeaponSkinsRenewalDate) var rotatedWeaponSkinsRenewalDate: Double = Double.infinity
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -56,6 +56,7 @@ final class ViewModel: ObservableObject {
     // For Downlaod Data
     @Published var isLoadingDataDownloading: Bool = false
     @Published var isPresentDataDownloadView: Bool = false
+    @Published var isPresentDataUpdateView: Bool = false
     @Published var downloadingErrorText: String = ""
     @Published var downloadButtonShakeAnimation: CGFloat = 0.0
     
@@ -92,9 +93,10 @@ final class ViewModel: ObservableObject {
     
     init() {
         // 현재 날짜 불러오기
-        let currentDate = Date().timeIntervalSinceReferenceDate
+        let currentDate = Date()
         // 로테이션 스킨 갱신 날짜 불러오기
-        let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsRenewalDate).timeIntervalSinceReferenceDate
+        let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsRenewalDate)
+        print(currentDate.timeIntervalSinceReferenceDate, rotatedWeaponSkinsRenewalDate.timeIntervalSinceReferenceDate)
         // 로테이션 스킨 갱신 날짜에 다다르면
         if currentDate > rotatedWeaponSkinsRenewalDate {
             // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터 강제 갱신하기 (새로고침)
@@ -105,9 +107,11 @@ final class ViewModel: ObservableObject {
                 // ✏️ 로그인이 되어 있지 않은 상태에서 호출된다면 예외가 발생하게 됨.
             }
         }
+
+        // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
+        self.storeRotationWeaponSkinsRemainingSeconds = self.getRemainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
         
-        // Timer가 흐르기 전에 먼저 시간을 계산해 업데이트하기
-        updateRotationWeaponSkinsRemainingTime()
+        // 시간을 흐르게 하면서 스킨 데이터 새로고침 확인하가
         timer = Timer.scheduledTimer(
             withTimeInterval: 1.0,
             repeats: true,
@@ -248,8 +252,8 @@ final class ViewModel: ObservableObject {
         
         // 로그인 여부 및 사용자 정보 삭제하기
         self.isLoggedIn = false
-        self.accessTokenExpiryDate = 0.0
-        self.rotatedWeaponSkinsRenewalDate = 0.0
+        self.accessTokenExpiryDate = Double.infinity
+        self.rotatedWeaponSkinsRenewalDate = Double.infinity
         self.realmManager.deleteAll(of: PlayerID.self)
         self.realmManager.deleteAll(of: PlayerWallet.self)
         self.realmManager.deleteAll(of: RotatedWeaponSkins.self)
@@ -337,36 +341,48 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func downloadValorantData() async {
+    func downloadValorantData(update: Bool = false) async {
         do {
             // 로딩 버튼 보이게 하기
             withAnimation(.spring()) { self.isLoadingDataDownloading = true }
+            //
+            self.totalImagesToDownload = 3
             // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
             // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
             self.storeRotationWeaponSkins.weaponSkins = []
             // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadValorantVersion()
+            try await self.downloadValorantVersion(); self.imagesDownloadedCount += 1
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadWeaponSkinsData()
+            try await self.downloadWeaponSkinsData(); self.imagesDownloadedCount += 1
             // 가격 정보 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadStorePricesData()
+            try await self.downloadStorePricesData(); self.imagesDownloadedCount += 1
             // 스킨 이미지 데이터 다운로드받고, 로컬 Document 폴더에 저장하기
             try await self.downloadWeaponSkinImages()
-            // 로테이션 스킨 데이터 불러오기
-            await self.getStoreRotationWeaponSkins()
+            // 스킨 데이터를 업데이트하면
+            // ✏️ 최초 다운로드를 끝내면 onAppear로 자동으로 스킨 데이터를 불러올 수 있는 반면에,
+            // ✏️ 데이터 업데이트를 하면 스킨 데이터를 갱신할 수 있는 수단이 전무하기 때문에 명시적으로 호출함.
+            if update {
+                // 로테이션 스킨 데이터 불러오기
+                await self.getStoreRotationWeaponSkins()
+                // + 번들 스킨 데이터 불러오기
+                // + 야시장 스킨 데이터 불러오기
+            }
             
             withAnimation(.spring()) {
-                    // 로딩 버튼 가리기
-                    self.isLoadingDataDownloading = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
                     withAnimation(.spring()) {
                         // 로그인에 성공하면 성공 여부 수정하기
                         self.isLoggedIn = true
                         // 다운로드를 모두 마치면 성공 여부 수정하기
                         self.isDataDownloaded = true
+                        // 로딩 버튼 가리기
+                        self.isLoadingDataDownloading = false
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
                         // 다운로드 화면을 가리기
                         self.isPresentDataDownloadView = false
                         // ✏️ false로 수정해주지 않으면 상점 화면에서 다운로드 시트가 나타남.
+                        // ✏️ 0.75초 지연하는 이유는 팝 내비게이션 스택 애니메이션이 보이게 하지 않기 위함.
                     }
                 }
             }
@@ -519,8 +535,8 @@ final class ViewModel: ObservableObject {
             }
         // 버전을 비교한 결과 서로 다르다면
         } catch ResourceError.urlError {
-            // 다운로드 화면이 보이게 하기
-            self.isPresentDataDownloadView = true
+            // 업데이트 화면이 보이게 하기
+            self.isPresentDataUpdateView = true
         } catch {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
@@ -750,32 +766,16 @@ final class ViewModel: ObservableObject {
         }
     }
     
-    func updateRotationWeaponSkinsRemainingTime(_ timer: Timer? = nil) {
+    @objc func updateRotationWeaponSkinsRemainingTime(_ timer: Timer? = nil) {
+        // 로그인이 되어 있으면
         if self.isLoggedIn {
             // 현재 날짜 불러오기
-            let currentDate = Date().timeIntervalSinceReferenceDate
+            let currentDate = Date()
             // 로테이션 스킨 갱신 날짜 불러오기
-            let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsRenewalDate).timeIntervalSinceReferenceDate
-            
-            // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
-            let dateComponents = self.calendar.dateComponents(
-                [.hour, .minute, .second],
-                from: Date(timeIntervalSinceReferenceDate: currentDate),
-                to: Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsRenewalDate)
-            )
-            let hour = dateComponents.hour ?? 0
-            let minute = dateComponents.minute ?? 0
-            let second = dateComponents.second ?? 0
-            
-            // 남은 시간 문자열 출력을 위한 숫자 포맷 설정하기
-            let formatter = NumberFormatter()
-            formatter.minimumIntegerDigits = 2
-            // 각 날짜 요소를 숫자 포맷으로 변환하기
-            let formattedHour = formatter.string(for: hour) ?? "00"
-            let formattedMinute = formatter.string(for: minute) ?? "00"
-            let formattedSecond = formatter.string(for: second) ?? "00"
+            let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsRenewalDate)
             
             // 로테이션 스킨 갱신 날짜에 다다르면
+            // ✏️ 앱이 켜져 있는 동안 로테이션 스킨 갱신 날짜에 다다르는 경우, 자동으로 갱신시키기 위해 아래 코드를 구현함.
             if currentDate > rotatedWeaponSkinsRenewalDate {
                 // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터 강제 갱신하기 (새로고침)
                 Task {
@@ -787,8 +787,30 @@ final class ViewModel: ObservableObject {
             }
             
             // 결과 업데이트하기
-            self.storeRotationWeaponSkinsRemainingSeconds = "\(formattedHour):\(formattedMinute):\(formattedSecond)"
+            self.storeRotationWeaponSkinsRemainingSeconds = self.getRemainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
         }
+    }
+    
+    func getRemainingTimeString(from date1: Date, to date2: Date) -> String {
+        // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
+        let dateComponents = self.calendar.dateComponents(
+            [.hour, .minute, .second],
+            from: date1,
+            to: date2
+        )
+        let hour = dateComponents.hour ?? 0
+        let minute = dateComponents.minute ?? 0
+        let second = dateComponents.second ?? 0
+        
+        // 남은 시간 문자열 출력을 위한 숫자 포맷 설정하기
+        let formatter = NumberFormatter()
+        formatter.minimumIntegerDigits = 2
+        // 각 날짜 요소를 숫자 포맷으로 변환하기
+        let formattedHour = formatter.string(for: hour) ?? "00"
+        let formattedMinute = formatter.string(for: minute) ?? "00"
+        let formattedSecond = formatter.string(for: second) ?? "00"
+        // 결과 반환하기
+        return "\(formattedHour):\(formattedMinute):\(formattedSecond)"
     }
     
 }
