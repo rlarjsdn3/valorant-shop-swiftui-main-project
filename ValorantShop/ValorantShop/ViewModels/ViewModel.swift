@@ -31,7 +31,7 @@ final class ViewModel: ObservableObject {
     @AppStorage(UserDefaults.isLoggedIn) var isLoggedIn: Bool = false
     @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
     @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = 0.0
-    @AppStorage(UserDefaults.rotatedWeaponSkinsExpiryDate) var rotatedWeaponSkinsExpiryDate: Double = 0.0
+    @AppStorage(UserDefaults.rotatedWeaponSkinsRenewalDate) var rotatedWeaponSkinsRenewalDate: Double = 0.0
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -86,12 +86,27 @@ final class ViewModel: ObservableObject {
     // MARK: - INTIALIZER
     
     init() {
-        // Timer가 흐르기 전에 최초 1번만 시간 계산하기
-        calculateRotationWeaponSkinsRemainingTime()
+        // 현재 날짜 불러오기
+        let currentDate = Date().timeIntervalSinceReferenceDate
+        // 로테이션 스킨 갱신 날짜 불러오기
+        let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsRenewalDate).timeIntervalSinceReferenceDate
+        // 로테이션 스킨 갱신 날짜에 다다르면
+        if currentDate > rotatedWeaponSkinsRenewalDate {
+            // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터 강제 갱신하기 (새로고침)
+            Task {
+                await self.getPlayerID(reload: true)
+                await self.getPlayerWallet(reload: true)
+                await self.getStoreRotationWeaponSkins(reload: true)
+                // ✏️ 로그인이 되어 있지 않은 상태에서 호출된다면 예외가 발생하게 됨.
+            }
+        }
+        
+        // Timer가 흐르기 전에 먼저 시간을 계산해 업데이트하기
+        updateRotationWeaponSkinsRemainingTime()
         timer = Timer.scheduledTimer(
             withTimeInterval: 1.0,
             repeats: true,
-            block: calculateRotationWeaponSkinsRemainingTime(_:)
+            block: updateRotationWeaponSkinsRemainingTime(_:)
         )
     }
     
@@ -229,7 +244,7 @@ final class ViewModel: ObservableObject {
         // 로그인 여부 및 사용자 정보 삭제하기
         self.isLoggedIn = false
         self.accessTokenExpiryDate = 0.0
-        self.rotatedWeaponSkinsExpiryDate = 0.0
+        self.rotatedWeaponSkinsRenewalDate = 0.0
         self.realmManager.deleteAll(of: PlayerID.self)
         self.realmManager.deleteAll(of: PlayerWallet.self)
         self.realmManager.deleteAll(of: RotatedWeaponSkins.self)
@@ -612,7 +627,7 @@ final class ViewModel: ObservableObject {
                 // 현재 날짜 불러오기
                 let currentDate = Date().timeIntervalSinceReferenceDate
                 // 로테이션 갱신 시간이 지났다면
-                if currentDate > rotatedWeaponSkinsExpiryDate {
+                if currentDate > rotatedWeaponSkinsRenewalDate {
                     do {
                         // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                         try await self.fetchStoreRotationWeaponSkins()
@@ -705,7 +720,7 @@ final class ViewModel: ObservableObject {
             puuid: reAuthTokens.puuid
         ).get().skinsPanelLayout
         // 로테이션 갱신 시간을 UserDefaults에 저장하기
-        self.rotatedWeaponSkinsExpiryDate = Date().addingTimeInterval(
+        self.rotatedWeaponSkinsRenewalDate = Date().addingTimeInterval(
             Double(rotatedWeaponSkins.singleItemOffersRemainingDurationInSeconds)
         ).timeIntervalSinceReferenceDate
         // Realm에 새로운 로테이션 스킨 데이터 저장하기 (스킨의 첫 번째 레벨의 UUID)
@@ -715,12 +730,12 @@ final class ViewModel: ObservableObject {
         }
     }
     
-    func calculateRotationWeaponSkinsRemainingTime(_ timer: Timer? = nil) {
+    func updateRotationWeaponSkinsRemainingTime(_ timer: Timer? = nil) {
         if self.isLoggedIn {
             // 현재 날짜 불러오기
             let currentDate = Date().timeIntervalSinceReferenceDate
             // 로테이션 스킨 갱신 날짜 불러오기
-            let expiryDate = Date(timeIntervalSinceReferenceDate: self.rotatedWeaponSkinsExpiryDate).timeIntervalSinceReferenceDate
+            let expiryDate = Date(timeIntervalSinceReferenceDate: self.rotatedWeaponSkinsRenewalDate).timeIntervalSinceReferenceDate
             
             // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
             let dateComponents = self.calendar.dateComponents(
@@ -739,16 +754,6 @@ final class ViewModel: ObservableObject {
             let formattedHour = formatter.string(for: hour) ?? "00"
             let formattedMinute = formatter.string(for: minute) ?? "00"
             let formattedSecond = formatter.string(for: second) ?? "00"
-            
-            // 로테이션 스킨 갱신 날짜에 다다르면
-            if currentDate > expiryDate {
-                // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터 강제 갱신하기 (새로고침)
-                Task {
-                    await self.getPlayerID(reload: true)
-                    await self.getPlayerWallet(reload: true)
-                    await self.getStoreRotationWeaponSkins(reload: true)
-                }
-            }
             
             // 결과 업데이트하기
             self.storeRotationWeaponSkinsRemainingSeconds = "\(formattedHour):\(formattedMinute):\(formattedSecond)"

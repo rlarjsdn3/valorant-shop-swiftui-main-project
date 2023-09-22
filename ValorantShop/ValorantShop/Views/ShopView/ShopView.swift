@@ -43,7 +43,8 @@ struct ShopView: View {
                 
                 Button("리로드") {
                     Task {
-                        await viewModel.getStoreRotationWeaponSkins()
+                        await viewModel.getPlayerWallet(reload: true)
+                        await viewModel.getStoreRotationWeaponSkins(reload: true)
                     }
                 }
             }
