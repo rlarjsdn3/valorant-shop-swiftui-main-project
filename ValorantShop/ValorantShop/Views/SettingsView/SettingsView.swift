@@ -13,6 +13,17 @@ struct SettingsView: View {
     
     @EnvironmentObject var viewModel: ViewModel
     
+    // MARK: - COMPUTED PROPERTIES
+    
+    var lastUpdateCheckDateString: String {
+        let lastUpdateCheckDate: Date = Date(timeIntervalSinceReferenceDate: viewModel.lastUpdateCheckDate)
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M월 d일(E) H:m"
+        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        return formatter.string(from: lastUpdateCheckDate)
+    }
+    
     // MARK: - BODY
     
     var body: some View {
@@ -31,14 +42,8 @@ struct SettingsView: View {
                             await viewModel.checkValorantVersion()
                         }
                     }
-                    
-                    HStack {
-                        Text("최근 업데이트 확인")
-                        
-                        Spacer()
-                        
-                        Text("9월 22일(금) 오후 2:39")
-                    }
+                } footer: {
+                    Text("최근 업데이트 확인: \(lastUpdateCheckDateString)")
                 }
                 
                 Section {

@@ -30,6 +30,7 @@ final class ViewModel: ObservableObject {
     
     @AppStorage(UserDefaults.isLoggedIn) var isLoggedIn: Bool = false
     @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
+    @AppStorage(UserDefaults.lastUpdateCheckDate) var lastUpdateCheckDate: Double = Double.infinity
     @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
     @AppStorage(UserDefaults.rotatedWeaponSkinsRenewalDate) var rotatedWeaponSkinsRenewalDate: Double = Double.infinity
     
@@ -109,7 +110,7 @@ final class ViewModel: ObservableObject {
         }
 
         // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
-        self.storeRotationWeaponSkinsRemainingSeconds = self.getRemainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
+        self.storeRotationWeaponSkinsRemainingSeconds = self.remainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
         
         // 시간을 흐르게 하면서 스킨 데이터 새로고침 확인하가
         timer = Timer.scheduledTimer(
@@ -119,7 +120,7 @@ final class ViewModel: ObservableObject {
         )
     }
     
-    // MARK: - FUNCTIONS
+    // MARK: - LOGIN
     
     @MainActor
     func login(username: String, password: String) async {
@@ -242,6 +243,8 @@ final class ViewModel: ObservableObject {
         }
     }
     
+    // MARK: - LOGOUT
+    
     func logout() {
         // 새로운 세션 할당하기
         oauthManager.urlSession = URLSession(configuration: .ephemeral)
@@ -265,6 +268,8 @@ final class ViewModel: ObservableObject {
         // 런치 스크린 표시 여부 수정하기
         self.isPresentLoadingScreenView = true
     }
+    
+    // MARK: - REAUTH TOKENS
     
     private func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
         // ⭐️ 최초 로그인을 하면 사용자 고유 정보를 불러온 후, 키체인에 저장함.
@@ -340,6 +345,8 @@ final class ViewModel: ObservableObject {
         }
     }
     
+    // MARK: - DOWNLOAD DATA
+    
     @MainActor
     func downloadValorantData(update: Bool = false) async {
         do {
@@ -405,7 +412,7 @@ final class ViewModel: ObservableObject {
         // 발로란트 버전 데이터 다운로드받기
         let valorantVersion = try await resourceManager.fetchValorantVersion().get()
         // 발로란트 버전 데이터를 Realm에 저장하기
-        self.saveStoreData(valorantVersion)
+        self.overwriteRealmObject(valorantVersion)
     }
     
     @MainActor
@@ -413,7 +420,7 @@ final class ViewModel: ObservableObject {
         // 무기 스킨 데이터 다운로드받기
         let weaponSkins = try await resourceManager.fetchWeaponSkins().get()
         // 무기 스킨 데이터를 Realm에 저장하기
-        self.saveStoreData(weaponSkins)
+        self.overwriteRealmObject(weaponSkins)
     }
     
     @MainActor
@@ -426,14 +433,7 @@ final class ViewModel: ObservableObject {
             riotEntitlement: reAuthTokens.riotEntitlement
         ).get()
         // 상점 가격 데이터를 Realm에 저장하기
-        self.saveStoreData(storePrices)
-    }
-    
-    private func saveStoreData<T: Object>(_ object: T) {
-        // 데이터를 저장하기 전, 기존 데이터 삭제하기
-        realmManager.deleteAll(of: T.self)
-        // 새로운 데이터 저장하기
-        realmManager.create(object)
+        self.overwriteRealmObject(storePrices)
     }
     
     @MainActor
@@ -517,6 +517,8 @@ final class ViewModel: ObservableObject {
         return "\(type.prefixFileName)-\(uuid).png"
     }
     
+    // MARK: - CHECK VERSION
+    
     @MainActor
     func checkValorantVersion() async {
         do {
@@ -532,7 +534,10 @@ final class ViewModel: ObservableObject {
             {
                 // ⭐️ 링크 에러는 아니지만 편의를 위해 임시로 링크 에러를 던짐.
                 throw ResourceError.urlError
+                // ✏️ 새로운 버전 데이터는 다운로드 화면에서 한꺼번에 다운 받음.
             }
+            // 최근 업데이트 확인 갱신하기
+            self.lastUpdateCheckDate = Date().timeIntervalSinceReferenceDate
         // 버전을 비교한 결과 서로 다르다면
         } catch ResourceError.urlError {
             // 업데이트 화면이 보이게 하기
@@ -541,6 +546,8 @@ final class ViewModel: ObservableObject {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
     }
+    
+    // MARK: - GET PLAYER DATA
     
     @MainActor
     func getPlayerID(reload: Bool = false) async {
@@ -766,6 +773,17 @@ final class ViewModel: ObservableObject {
         }
     }
     
+    // MARK: - REALM CRUD
+    
+    private func overwriteRealmObject<T: Object>(_ object: T) {
+        // 데이터를 저장하기 전, 기존 데이터 삭제하기
+        realmManager.deleteAll(of: T.self)
+        // 새로운 데이터 저장하기
+        realmManager.create(object)
+    }
+    
+    // MARK: - TIMER
+    
     @objc func updateRotationWeaponSkinsRemainingTime(_ timer: Timer? = nil) {
         // 로그인이 되어 있으면
         if self.isLoggedIn {
@@ -787,11 +805,13 @@ final class ViewModel: ObservableObject {
             }
             
             // 결과 업데이트하기
-            self.storeRotationWeaponSkinsRemainingSeconds = self.getRemainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
+            self.storeRotationWeaponSkinsRemainingSeconds = self.remainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
         }
     }
     
-    func getRemainingTimeString(from date1: Date, to date2: Date) -> String {
+    // MARK: - ETC
+    
+    private func remainingTimeString(from date1: Date, to date2: Date) -> String {
         // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
         let dateComponents = self.calendar.dateComponents(
             [.hour, .minute, .second],

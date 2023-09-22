@@ -11,6 +11,7 @@ struct UserDefaults {
     
     // For Auth
     static var isLoggedIn: String = "isLoggedIn"
+    static var lastUpdateCheckDate: String = "lastUpdateCheckDate"
     static var accessTokenExpiryDate: String = "AccessTokenExpiryDate"
     static var rotatedWeaponSkinsRenewalDate: String = "RotatedWeaponSkinsRenewalDate"
     

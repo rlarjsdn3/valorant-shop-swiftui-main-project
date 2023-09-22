@@ -26,11 +26,10 @@ struct OAuthView: View {
                 .navigationDestination(isPresented: $viewModel.isPresentDataDownloadView) {
                     DataDownloadView(of: .download)
                         .navigationBarBackButtonHidden()
-                    // 네비게이션 백버튼 숨기기
                 }
                 .navigationBarBackButtonHidden()
         }
-        // - For Debug --
+        // -- For Debug --
         .overlay(alignment: .bottomTrailing) {
             Menu {
                 Button("로그아웃") {
@@ -53,10 +52,7 @@ struct OAuthView: View {
             }
             .padding()
         }
-        .onAppear {
-            print("다운로드 여부: \(viewModel.isDataDownloaded)")
-        }
-        // ----------
+        // ---------------
     }
 }
 
