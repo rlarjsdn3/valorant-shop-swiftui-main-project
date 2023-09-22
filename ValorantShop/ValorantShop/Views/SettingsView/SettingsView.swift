@@ -26,8 +26,18 @@ struct SettingsView: View {
                 }
                 
                 Section {
-                    Button("데이터 다운로드", role: .destructive) {
-                        viewModel.isPresentDataDownloadView = true
+                    Button("업데이트 확인") {
+                        Task {
+                            await viewModel.checkValorantVersion()
+                        }
+                    }
+                    
+                    HStack {
+                        Text("최근 업데이트 확인")
+                        
+                        Spacer()
+                        
+                        Text("9월 22일(금) 오후 2:39")
                     }
                 }
                 
@@ -40,7 +50,7 @@ struct SettingsView: View {
             .navigationTitle("설정")
         }
         .sheet(isPresented: $viewModel.isPresentDataDownloadView) {
-            DataDownloadView()
+            DataDownloadView(of: .update)
         }
     }
 }

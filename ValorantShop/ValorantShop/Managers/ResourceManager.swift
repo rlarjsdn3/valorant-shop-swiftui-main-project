@@ -246,7 +246,10 @@ final class ResourceManager {
         urlRequest.httpMethod = "GET"
         
         // 비동기 HTTP 통신하기
-        let (data, response) = try! await urlSession.data(for: urlRequest)
+        guard let (data, response) = try? await urlSession.data(for: urlRequest) else {
+            print("네트워크 에러: \(#function)")
+            return .failure(.networkError)
+        }
         // 상태 코드가 올바른지 확인하기
         guard let httpResponse = (response as? HTTPURLResponse),
               (200..<300) ~= httpResponse.statusCode else {

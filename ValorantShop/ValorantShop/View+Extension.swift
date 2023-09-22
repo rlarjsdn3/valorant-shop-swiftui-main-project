@@ -36,18 +36,30 @@ extension View {
 
 extension View {
     
-    func dismissKeyboard() {
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
-        )
-    }
-    
     var screenSize: CGRect {
         guard let screenSize = UIApplication.shared.connectedScenes.compactMap({ scene -> UIWindow? in
             (scene as? UIWindowScene)?.keyWindow}).first?.frame else {
             return UIScreen.main.bounds
         }
         return screenSize
+    }
+    
+    var hasBezel: Bool {
+        return safeAreaInsets.bottom == 0 ? true : false
+    }
+    
+    var safeAreaInsets: UIEdgeInsets {
+        guard let safeAreaInsets = UIApplication.shared.connectedScenes.compactMap({ scene -> UIWindow? in
+            (scene as? UIWindowScene)?.keyWindow}).first?.safeAreaInsets else {
+            return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        }
+        return safeAreaInsets
+    }
+    
+    func dismissKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
+        )
     }
     
 }

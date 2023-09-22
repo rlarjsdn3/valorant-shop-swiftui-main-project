@@ -24,7 +24,8 @@ struct OAuthView: View {
                     }
                 }
                 .navigationDestination(isPresented: $viewModel.isPresentDataDownloadView) {
-                    DataDownloadView()
+                    DataDownloadView(of: .download)
+                        .navigationBarBackButtonHidden()
                     // 네비게이션 백버튼 숨기기
                 }
                 .navigationBarBackButtonHidden()

@@ -54,9 +54,14 @@ final class ViewModel: ObservableObject {
     @Published var selectedCustomTab: CustomTabType = .shop
     
     // For Downlaod Data
+    @Published var isLoadingDataDownloading: Bool = false
     @Published var isPresentDataDownloadView: Bool = false
-    @Published var totalImageCountToDownload: Int = 0
-    @Published var totalDownloadedImageCount: Int = 0
+    @Published var downloadingErrorText: String = ""
+    @Published var downloadButtonShakeAnimation: CGFloat = 0.0
+    
+    
+    @Published var totalImagesToDownload: Int = 0
+    @Published var imagesDownloadedCount: Int = 0
     
     // For PlayerID
     @Published var gameName: String = ""
@@ -119,10 +124,10 @@ final class ViewModel: ObservableObject {
         
         // 계정이름과 비밀번호가 입력되었는지 확인하기
         guard !username.isEmpty, !password.isEmpty else {
-            // 에러 메시지 출력하기
-            self.loginErrorText = "계정이름과 비밀번호를 입력해주세요."
             // 에러 햅틱 피드백 전달하기
             hapticManager.notify(.error)
+            // 에러 메시지 출력하기
+            self.loginErrorText = "계정이름과 비밀번호를 입력해주세요."
             // 로그인 버튼에 흔들기 애니메이션 적용하기
             withAnimation(.spring()) { self.loginButtonShakeAnimation += 1.0 }
             return
@@ -158,7 +163,7 @@ final class ViewModel: ObservableObject {
             // 이중 인증 화면 보이게 하기
             withAnimation(.spring()) { self.isPresentMultifactorAuthView = true }
         // HTTP 통신에 실패한다면
-        } catch OAuthError.statusCodeError {
+        } catch OAuthError.networkError, OAuthError.statusCodeError {
             // 에러 메시지 출력하기
             self.loginErrorText = "서버에 연결하는 데 문제가 발생하였습니다."
             // 에러 햅틱 피드백 전달하기
@@ -221,14 +226,14 @@ final class ViewModel: ObservableObject {
                 }
             }
         } catch {
-            // 에러 메시지 출력하기
-            self.multifactorErrorText = "로그인 코드가 일치하지 않습니다."
             // 에러 햅틱 피드백 전달하기
             hapticManager.notify(.error)
             // 이중 인증 로딩 가리기
             withAnimation(.spring()) { self.isLoadingMultifactor = false }
             // 텍스트 필드에 흔들기 애니메이션 적용하기
             withAnimation(.spring()) { self.codeBoxShakeAnimation += 1.0 }
+            // 에러 메시지 출력하기
+            self.multifactorErrorText = "로그인 코드가 일치하지 않습니다."
             
         }
     }
@@ -332,8 +337,10 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func downloadValorantData(reload: Bool = false) async {
+    func downloadValorantData() async {
         do {
+            // 로딩 버튼 보이게 하기
+            withAnimation(.spring()) { self.isLoadingDataDownloading = true }
             // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
             // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
             self.storeRotationWeaponSkins.weaponSkins = []
@@ -345,22 +352,35 @@ final class ViewModel: ObservableObject {
             try await self.downloadStorePricesData()
             // 스킨 이미지 데이터 다운로드받고, 로컬 Document 폴더에 저장하기
             try await self.downloadWeaponSkinImages()
+            // 로테이션 스킨 데이터 불러오기
+            await self.getStoreRotationWeaponSkins()
             
-            // 
-            if reload {
-                // 새로운 스킨 데이터로 상점 정보를 뷰에 로드하기
-                await self.getStoreRotationWeaponSkins(reload: true)
+            withAnimation(.spring()) {
+                    // 로딩 버튼 가리기
+                    self.isLoadingDataDownloading = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+                    withAnimation(.spring()) {
+                        // 로그인에 성공하면 성공 여부 수정하기
+                        self.isLoggedIn = true
+                        // 다운로드를 모두 마치면 성공 여부 수정하기
+                        self.isDataDownloaded = true
+                        // 다운로드 화면을 가리기
+                        self.isPresentDataDownloadView = false
+                        // ✏️ false로 수정해주지 않으면 상점 화면에서 다운로드 시트가 나타남.
+                    }
+                }
             }
-            
-            // 다운로드를 모두 마치면 성공 여부 수정하기
-            self.isDataDownloaded = true
-            // 로그인에 성공하면 성공 여부 수정하기
-            self.isLoggedIn = true
-            // 다운로드 화면 보기를 false로 수정하기
-            self.isPresentDataDownloadView = false
-            // ✏️ false로 수정해주지 않으면 상점 화면에서 다운로드 시트가 나타남.
         } catch {
-            return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+            withAnimation(.spring()) {
+                // 로딩 버튼 가리기
+                self.isLoadingDataDownloading = false
+                // 다운로드 버튼에 흔들기 애니메이션 적용하기
+                self.downloadButtonShakeAnimation += 1.0
+            }
+            // 에러 햅틱 피드백 전달하기
+            hapticManager.notify(.error)
+            // 에러 메시지 출력하기
+            self.downloadingErrorText = "서버에 연결하는 데 문제가 발생하였습니다."
         }
     }
     
@@ -449,14 +469,14 @@ final class ViewModel: ObservableObject {
             
         
         // 총 다운로드할 이미지 개수를 프로퍼티 래퍼에 저장하기
-        self.totalImageCountToDownload = notDownloadedImages.count
+        self.totalImagesToDownload = notDownloadedImages.count
         
         // 이미지를 다운로드해 Documents 폴더에 저장하기
         for notDownloadedImage in notDownloadedImages {
             // 다운로드한 이미지 데이터를 저장하는 변수 선언하기
             var imageData: Data
             // 다운로드 한 이미지 개수 증가시키기
-            self.totalDownloadedImageCount += 1
+            self.imagesDownloadedCount += 1
             // 이미지 타입 저장하기
             let imageType = notDownloadedImage.imageType
             // UUID값 저장하기
@@ -622,7 +642,7 @@ final class ViewModel: ObservableObject {
         let rotatedWeaponSkins = realmManager.read(of: RotatedWeaponSkins.self)
         // 강제로 다시 불러오지 안는다면
         if !reload {
-            // Realm에 저장된 로테이션 스킨 데이터가 없다면
+            // Realm에 저장된 로테이션 스킨 데이터가 있다면
             if !rotatedWeaponSkins.isEmpty {
                 // 현재 날짜 불러오기
                 let currentDate = Date().timeIntervalSinceReferenceDate
@@ -735,13 +755,13 @@ final class ViewModel: ObservableObject {
             // 현재 날짜 불러오기
             let currentDate = Date().timeIntervalSinceReferenceDate
             // 로테이션 스킨 갱신 날짜 불러오기
-            let expiryDate = Date(timeIntervalSinceReferenceDate: self.rotatedWeaponSkinsRenewalDate).timeIntervalSinceReferenceDate
+            let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsRenewalDate).timeIntervalSinceReferenceDate
             
             // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
             let dateComponents = self.calendar.dateComponents(
                 [.hour, .minute, .second],
                 from: Date(timeIntervalSinceReferenceDate: currentDate),
-                to: Date(timeIntervalSinceReferenceDate: expiryDate)
+                to: Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsRenewalDate)
             )
             let hour = dateComponents.hour ?? 0
             let minute = dateComponents.minute ?? 0
@@ -754,6 +774,17 @@ final class ViewModel: ObservableObject {
             let formattedHour = formatter.string(for: hour) ?? "00"
             let formattedMinute = formatter.string(for: minute) ?? "00"
             let formattedSecond = formatter.string(for: second) ?? "00"
+            
+            // 로테이션 스킨 갱신 날짜에 다다르면
+            if currentDate > rotatedWeaponSkinsRenewalDate {
+                // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터 강제 갱신하기 (새로고침)
+                Task {
+                    await self.getPlayerID(reload: true)
+                    await self.getPlayerWallet(reload: true)
+                    await self.getStoreRotationWeaponSkins(reload: true)
+                    // ✏️ 로그인이 되어 있지 않은 상태에서 호출된다면 예외가 발생하게 됨.
+                }
+            }
             
             // 결과 업데이트하기
             self.storeRotationWeaponSkinsRemainingSeconds = "\(formattedHour):\(formattedMinute):\(formattedSecond)"
