@@ -57,7 +57,6 @@ struct ContentView: View {
             }
             // 로그아웃했다가 다시 들어오는 상황도 고려
             .onAppear {
-                print("Shop - onAppear")
                 Task {
                     await viewModel.checkValorantVersion()
                     await viewModel.getPlayerID()
@@ -71,8 +70,8 @@ struct ContentView: View {
                     await viewModel.checkValorantVersion()
                 }
             }
-            .sheet(isPresented: $viewModel.isPresentDataDownloadView) {
-                DataDownloadView()
+            .sheet(isPresented: $viewModel.isPresentDataUpdateView) {
+                DataDownloadView(of: .update)
             }
         }
     }

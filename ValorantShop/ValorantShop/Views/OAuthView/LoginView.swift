@@ -133,7 +133,7 @@ struct LoginView: View {
                             }
                         }
                         .frame(maxWidth: .infinity)
-                        .frame(height: 53)
+                        .frame(height: 55)
                         .background(Color.valorant, in: RoundedRectangle(cornerRadius: 15))
                     }
                     .padding(.top, 1)
@@ -142,42 +142,45 @@ struct LoginView: View {
                     
                     Spacer()
                 }
-                .onChange(of: focusField, perform: { newValue in
-                    if newValue == .username || newValue == .password {
-                        withAnimation(.spring()) {
-                            mainTextAnimation = false
-                            keyboardAnimation = true
-                        }
-                    } else if newValue == nil {
-                        withAnimation(.spring()) {
-                            mainTextAnimation = true
-                            keyboardAnimation = false
-                        }
+            .onAppear {
+                loginAnimation()
+            }
+            .onDisappear {
+                viewModel.loginErrorText = ""
+            }
+            .onChange(of: focusField) { newValue in
+                if newValue == .username || newValue == .password {
+                    withAnimation(.spring()) {
+                        mainTextAnimation = false
+                        keyboardAnimation = true
                     }
-                })
-                .onAppear {
-                    loginAnimation()
-                }
-                .overlay(alignment: .top) {
-                    VStack {
-                        Text("Valorant")
-                        Text("Store")
+                } else if newValue == nil {
+                    withAnimation(.spring()) {
+                        mainTextAnimation = true
+                        keyboardAnimation = false
                     }
-                    .font(.custom(Fonts.valorantFont, size: 50))
-                    .padding(.top, screenSize.height * 0.1)
-                    .offset(y: mainTextAnimation ? 0 : -screenSize.height)
                 }
-                .overlay(alignment: .bottom) {
-                    Link(destination: URL(string: RiotURL.canNotLogin)!) {
-                        Text("로그인이 안되시나요?")
-                            .font(.callout)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .opacity(helpButtonAnimation ? 1 : 0)
+            }
+            .overlay(alignment: .top) {
+                VStack {
+                    Text("Valorant")
+                    Text("Store")
                 }
-                .offset(y: keyboardAnimation ? -(screenSize.height * 0.1) : 0)
-                .padding(20)
-                .ignoresSafeArea(.keyboard)
+                .font(.custom(Fonts.valorantFont, size: 50))
+                .padding(.top, screenSize.height * 0.1)
+                .offset(y: mainTextAnimation ? 0 : -screenSize.height)
+            }
+            .overlay(alignment: .bottom) {
+                Link(destination: URL(string: RiotURL.canNotLogin)!) {
+                    Text("로그인이 안되시나요?")
+                        .font(.callout)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .opacity(helpButtonAnimation ? 1 : 0)
+            }
+            .offset(y: keyboardAnimation ? -(screenSize.height * 0.1) : 0)
+            .padding(20)
+            .ignoresSafeArea(.keyboard)
         }
     }
     
