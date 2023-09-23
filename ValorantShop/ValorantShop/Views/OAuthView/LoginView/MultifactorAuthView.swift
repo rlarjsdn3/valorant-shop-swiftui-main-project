@@ -82,6 +82,23 @@ struct MultifactorAuthView: View {
                     .frame(height: 10)
                     .foregroundColor(Color.valorant)
             }
+            .onAppear {
+                withAnimation(.spring()) {
+                    materialAnimation = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        withAnimation(.spring()) {
+                            focusField = .code
+                            codeBoxAnimation = true
+                        }
+                    }
+                }
+            }
+            .onDisappear {
+                viewModel.multifactorErrorText = ""
+                withAnimation(.spring()) {
+                    viewModel.isLoadingLogin = false
+                }
+            }
             .onChange(of: inputCode) { input in
                 if input.count >= 6 {
                     Task {
@@ -106,18 +123,6 @@ struct MultifactorAuthView: View {
             .background(Color(UIColor.systemBackground), in: RoundedRectangle(cornerRadius: 15))
             .offset(y: codeBoxAnimation ? -(screenSize.height * 0.2) : -screenSize.height)
             .padding()
-        }
-        .onAppear {
-            viewModel.multifactorErrorText = ""
-            withAnimation(.spring()) {
-                materialAnimation = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    withAnimation(.spring()) {
-                        focusField = .code
-                        codeBoxAnimation = true
-                    }
-                }
-            }
         }
         .ignoresSafeArea(.keyboard)
     }

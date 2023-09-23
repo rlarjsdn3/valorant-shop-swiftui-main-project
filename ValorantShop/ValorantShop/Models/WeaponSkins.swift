@@ -5,11 +5,12 @@
 //  Created by 김건우 on 2023/09/15.
 //
 
+import SwiftUI
 import RealmSwift
 
 final class WeaponSkins: Object, Codable {
     @Persisted var status: Int
-    @Persisted var skins: List<Skin>
+    @Persisted var skins: RealmSwift.List<Skin>
     
     enum CodingKeys: String, CodingKey {
         case skins = "data"
@@ -21,8 +22,8 @@ final class Skin: EmbeddedObject, Codable {
     @Persisted var displayName: String
     @Persisted var contentTierUUID: ContentTier?
     @Persisted var displayIcon: String?
-    @Persisted var chromas: List<Chroma>
-    @Persisted var levels: List<Level>
+    @Persisted var chromas: RealmSwift.List<Chroma>
+    @Persisted var levels: RealmSwift.List<Level>
     
     enum CodingKeys: String, CodingKey {
         case uuid, displayName
@@ -38,6 +39,36 @@ enum ContentTier: String, PersistableEnum, Codable {
     case primeumEdition = "60bca009-4182-7998-dee7-b8a2558dc369"
     case exclusiveEdition = "e046854e-406c-37f4-6607-19a9ba8426fc"
     case ultraEdition = "411e4a55-4e59-7757-41f0-86a53f101bb5"
+    
+    var hightlightColor: Color {
+        switch self {
+        case .selectEdition:
+            return Color.selectEdition
+        case .deulxeEdition:
+            return Color.deulxeEdition
+        case .primeumEdition:
+            return Color.premiumEdition
+        case .exclusiveEdition:
+            return Color.exclusiveEdition
+        case .ultraEdition:
+            return Color.ultraEdition
+        }
+    }
+    
+    var rankLogoName: String {
+        switch self {
+        case .selectEdition:
+            return "selectEdition"
+        case .deulxeEdition:
+            return "deulxeEdition"
+        case .primeumEdition:
+            return "premiumEdition"
+        case .exclusiveEdition:
+            return "exclusiveEdition"
+        case .ultraEdition:
+            return "ultraEdition"
+        }
+    }
 }
 
 final class Chroma: EmbeddedObject, Codable {

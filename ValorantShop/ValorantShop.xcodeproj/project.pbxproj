@@ -24,11 +24,16 @@
 		9E29228C2AB0A9D200D6FE07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */; };
 		9E29228F2AB0A9D200D6FE07 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E29228E2AB0A9D200D6FE07 /* Preview Assets.xcassets */; };
 		9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E29229B2AB0AF3D00D6FE07 /* CustomTabView.swift */; };
-		9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A12AB0B51D00D6FE07 /* ShopView.swift */; };
+		9E2922A22AB0B51D00D6FE07 /* StoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A12AB0B51D00D6FE07 /* StoreView.swift */; };
 		9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A32AB0B54400D6FE07 /* CollectionView.swift */; };
 		9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */; };
 		9E611CD22ABC58E400D1A310 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */; };
 		9E611CD52ABC7B4400D1A310 /* OAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611CD42ABC7B4400D1A310 /* OAuthView.swift */; };
+		9E611CE12ABDDD9C00D1A310 /* AZVideoPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */; };
+		9E611D002ABEA45600D1A310 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611CFF2ABEA45600D1A310 /* MainView.swift */; };
+		9E611D022ABED7F300D1A310 /* SkinsMarketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D012ABED7F300D1A310 /* SkinsMarketView.swift */; };
+		9E611D052ABED81100D1A310 /* BundleMarketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D042ABED81100D1A310 /* BundleMarketView.swift */; };
+		9E611D072ABED81700D1A310 /* NightMarketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D062ABED81700D1A310 /* NightMarketView.swift */; };
 		9E7638712AB894A600BD0AB4 /* MultifactorAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */; };
 		9E7638742ABAF9B000BD0AB4 /* ShakeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */; };
 		9E8A86BF2ABC37A6006A61FA /* CodeBoxModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8A86BE2ABC37A6006A61FA /* CodeBoxModifier.swift */; };
@@ -58,11 +63,15 @@
 		9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9E29228E2AB0A9D200D6FE07 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		9E29229B2AB0AF3D00D6FE07 /* CustomTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabView.swift; sourceTree = "<group>"; };
-		9E2922A12AB0B51D00D6FE07 /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
+		9E2922A12AB0B51D00D6FE07 /* StoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreView.swift; sourceTree = "<group>"; };
 		9E2922A32AB0B54400D6FE07 /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
 		9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		9E611CD42ABC7B4400D1A310 /* OAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthView.swift; sourceTree = "<group>"; };
+		9E611CFF2ABEA45600D1A310 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		9E611D012ABED7F300D1A310 /* SkinsMarketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinsMarketView.swift; sourceTree = "<group>"; };
+		9E611D042ABED81100D1A310 /* BundleMarketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleMarketView.swift; sourceTree = "<group>"; };
+		9E611D062ABED81700D1A310 /* NightMarketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightMarketView.swift; sourceTree = "<group>"; };
 		9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultifactorAuthView.swift; sourceTree = "<group>"; };
 		9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeEffect.swift; sourceTree = "<group>"; };
 		9E8A86BE2ABC37A6006A61FA /* CodeBoxModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeBoxModifier.swift; sourceTree = "<group>"; };
@@ -82,6 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E611CE12ABDDD9C00D1A310 /* AZVideoPlayer in Frameworks */,
 				9E266EB62AB34E8B00178F25 /* RealmSwift in Frameworks */,
 				9E266EB42AB34E8B00178F25 /* Realm in Frameworks */,
 				9E266EB12AB34E6B00178F25 /* KeychainAccess in Frameworks */,
@@ -114,6 +124,7 @@
 				9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */,
 				9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */,
 				9E2922952AB0AE0B00D6FE07 /* Views */,
+				9E29229A2AB0AF3000D6FE07 /* CustomTabView */,
 				9E2922962AB0AE2200D6FE07 /* ViewModels */,
 				9EB4C5612AB49D7B00AE4425 /* Models */,
 				9E2922972AB0AE2C00D6FE07 /* Managers */,
@@ -140,10 +151,7 @@
 			children = (
 				9E2922892AB0A9D200D6FE07 /* ContentView.swift */,
 				9E611CD32ABC7B2C00D1A310 /* OAuthView */,
-				9E29229E2AB0B50000D6FE07 /* ShopView */,
-				9E29229F2AB0B50700D6FE07 /* CollectionView */,
-				9E2922A02AB0B51300D6FE07 /* SettingsView */,
-				9E29229A2AB0AF3000D6FE07 /* CustomTabView */,
+				9E611CFC2ABEA40D00D1A310 /* MainView */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -192,12 +200,13 @@
 			path = CustomTabView;
 			sourceTree = "<group>";
 		};
-		9E29229E2AB0B50000D6FE07 /* ShopView */ = {
+		9E29229E2AB0B50000D6FE07 /* StoreView */ = {
 			isa = PBXGroup;
 			children = (
-				9E2922A12AB0B51D00D6FE07 /* ShopView.swift */,
+				9E2922A12AB0B51D00D6FE07 /* StoreView.swift */,
+				9E611D032ABED7FF00D1A310 /* ItemListView */,
 			);
-			path = ShopView;
+			path = StoreView;
 			sourceTree = "<group>";
 		};
 		9E29229F2AB0B50700D6FE07 /* CollectionView */ = {
@@ -206,6 +215,7 @@
 				9E2922A32AB0B54400D6FE07 /* CollectionView.swift */,
 			);
 			name = CollectionView;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		9E2922A02AB0B51300D6FE07 /* SettingsView */ = {
@@ -220,11 +230,48 @@
 			isa = PBXGroup;
 			children = (
 				9E611CD42ABC7B4400D1A310 /* OAuthView.swift */,
-				9E266EAD2AB34A7400178F25 /* LoginView.swift */,
-				9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */,
-				9ED509552AB6A6F200149206 /* DataDownloadView.swift */,
+				9E611CFD2ABEA43100D1A310 /* LoginView */,
+				9E611CFE2ABEA43F00D1A310 /* DataDownloadView */,
 			);
 			path = OAuthView;
+			sourceTree = "<group>";
+		};
+		9E611CFC2ABEA40D00D1A310 /* MainView */ = {
+			isa = PBXGroup;
+			children = (
+				9E611CFF2ABEA45600D1A310 /* MainView.swift */,
+				9E29229E2AB0B50000D6FE07 /* StoreView */,
+				9E29229F2AB0B50700D6FE07 /* CollectionView */,
+				9E2922A02AB0B51300D6FE07 /* SettingsView */,
+			);
+			path = MainView;
+			sourceTree = "<group>";
+		};
+		9E611CFD2ABEA43100D1A310 /* LoginView */ = {
+			isa = PBXGroup;
+			children = (
+				9E266EAD2AB34A7400178F25 /* LoginView.swift */,
+				9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */,
+			);
+			path = LoginView;
+			sourceTree = "<group>";
+		};
+		9E611CFE2ABEA43F00D1A310 /* DataDownloadView */ = {
+			isa = PBXGroup;
+			children = (
+				9ED509552AB6A6F200149206 /* DataDownloadView.swift */,
+			);
+			path = DataDownloadView;
+			sourceTree = "<group>";
+		};
+		9E611D032ABED7FF00D1A310 /* ItemListView */ = {
+			isa = PBXGroup;
+			children = (
+				9E611D012ABED7F300D1A310 /* SkinsMarketView.swift */,
+				9E611D042ABED81100D1A310 /* BundleMarketView.swift */,
+				9E611D062ABED81700D1A310 /* NightMarketView.swift */,
+			);
+			path = ItemListView;
 			sourceTree = "<group>";
 		};
 		9E7638722ABAF9A100BD0AB4 /* Modifier */ = {
@@ -277,6 +324,7 @@
 				9E266EB02AB34E6B00178F25 /* KeychainAccess */,
 				9E266EB32AB34E8B00178F25 /* Realm */,
 				9E266EB52AB34E8B00178F25 /* RealmSwift */,
+				9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */,
 			);
 			productName = ValorantShop;
 			productReference = 9E2922842AB0A9D200D6FE07 /* ValorantShop.app */;
@@ -309,6 +357,7 @@
 			packageReferences = (
 				9E266EAF2AB34E6B00178F25 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				9E266EB22AB34E8B00178F25 /* XCRemoteSwiftPackageReference "realm-swift" */,
+				9E611CDF2ABDDD9C00D1A310 /* XCRemoteSwiftPackageReference "AZVideoPlayer" */,
 			);
 			productRefGroup = 9E2922852AB0A9D200D6FE07 /* Products */;
 			projectDirPath = "";
@@ -347,18 +396,22 @@
 				9ED509582AB71D8700149206 /* View+Extension.swift in Sources */,
 				9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */,
 				9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */,
+				9E611D022ABED7F300D1A310 /* SkinsMarketView.swift in Sources */,
 				9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */,
 				9EB4C5652AB4A14700AE4425 /* Version.swift in Sources */,
+				9E611D072ABED81700D1A310 /* NightMarketView.swift in Sources */,
 				9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */,
 				9E064C372ABC1F5E004A5D96 /* PlayerWallet.swift in Sources */,
 				9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */,
 				9E266EAE2AB34A7400178F25 /* LoginView.swift in Sources */,
 				9E266EA92AB3436600178F25 /* Constants.swift in Sources */,
 				9E611CD52ABC7B4400D1A310 /* OAuthView.swift in Sources */,
+				9E611D052ABED81100D1A310 /* BundleMarketView.swift in Sources */,
 				9EB4C5692AB4A85D00AE4425 /* RealmManager.swift in Sources */,
 				9EB4C5632AB49DB500AE4425 /* WeaponSkins.swift in Sources */,
+				9E611D002ABEA45600D1A310 /* MainView.swift in Sources */,
 				9EB4C5672AB4A68500AE4425 /* StorePrices.swift in Sources */,
-				9E2922A22AB0B51D00D6FE07 /* ShopView.swift in Sources */,
+				9E2922A22AB0B51D00D6FE07 /* StoreView.swift in Sources */,
 				9E7638742ABAF9B000BD0AB4 /* ShakeEffect.swift in Sources */,
 				9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */,
 				9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */,
@@ -592,6 +645,14 @@
 				kind = branch;
 			};
 		};
+		9E611CDF2ABDDD9C00D1A310 /* XCRemoteSwiftPackageReference "AZVideoPlayer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/adamzarn/AZVideoPlayer";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -609,6 +670,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9E266EB22AB34E8B00178F25 /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9E611CDF2ABDDD9C00D1A310 /* XCRemoteSwiftPackageReference "AZVideoPlayer" */;
+			productName = AZVideoPlayer;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
