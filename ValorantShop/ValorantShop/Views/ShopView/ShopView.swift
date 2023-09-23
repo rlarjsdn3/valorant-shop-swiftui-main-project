@@ -47,6 +47,10 @@ struct ShopView: View {
                         await viewModel.getStoreRotationWeaponSkins(reload: true)
                     }
                 }
+                
+                Button("시간 되돌리기") {
+                    viewModel.rotatedWeaponSkinsExpiryDate = 717119999.0
+                }
             }
         }
     }

@@ -47,6 +47,10 @@ struct OAuthView: View {
                 Button("모든 데이터 삭제하기") {
                     viewModel.DeleteAllApplicationDataForDeveloper()
                 }
+                
+                Button("시간 되돌리기") {
+                    viewModel.rotatedWeaponSkinsExpiryDate = 717119999.0
+                }
             } label: {
                 Text("개발자")
             }

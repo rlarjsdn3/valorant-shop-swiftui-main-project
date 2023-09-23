@@ -10,6 +10,15 @@ import Foundation
 import RealmSwift
 import KeychainAccess
 
+// MARK: - ENUM
+
+enum ExpiryDateTye {
+    case token
+    case rotate
+    case bundle
+    case bonus
+}
+
 // MARK: - MODELS
 
 struct ReAuthTokens {
@@ -30,9 +39,9 @@ final class ViewModel: ObservableObject {
     
     @AppStorage(UserDefaults.isLoggedIn) var isLoggedIn: Bool = false
     @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
-    @AppStorage(UserDefaults.lastUpdateCheckDate) var lastUpdateCheckDate: Double = Double.infinity
-    @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
-    @AppStorage(UserDefaults.rotatedWeaponSkinsRenewalDate) var rotatedWeaponSkinsRenewalDate: Double = Double.infinity
+    @AppStorage(UserDefaults.lastUpdateCheckDate) var lastUpdateCheckDate: Double = 0.0
+    @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = 0.0
+    @AppStorage(UserDefaults.rotatedWeaponSkinsRenewalDate) var rotatedWeaponSkinsExpiryDate: Double = 0.0
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -96,23 +105,11 @@ final class ViewModel: ObservableObject {
         // 현재 날짜 불러오기
         let currentDate = Date()
         // 로테이션 스킨 갱신 날짜 불러오기
-        let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsRenewalDate)
-        print(currentDate.timeIntervalSinceReferenceDate, rotatedWeaponSkinsRenewalDate.timeIntervalSinceReferenceDate)
-        // 로테이션 스킨 갱신 날짜에 다다르면
-        if currentDate > rotatedWeaponSkinsRenewalDate {
-            // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터 강제 갱신하기 (새로고침)
-            Task {
-                await self.getPlayerID(reload: true)
-                await self.getPlayerWallet(reload: true)
-                await self.getStoreRotationWeaponSkins(reload: true)
-                // ✏️ 로그인이 되어 있지 않은 상태에서 호출된다면 예외가 발생하게 됨.
-            }
-        }
-
+        let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsExpiryDate)
         // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
         self.storeRotationWeaponSkinsRemainingSeconds = self.remainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
         
-        // 시간을 흐르게 하면서 스킨 데이터 새로고침 확인하가
+        // 시간을 흐르게 하면서 스킨 데이터 새로고침 확인하기
         timer = Timer.scheduledTimer(
             withTimeInterval: 1.0,
             repeats: true,
@@ -255,8 +252,8 @@ final class ViewModel: ObservableObject {
         
         // 로그인 여부 및 사용자 정보 삭제하기
         self.isLoggedIn = false
-        self.accessTokenExpiryDate = Double.infinity
-        self.rotatedWeaponSkinsRenewalDate = Double.infinity
+        self.accessTokenExpiryDate = 0.0
+        self.rotatedWeaponSkinsExpiryDate = 0.0
         self.realmManager.deleteAll(of: PlayerID.self)
         self.realmManager.deleteAll(of: PlayerWallet.self)
         self.realmManager.deleteAll(of: RotatedWeaponSkins.self)
@@ -281,10 +278,8 @@ final class ViewModel: ObservableObject {
         if let accessToken = try? keychain.get(Keychains.accessToken),
            let riotEntitlement = try? keychain.get(Keychains.riotEntitlement),
            let puuid = try? keychain.get(Keychains.puuid) {
-            // 현재 날짜 불러오기
-            let currentDate = Date().timeIntervalSinceReferenceDate            
             // 토큰이 만료되었다면
-            if currentDate > accessTokenExpiryDate {
+            if self.isExpired(of: .token) {
                 do {
                     // 새롭게 접근 토큰 등 사용자 고유 정보 불러오기
                     let reAuthTokens = try await self.fetchReAuthTokens().get()
@@ -555,25 +550,37 @@ final class ViewModel: ObservableObject {
         var playerID = realmManager.read(of: PlayerID.self)
         // 강제로 다시 불러오지 안는다면
         if !reload {
+            // Realm에 저장된 로테이션 스킨 데이터가 있다면
+            if !playerID.isEmpty {
+                // 로테이션 갱신 시간이 지났다면
+                if self.isExpired(of: .rotate) {
+                    do {
+                        // 사용자ID 데이터를 불러와 Realm에 저장하기
+                        try await self.fetchPlayerID()
+                    } catch {
+                        return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                    }
+                }
             // Realm에 저장된 로테이션 스킨 데이터가 없다면
-            if playerID.isEmpty {
+            } else {
                 do {
+                    // 사용자ID 데이터를 불러와 Realm에 저장하기
                     try await self.fetchPlayerID()
-                    // Realm에 저장된 사용자ID 데이터 다시 불러오기
-                    playerID = realmManager.read(of: PlayerID.self)
                 } catch {
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                 }
             }
+            // Realm에 저장된 사용자ID 데이터 다시 불러오기
+            playerID = realmManager.read(of: PlayerID.self)
         // 강제로 다시 불러온다면
         } else {
             do {
                 try await self.fetchPlayerID()
-                // Realm에 저장된 사용자ID 데이터 다시 불러오기
-                playerID = realmManager.read(of: PlayerID.self)
             } catch {
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
             }
+            // Realm에 저장된 사용자ID 데이터 다시 불러오기
+            playerID = realmManager.read(of: PlayerID.self)
         }
         
         // 사용자 닉네임 불러오기
@@ -609,25 +616,36 @@ final class ViewModel: ObservableObject {
         if !reload {
             // Realm에 저장된 사용자 지갑 데이터가 없다면
             if playerWallet.isEmpty {
-                do {
-                    // 사용자 지갑 데이터를 불러와 Realm에 저장하기
-                    try await self.fetchPlayerWallet()
-                    // Realm에 저장된 사용자 지갑 데이터 다시 불러오기
-                    playerWallet = realmManager.read(of: PlayerWallet.self)
-                } catch {
-                    return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                // 로테이션 갱신 시간이 지났다면
+                if self.isExpired(of: .rotate) {
+                    do {
+                        // 사용자 지갑 데이터를 불러와 Realm에 저장하기
+                        try await self.fetchPlayerWallet()
+                    } catch {
+                        return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                    }
+                // Realm에 저장된 로테이션 스킨 데이터가 없다면
+                } else {
+                    do {
+                        // 사용자 지갑 데이터를 불러와 Realm에 저장하기
+                        try await self.fetchPlayerWallet()
+                    } catch {
+                        return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                    }
                 }
+                // Realm에 저장된 사용자ID 데이터 다시 불러오기
+                playerWallet = realmManager.read(of: PlayerWallet.self)
             }
         // 강제로 다시 불러온다면
         } else {
             do {
                 // 사용자 지갑 데이터를 불러와 Realm에 저장하기
                 try await self.fetchPlayerWallet()
-                // Realm에 저장된 사용자 지갑 데이터 다시 불러오기
-                playerWallet = realmManager.read(of: PlayerWallet.self)
             } catch {
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
             }
+            // Realm에 저장된 사용자 지갑 데이터 다시 불러오기
+            playerWallet = realmManager.read(of: PlayerWallet.self)
         }
         
         // 발로란트 포인트(VP) 불러오기
@@ -667,10 +685,8 @@ final class ViewModel: ObservableObject {
         if !reload {
             // Realm에 저장된 로테이션 스킨 데이터가 있다면
             if !rotatedWeaponSkins.isEmpty {
-                // 현재 날짜 불러오기
-                let currentDate = Date().timeIntervalSinceReferenceDate
                 // 로테이션 갱신 시간이 지났다면
-                if currentDate > rotatedWeaponSkinsRenewalDate {
+                if self.isExpired(of: .rotate) {
                     do {
                         // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                         try await self.fetchStoreRotationWeaponSkins()
@@ -763,13 +779,31 @@ final class ViewModel: ObservableObject {
             puuid: reAuthTokens.puuid
         ).get().skinsPanelLayout
         // 로테이션 갱신 시간을 UserDefaults에 저장하기
-        self.rotatedWeaponSkinsRenewalDate = Date().addingTimeInterval(
+        self.rotatedWeaponSkinsExpiryDate = Date().addingTimeInterval(
             Double(rotatedWeaponSkins.singleItemOffersRemainingDurationInSeconds)
         ).timeIntervalSinceReferenceDate
         // Realm에 새로운 로테이션 스킨 데이터 저장하기 (스킨의 첫 번째 레벨의 UUID)
         for uuid in rotatedWeaponSkins.singleItemOffers {
             let rotatedWeaponSkins = RotatedWeaponSkins(value: ["uuid": "\(uuid)"])
             realmManager.create(rotatedWeaponSkins)
+        }
+    }
+    
+    private func isExpired(of type: ExpiryDateTye) -> Bool {
+        // 현재 날짜 불러오기
+        let currentDate = Date().timeIntervalSinceReferenceDate
+        // 체크해야 할 갱신 시간 체크하기
+        switch type {
+        case .token:
+            // 토큰 갱신 시간이 지났다면
+            return currentDate > accessTokenExpiryDate ? true : false
+        case .rotate:
+            // 로테이션 갱신 시간이 지났다면
+            return currentDate > rotatedWeaponSkinsExpiryDate ? true : false
+        case .bundle:
+            return false // + 임시
+        case .bonus:
+            return false // + 임시
         }
     }
     
@@ -790,7 +824,7 @@ final class ViewModel: ObservableObject {
             // 현재 날짜 불러오기
             let currentDate = Date()
             // 로테이션 스킨 갱신 날짜 불러오기
-            let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsRenewalDate)
+            let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsExpiryDate)
             
             // 로테이션 스킨 갱신 날짜에 다다르면
             // ✏️ 앱이 켜져 있는 동안 로테이션 스킨 갱신 날짜에 다다르는 경우, 자동으로 갱신시키기 위해 아래 코드를 구현함.
