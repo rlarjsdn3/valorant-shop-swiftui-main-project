@@ -18,11 +18,6 @@ struct OAuthView: View {
     var body: some View {
         NavigationStack {
             LoginView()
-                .overlay {
-                    if viewModel.isPresentMultifactorAuthView {
-                        MultifactorAuthView()
-                    }
-                }
                 .navigationDestination(isPresented: $viewModel.isPresentDataDownloadView) {
                     DataDownloadView(of: .download)
                         .navigationBarBackButtonHidden()

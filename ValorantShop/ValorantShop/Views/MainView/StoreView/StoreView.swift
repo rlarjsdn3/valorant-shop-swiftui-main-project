@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ShopView: View {
+struct StoreView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -58,9 +58,9 @@ struct ShopView: View {
 
 // MARK: - PREVIEW
 
-struct ShopView_Previews: PreviewProvider {
+struct StoreView_Previews: PreviewProvider {
     static var previews: some View {
-        ShopView()
+        StoreView()
             .environmentObject(ViewModel())
     }
 }
