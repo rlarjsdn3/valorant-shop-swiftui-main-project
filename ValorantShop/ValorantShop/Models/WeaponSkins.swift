@@ -54,6 +54,21 @@ enum ContentTier: String, PersistableEnum, Codable {
             return Color.ultraEdition
         }
     }
+    
+    var rankLogoName: String {
+        switch self {
+        case .selectEdition:
+            return "selectEdition"
+        case .deulxeEdition:
+            return "deulxeEdition"
+        case .primeumEdition:
+            return "premiumEdition"
+        case .exclusiveEdition:
+            return "exclusiveEdition"
+        case .ultraEdition:
+            return "ultraEdition"
+        }
+    }
 }
 
 final class Chroma: EmbeddedObject, Codable {

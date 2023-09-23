@@ -827,14 +827,14 @@ final class ViewModel: ObservableObject {
             let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: rotatedWeaponSkinsExpiryDate)
             
             // 로테이션 스킨 갱신 날짜에 다다르면
-            // ✏️ 앱이 켜져 있는 동안 로테이션 스킨 갱신 날짜에 다다르는 경우, 자동으로 갱신시키기 위해 아래 코드를 구현함.
-            if currentDate > rotatedWeaponSkinsRenewalDate {
+            if currentDate > rotatedWeaponSkinsRenewalDate && self.isLoggedIn {
                 // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터 강제 갱신하기 (새로고침)
                 Task {
                     await self.getPlayerID(reload: true)
                     await self.getPlayerWallet(reload: true)
                     await self.getStoreRotationWeaponSkins(reload: true)
                     // ✏️ 로그인이 되어 있지 않은 상태에서 호출된다면 예외가 발생하게 됨.
+                    // ✏️ 앱이 켜져 있는 동안 로테이션 스킨 갱신 날짜에 다다르는 경우, 자동으로 갱신시키기 위해 위 코드를 구현함.
                 }
             }
             

@@ -13,6 +13,12 @@ struct MainView: View {
     
     @EnvironmentObject var viewModel: ViewModel
     
+    // MARK: - PROPERTIES
+    
+    let didBecomeActiveNotification = NotificationCenter.default.publisher(
+        for: UIApplication.didBecomeActiveNotification
+    )
+    
     // MARK: - BODY
     
     var body: some View {
@@ -31,6 +37,7 @@ struct MainView: View {
             CustomTabView()
         }
         .onAppear {
+            // ✏️ 로그인에 성공하거나, 앱으로 들어오면 서버나 DB로부터 최신 데이터를 받아옴.
             Task {
                 await viewModel.checkValorantVersion()
                 await viewModel.getPlayerID()
@@ -38,7 +45,8 @@ struct MainView: View {
                 await viewModel.getStoreRotationWeaponSkins()
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { output in
+        .onReceive(didBecomeActiveNotification) { _ in
+            // ✏️ 앱으로 들어오면 서버로부터 최신 데이터가 있는지 확인함.
             Task {
                 await viewModel.checkValorantVersion()
             }
