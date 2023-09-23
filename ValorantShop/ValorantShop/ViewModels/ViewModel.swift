@@ -45,8 +45,8 @@ final class ViewModel: ObservableObject {
     
     @AppStorage(UserDefaults.isLoggedIn) var isLoggedIn: Bool = false
     @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
-    @AppStorage(UserDefaults.lastUpdateCheckDate) var lastUpdateCheckDate: Double = 0.0
-    @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = 0.0
+    @AppStorage(UserDefaults.lastUpdateCheckDate) var lastUpdateCheckDate: Double = Double.infinity
+    @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
     @AppStorage(UserDefaults.rotatedWeaponSkinsRenewalDate) var rotatedWeaponSkinsExpiryDate: Double = 0.0
     
     // MARK: - WRAPPER PROPERTIES
@@ -261,19 +261,22 @@ final class ViewModel: ObservableObject {
         try? keychain.removeAll()
         
         // 로그인 여부 및 사용자 정보 삭제하기
-        self.isLoggedIn = false
-        self.accessTokenExpiryDate = 0.0
-        self.rotatedWeaponSkinsExpiryDate = 0.0
+        withAnimation(.spring()) { self.isLoggedIn = false }
+        self.accessTokenExpiryDate = Double.infinity
+        self.rotatedWeaponSkinsExpiryDate = Double.infinity
         self.realmManager.deleteAll(of: PlayerID.self)
         self.realmManager.deleteAll(of: PlayerWallet.self)
         self.realmManager.deleteAll(of: RotatedWeaponSkins.self)
         
-        // 커스탬 탭 선택 초기화하기
-        self.selectedCustomTab = .shop
         // 불러온 상점 데이터 삭제하기
         self.storeRotationWeaponSkins = .init()
-        // 런치 스크린 표시 여부 수정하기
-        self.isPresentLoadingScreenView = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            // 커스탬 탭 선택 초기화하기
+            self.selectedCustomTab = .shop
+            // 런치 스크린 표시 여부 수정하기
+            self.isPresentLoadingScreenView = true
+            // ✏️ 로그아웃 시, 화면이 어색하게 바뀌는 걸 방지하고자 1초 딜레이를 둠.
+        }
     }
     
     // MARK: - REAUTH TOKENS
@@ -555,15 +558,29 @@ final class ViewModel: ObservableObject {
     // MARK: - GET PLAYER DATA
     
     @MainActor
+    func getPlayerData(forceLoad: Bool = false) async {
+        // 사용자ID 등 사용자 데이터 불러오기
+        await self.getPlayerID()
+        await self.getPlayerWallet()
+        await self.getStoreRotationWeaponSkins()
+        // ✏️ 사용자에게 화면이 보여지고 나서도
+        // ✏️ 어색하게 갑작스레 뷰가 리-렌더링되는 모습을 숨기고자 1초 딜레이를 둠.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            // 로딩 스크린 화면 끄기
+            withAnimation(.easeInOut(duration: 0.2)) { self.isPresentLoadingScreenView = false }
+        }
+    }
+    
+    @MainActor
     func reloadPlayerData(of type: ReloadDataType) async {
         // 로딩 애니메이션 시작하기
         withAnimation(.spring(dampingFraction: 0.3)) { self.refreshButtonRotateAnimation = true }
         // 사용자 지갑 데이터 불러오기
-        await getPlayerWallet(reload: true)
+        await getPlayerWallet(forceLoad: true)
         // 어느 데이터를 불러올지 확인하기
         switch type {
         case .skin:
-            await self.getStoreRotationWeaponSkins(reload: true)
+            await self.getStoreRotationWeaponSkins(forceLoad: true)
         case .bndle:
             fallthrough // 임시
         case .bonus:
@@ -574,11 +591,11 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func getPlayerID(reload: Bool = false) async {
+    func getPlayerID(forceLoad: Bool = false) async {
         // Realm에 저장된 사용자ID 데이터 불러오기
         var playerID = realmManager.read(of: PlayerID.self)
         // 강제로 다시 불러오지 안는다면
-        if !reload {
+        if !forceLoad {
             // Realm에 저장된 로테이션 스킨 데이터가 있다면
             if !playerID.isEmpty {
                 // 로테이션 갱신 시간이 지났다면
@@ -638,11 +655,11 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func getPlayerWallet(reload: Bool = false) async {
+    func getPlayerWallet(forceLoad: Bool = false) async {
         // Realm에 저장된 사용자 지갑 데이터 불러오기
         var playerWallet = realmManager.read(of: PlayerWallet.self)
         // 강제로 다시 불러오지 안는다면
-        if !reload {
+        if !forceLoad {
             // Realm에 저장된 사용자 지갑 데이터가 없다면
             if playerWallet.isEmpty {
                 // 로테이션 갱신 시간이 지났다면
@@ -707,11 +724,11 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    func getStoreRotationWeaponSkins(reload: Bool = false) async {
+    func getStoreRotationWeaponSkins(forceLoad: Bool = false) async {
         // Realm에 저장된 로테이션 스킨 데이터 불러오기
         let rotatedWeaponSkins = realmManager.read(of: RotatedWeaponSkins.self)
         // 강제로 다시 불러오지 안는다면
-        if !reload {
+        if !forceLoad {
             // Realm에 저장된 로테이션 스킨 데이터가 있다면
             if !rotatedWeaponSkins.isEmpty {
                 // 로테이션 갱신 시간이 지났다면
@@ -788,11 +805,6 @@ final class ViewModel: ObservableObject {
         
         // 결과 업데이트하기
         self.storeRotationWeaponSkins = storeRotationWeaponSkins
-        
-        // 런치 스크린 화면 끄기
-        withAnimation(.easeInOut(duration: 0.2)) {
-            self.isPresentLoadingScreenView = false
-        }
     }
     
     @MainActor
@@ -857,14 +869,11 @@ final class ViewModel: ObservableObject {
             
             // 로테이션 스킨 갱신 날짜에 다다르면
             if currentDate > rotatedWeaponSkinsRenewalDate && self.isLoggedIn {
-                // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터 강제 갱신하기 (새로고침)
+                // Foreground 상태에서 사용자ID, 사용자 지갑, 로테이션 스킨 데이터를 갱신하는 코드
                 Task {
-                    await self.getPlayerID(reload: true)
-                    await self.getPlayerWallet(reload: true)
-                    await self.getStoreRotationWeaponSkins(reload: true)
-                    // ✏️ 로그인이 되어 있지 않은 상태에서 호출된다면 예외가 발생하게 됨.
-                    // ✏️ 앱이 켜져 있는 동안 로테이션 스킨 갱신 날짜에 다다르는 경우, 자동으로 갱신시키기 위해 위 코드를 구현함.
+                    await self.getPlayerData(forceLoad: true)
                 }
+                // ✏️ 앱이 켜져 있는 동안 로테이션 스킨 갱신 날짜에 다다르는 경우, 자동으로 갱신시키기 위해 위 코드를 구현함.
             }
             
             // 결과 업데이트하기

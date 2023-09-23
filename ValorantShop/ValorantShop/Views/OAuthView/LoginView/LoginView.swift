@@ -62,6 +62,7 @@ struct LoginView: View {
                                 focusField = .password
                             }
                             .focused($focusField, equals: .username)
+                            .textInputAutocapitalization(.never)
                         if !inputUsername.isEmpty {
                             Button {
                                 inputUsername = ""
@@ -86,9 +87,16 @@ struct LoginView: View {
                         SecureField("비밀번호", text: $inputPassword)
                             .submitLabel(.done)
                             .onSubmit {
-                                focusField = nil
+                                dismissKeyboard()
+                                Task {
+                                    await viewModel.login(
+                                        username: inputUsername,
+                                        password: inputPassword
+                                    )
+                                }
                             }
                             .focused($focusField, equals: .password)
+                            .textInputAutocapitalization(.never)
                         if !inputPassword.isEmpty {
                             Button {
                                 inputPassword = ""
