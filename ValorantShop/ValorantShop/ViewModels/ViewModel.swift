@@ -14,8 +14,14 @@ import KeychainAccess
 
 enum ExpiryDateTye {
     case token
-    case rotate
+    case skin
     case bundle
+    case bonus
+}
+
+enum ReloadDataType {
+    case skin
+    case bndle
     case bonus
 }
 
@@ -83,9 +89,13 @@ final class ViewModel: ObservableObject {
     @Published var vp: Int = 0
     @Published var kp: Int = 0
     
-    // For Storefront
+    // For StoreData
     @Published var storeRotationWeaponSkins: StoreRotationWeaponkins = .init()
     @Published var storeRotationWeaponSkinsRemainingSeconds: String = ""
+    
+    // For StoreView
+    @Published var selectedStoreTab: StoreTabType = .skin
+    @Published var refreshButtonRotateAnimation: Bool = false
     
     // MARK: - PROPERTIES
     
@@ -545,6 +555,25 @@ final class ViewModel: ObservableObject {
     // MARK: - GET PLAYER DATA
     
     @MainActor
+    func reloadPlayerData(of type: ReloadDataType) async {
+        // 로딩 애니메이션 시작하기
+        withAnimation(.spring(dampingFraction: 0.3)) { self.refreshButtonRotateAnimation = true }
+        // 사용자 지갑 데이터 불러오기
+        await getPlayerWallet(reload: true)
+        // 어느 데이터를 불러올지 확인하기
+        switch type {
+        case .skin:
+            await self.getStoreRotationWeaponSkins(reload: true)
+        case .bndle:
+            fallthrough // 임시
+        case .bonus:
+            break // 임시
+        }
+        // 로딩 애니메이션 끝내기
+        self.refreshButtonRotateAnimation = false
+    }
+    
+    @MainActor
     func getPlayerID(reload: Bool = false) async {
         // Realm에 저장된 사용자ID 데이터 불러오기
         var playerID = realmManager.read(of: PlayerID.self)
@@ -553,7 +582,7 @@ final class ViewModel: ObservableObject {
             // Realm에 저장된 로테이션 스킨 데이터가 있다면
             if !playerID.isEmpty {
                 // 로테이션 갱신 시간이 지났다면
-                if self.isExpired(of: .rotate) {
+                if self.isExpired(of: .skin) {
                     do {
                         // 사용자ID 데이터를 불러와 Realm에 저장하기
                         try await self.fetchPlayerID()
@@ -617,7 +646,7 @@ final class ViewModel: ObservableObject {
             // Realm에 저장된 사용자 지갑 데이터가 없다면
             if playerWallet.isEmpty {
                 // 로테이션 갱신 시간이 지났다면
-                if self.isExpired(of: .rotate) {
+                if self.isExpired(of: .skin) {
                     do {
                         // 사용자 지갑 데이터를 불러와 Realm에 저장하기
                         try await self.fetchPlayerWallet()
@@ -686,7 +715,7 @@ final class ViewModel: ObservableObject {
             // Realm에 저장된 로테이션 스킨 데이터가 있다면
             if !rotatedWeaponSkins.isEmpty {
                 // 로테이션 갱신 시간이 지났다면
-                if self.isExpired(of: .rotate) {
+                if self.isExpired(of: .skin) {
                     do {
                         // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                         try await self.fetchStoreRotationWeaponSkins()
@@ -797,7 +826,7 @@ final class ViewModel: ObservableObject {
         case .token:
             // 토큰 갱신 시간이 지났다면
             return currentDate > accessTokenExpiryDate ? true : false
-        case .rotate:
+        case .skin:
             // 로테이션 갱신 시간이 지났다면
             return currentDate > rotatedWeaponSkinsExpiryDate ? true : false
         case .bundle:

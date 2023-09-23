@@ -51,6 +51,11 @@ struct SettingsView: View {
                         viewModel.logout()
                     }
                 }
+                
+                Button("시간 되돌리기") {
+                    viewModel.timer?.invalidate()
+                    viewModel.rotatedWeaponSkinsExpiryDate = 717119999.0
+                }
             }
             .navigationTitle("설정")
         }
