@@ -38,6 +38,8 @@ struct MainView: View {
         }
         .onAppear {
             // ✏️ 로그인에 성공하거나, 앱으로 들어오면 서버나 DB로부터 최신 데이터를 받아옴.
+            // 버그 해결 방안: 로테이션 갱신 기간이 아직 유효한 경우에만 호출되도록 하기
+            // : 갱신 기간을 넘어버리면 Timer에게 해당 작업 위임
             Task {
                 await viewModel.checkValorantVersion()
                 await viewModel.getPlayerID()

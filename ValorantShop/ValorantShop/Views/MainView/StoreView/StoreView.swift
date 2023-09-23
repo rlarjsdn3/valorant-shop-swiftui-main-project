@@ -21,18 +21,36 @@ struct StoreView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: -20) {
-                ForEach(viewModel.storeRotationWeaponSkins.weaponSkins, id: \.skin.uuid) { weaponSkin in
-                    if let uuid = weaponSkin.skin.chromas.first?.uuid {
+            VStack(spacing: -5) {
+                HStack {
+                    Text("\(viewModel.storeRotationWeaponSkinsRemainingSeconds)")
+                    
+                    Spacer()
+                    
+                    Image("VP")
+                        .renderingMode(.template)
+                        .resizable()
+                        .frame(width: 20, height: 20)
+                        .offset(y: 1)
+                    
+                    Text("\(viewModel.vp)")
+                }
+                .fontWeight(.bold)
+                .padding(.horizontal)
+                
+                VStack(spacing: -16) {
+                    ForEach(viewModel.storeRotationWeaponSkins.weaponSkins, id: \.skin.uuid) { weaponSkin in
                         VStack {
-                            loadImage(of: ImageType.weaponSkins, uuid: uuid)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 300, height: 150)
-                                .rotationEffect(Angle(degrees: 45))
+                            if let uuid = weaponSkin.skin.chromas.first?.uuid {
+                                loadImage(of: ImageType.weaponSkins, uuid: uuid)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 150)
+                                    .rotationEffect(Angle(degrees: 45))
+                            }
                         }
                         .frame(height: 150)
-                        .frame(maxWidth: .infinity)
                         .overlay(alignment: .bottomLeading) {
                             Text(weaponSkin.skin.displayName)
                                 .font(.headline)
@@ -73,26 +91,21 @@ struct StoreView: View {
                         .padding()
                     }
                 }
-            }
-            
-            Text("\(viewModel.storeRotationWeaponSkinsRemainingSeconds)")
-            
-            Text("vp: \(viewModel.vp)")
-            Text("rp: \(viewModel.rp)")
-            Text("kp: \(viewModel.kp)")
-            
-            Button("리로드") {
-                Task {
-                    await viewModel.getPlayerWallet(reload: true)
-                    await viewModel.getStoreRotationWeaponSkins(reload: true)
+                
+                Button("리로드") {
+                    Task {
+                        await viewModel.getPlayerWallet(reload: true)
+                        await viewModel.getStoreRotationWeaponSkins(reload: true)
+                    }
+                }
+                
+                Button("시간 되돌리기") {
+                    viewModel.timer?.invalidate()
+                    viewModel.rotatedWeaponSkinsExpiryDate = 717119999.0
                 }
             }
-            
-            Button("시간 되돌리기") {
-                viewModel.timer?.invalidate()
-                viewModel.rotatedWeaponSkinsExpiryDate = 717119999.0
-            }
         }
+        .frame(maxWidth: .infinity)
         .background(Color(uiColor: UIColor.secondarySystemBackground))
     }
 }
