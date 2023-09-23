@@ -77,8 +77,8 @@ final class ViewModel: ObservableObject {
     @Published var downloadButtonShakeAnimation: CGFloat = 0.0
     
     
-    @Published var totalImagesToDownload: Int = 0
-    @Published var imagesDownloadedCount: Int = 0
+    @Published var imagesToDownload: Int = 0
+    @Published var downloadedImages: Int = 0
     
     // For PlayerID
     @Published var gameName: String = ""
@@ -358,16 +358,16 @@ final class ViewModel: ObservableObject {
             // 로딩 버튼 보이게 하기
             withAnimation(.spring()) { self.isLoadingDataDownloading = true }
             //
-            self.totalImagesToDownload = 3
+            self.imagesToDownload = 3
             // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
             // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
             self.storeRotationWeaponSkins.weaponSkins = []
             // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadValorantVersion(); self.imagesDownloadedCount += 1
+            try await self.downloadValorantVersion(); self.downloadedImages += 1
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadWeaponSkinsData(); self.imagesDownloadedCount += 1
+            try await self.downloadWeaponSkinsData(); self.downloadedImages += 1
             // 가격 정보 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadStorePricesData(); self.imagesDownloadedCount += 1
+            try await self.downloadStorePricesData(); self.downloadedImages += 1
             // 스킨 이미지 데이터 다운로드받고, 로컬 Document 폴더에 저장하기
             try await self.downloadWeaponSkinImages()
             // 스킨 데이터를 업데이트하면
@@ -390,11 +390,11 @@ final class ViewModel: ObservableObject {
                         // 로딩 버튼 가리기
                         self.isLoadingDataDownloading = false
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         // 다운로드 화면을 가리기
                         self.isPresentDataDownloadView = false
-                        // ✏️ false로 수정해주지 않으면 상점 화면에서 다운로드 시트가 나타남.
-                        // ✏️ 0.75초 지연하는 이유는 팝 내비게이션 스택 애니메이션이 보이게 하지 않기 위함.
+                        // ✏️ false로 수정해주지 않으면 상점 화면에 진입하면 다운로드 풀스크린 커버가 나타남.
+                        // ✏️ 팝 내비게이션 스택 애니메이션이 보이게 하지 않기 위해 1촣 딜레이를 둠.
                     }
                 }
             }
@@ -490,14 +490,14 @@ final class ViewModel: ObservableObject {
             
         
         // 총 다운로드할 이미지 개수를 프로퍼티 래퍼에 저장하기
-        self.totalImagesToDownload = notDownloadedImages.count
+        self.imagesToDownload = notDownloadedImages.count
         
         // 이미지를 다운로드해 Documents 폴더에 저장하기
         for notDownloadedImage in notDownloadedImages {
             // 다운로드한 이미지 데이터를 저장하는 변수 선언하기
             var imageData: Data
             // 다운로드 한 이미지 개수 증가시키기
-            self.imagesDownloadedCount += 1
+            self.downloadedImages += 1
             // 이미지 타입 저장하기
             let imageType = notDownloadedImage.imageType
             // UUID값 저장하기

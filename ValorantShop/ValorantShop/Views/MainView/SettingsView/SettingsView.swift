@@ -19,7 +19,7 @@ struct SettingsView: View {
         let lastUpdateCheckDate: Date = Date(timeIntervalSinceReferenceDate: viewModel.lastUpdateCheckDate)
         
         let formatter = DateFormatter()
-        formatter.dateFormat = "M월 d일(E) H:m"
+        formatter.dateFormat = "M월 d일(E) HH:mm"
         formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
         return formatter.string(from: lastUpdateCheckDate)
     }

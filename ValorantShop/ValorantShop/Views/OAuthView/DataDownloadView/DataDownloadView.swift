@@ -33,12 +33,12 @@ struct DataDownloadView: View {
     // MARK: - COMPUTED PROPERTIES
     
     var progressString: String {
-        let downloadedImages: Int = viewModel.imagesDownloadedCount
-        let imagesToDownload: Int = viewModel.totalImagesToDownload
+        let downloadedImages: Int = viewModel.downloadedImages
+        let imagesToDownload: Int = viewModel.imagesToDownload
         
         var progressString: String = ""
         if downloadedImages != 0 && imagesToDownload != 0 {
-            if downloadedImages > imagesToDownload {
+            if downloadedImages >= imagesToDownload {
                 progressString = "\(imagesToDownload)/\(imagesToDownload)"
             } else {
                 progressString = "\(downloadedImages)/\(imagesToDownload)"
@@ -48,14 +48,14 @@ struct DataDownloadView: View {
     }
     
     var progressPercentage: Double {
-        let downloadedImages = Double(viewModel.imagesDownloadedCount)
-        let imagesToDownload = Double(viewModel.totalImagesToDownload)
+        let downloadedImages = Double(viewModel.downloadedImages)
+        let imagesToDownload = Double(viewModel.imagesToDownload)
         let progressPercentage = downloadedImages / imagesToDownload
         return progressPercentage >= 1.0 ? 1.0 : progressPercentage
     }
     
     var progressPercentageValue: String {
-        return progressPercentage.isNaN ? "" : "\(String(format: "%d", progressPercentage * 100.0))%"
+        return progressPercentage.isNaN ? "" : "\(Int(progressPercentage * 100.0))%"
     }
     
     // MARK: - INTILAIZER
@@ -160,8 +160,8 @@ struct DataDownloadView: View {
         }
         .onDisappear {
             viewModel.downloadingErrorText = ""
-            viewModel.totalImagesToDownload = 0
-            viewModel.imagesDownloadedCount = 0
+            viewModel.imagesToDownload = 0
+            viewModel.downloadedImages = 0
         }
     }
 }
