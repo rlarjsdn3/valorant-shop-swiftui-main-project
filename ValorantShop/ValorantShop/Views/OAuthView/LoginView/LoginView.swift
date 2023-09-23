@@ -40,7 +40,7 @@ struct LoginView: View {
     var body: some View {
         ZStack {
             Color.clear
-                .contentShape(Rectangle())
+//                .contentShape(Rectangle())
                 .onTapGesture {
                     dismissKeyboard()
                 }

@@ -60,7 +60,7 @@ enum ContentTier: String, PersistableEnum, Codable {
         case .selectEdition:
             return "selectEdition"
         case .deulxeEdition:
-            return "deulxeEdition"
+            return "deluxeEdition"
         case .primeumEdition:
             return "premiumEdition"
         case .exclusiveEdition:

@@ -47,14 +47,13 @@ struct SettingsView: View {
                 }
                 
                 Section {
-                    Button("로그아웃") {
-                        viewModel.logout()
+                    HStack {
+                        Spacer()
+                        Button("로그아웃", role: .destructive) {
+                            viewModel.logout()
+                        }
+                        Spacer()
                     }
-                }
-                
-                Button("시간 되돌리기") {
-                    viewModel.timer?.invalidate()
-                    viewModel.rotatedWeaponSkinsExpiryDate = 717119999.0
                 }
             }
             .navigationTitle("설정")

@@ -281,6 +281,7 @@ final class ViewModel: ObservableObject {
     
     // MARK: - REAUTH TOKENS
     
+    @MainActor
     private func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
         // ⭐️ 최초 로그인을 하면 사용자 고유 정보를 불러온 후, 키체인에 저장함.
         // ⭐️ 이후 HTTP 통신을 위해 사용자 고유 정보가 필요하다면 키체인에 저장된 데이터를 불러와 사용함.
@@ -299,7 +300,8 @@ final class ViewModel: ObservableObject {
                     // 저장된 사용자 고유 정보 반환하기
                     return .success(reAuthTokens)
                 } catch {
-                    // 토큰 정보 불러오기에 실패하면 예외 던지기
+                    // 토큰 정보 불러오기에 실패하면 로그인 화면으로 되돌아가기
+                    self.isLoggedIn = false
                     return .failure(.noTokenError)
                 }
             }
@@ -320,7 +322,8 @@ final class ViewModel: ObservableObject {
                 // 저장된 사용자 고유 정보 반환하기
                 return .success(reAuthTokens)
             } catch {
-                // 토큰 정보 불러오기에 실패하면 예외 던지기
+                // 토큰 정보 불러오기에 실패하면 로그인 화면으로 되돌아가기
+                self.isLoggedIn = false
                 return .failure(.noTokenError)
             }
         }
@@ -560,9 +563,9 @@ final class ViewModel: ObservableObject {
     @MainActor
     func getPlayerData(forceLoad: Bool = false) async {
         // 사용자ID 등 사용자 데이터 불러오기
-        await self.getPlayerID()
-        await self.getPlayerWallet()
-        await self.getStoreRotationWeaponSkins()
+        await self.getPlayerID(forceLoad: forceLoad)
+        await self.getPlayerWallet(forceLoad: forceLoad)
+        await self.getStoreRotationWeaponSkins(forceLoad: forceLoad)
         // ✏️ 사용자에게 화면이 보여지고 나서도
         // ✏️ 어색하게 갑작스레 뷰가 리-렌더링되는 모습을 숨기고자 1초 딜레이를 둠.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -641,7 +644,7 @@ final class ViewModel: ObservableObject {
     @MainActor
     private func fetchPlayerID() async throws {
         // Realm에 저장되어 있는 기존 사용자ID 데이터 삭제하기
-        realmManager.deleteAll(of: RotatedWeaponSkins.self)
+        realmManager.deleteAll(of: PlayerID.self)
         // 접근 토큰 등 사용자 고유 정보 가져오기
         let reAuthTokens = try await self.getReAuthTokens().get()
         // 닉네임, 태그 정보 다운로드하기
@@ -722,6 +725,8 @@ final class ViewModel: ObservableObject {
         // Realm에 새로운 사용자 지갑 데이터 저장하기
         realmManager.create(wallet)
     }
+    
+    // MARK: - GET STORE DATA - SKINS
     
     @MainActor
     func getStoreRotationWeaponSkins(forceLoad: Bool = false) async {
@@ -830,6 +835,26 @@ final class ViewModel: ObservableObject {
         }
     }
     
+    // MARK: - GET STORE DATA - BUNDLE
+    
+    
+    
+    
+    
+    
+    
+    
+    // MARK: - GET STORE DATA - BONUS
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     private func isExpired(of type: ExpiryDateTye) -> Bool {
         // 현재 날짜 불러오기
         let currentDate = Date().timeIntervalSinceReferenceDate
@@ -869,6 +894,7 @@ final class ViewModel: ObservableObject {
             
             // 로테이션 스킨 갱신 날짜에 다다르면
             if currentDate > rotatedWeaponSkinsRenewalDate && self.isLoggedIn {
+                print("플레이어 데이터 가져오기 - Timer")
                 // Foreground 상태에서 사용자ID, 사용자 지갑, 로테이션 스킨 데이터를 갱신하는 코드
                 Task {
                     await self.getPlayerData(forceLoad: true)

@@ -41,6 +41,7 @@ struct MainView: View {
             let currentDate = Date().timeIntervalSinceReferenceDate
             // 로테이션 갱신 기간이 아직 유효하다면
             if currentDate < viewModel.rotatedWeaponSkinsExpiryDate {
+                print("플레이어 데이터 가져오기 - OnAppear")
                 // Not Running → Foreground 상태 전이 시,
                 // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터를 갱신하는 코드
                 Task {

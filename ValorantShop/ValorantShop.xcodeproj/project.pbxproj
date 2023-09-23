@@ -204,7 +204,7 @@
 			isa = PBXGroup;
 			children = (
 				9E2922A12AB0B51D00D6FE07 /* StoreView.swift */,
-				9E611D032ABED7FF00D1A310 /* ItemListView */,
+				9E611D032ABED7FF00D1A310 /* MarketListView */,
 			);
 			path = StoreView;
 			sourceTree = "<group>";
@@ -264,14 +264,14 @@
 			path = DataDownloadView;
 			sourceTree = "<group>";
 		};
-		9E611D032ABED7FF00D1A310 /* ItemListView */ = {
+		9E611D032ABED7FF00D1A310 /* MarketListView */ = {
 			isa = PBXGroup;
 			children = (
 				9E611D012ABED7F300D1A310 /* SkinsMarketView.swift */,
 				9E611D042ABED81100D1A310 /* BundleMarketView.swift */,
 				9E611D062ABED81700D1A310 /* NightMarketView.swift */,
 			);
-			path = ItemListView;
+			path = MarketListView;
 			sourceTree = "<group>";
 		};
 		9E7638722ABAF9A100BD0AB4 /* Modifier */ = {
