@@ -7,6 +7,6 @@
 
 import RealmSwift
 
-final class RotatedWeaponSkins: Object, Codable {
+final class storeSkinsList: Object, Codable {
     @Persisted var uuid: String
 }
