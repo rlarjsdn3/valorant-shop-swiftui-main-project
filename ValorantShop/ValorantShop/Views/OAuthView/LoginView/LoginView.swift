@@ -66,9 +66,11 @@ struct LoginView: View {
                         if !inputUsername.isEmpty {
                             Button {
                                 inputUsername = ""
+                                focusField = .username
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(Color.secondary)
+                                    .padding([.leading, .top, .bottom])
                             }
                         }
                     }
@@ -100,9 +102,11 @@ struct LoginView: View {
                         if !inputPassword.isEmpty {
                             Button {
                                 inputPassword = ""
+                                focusField = .password
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(Color.secondary)
+                                    .padding([.leading, .top, .bottom])
                             }
                         }
                     }

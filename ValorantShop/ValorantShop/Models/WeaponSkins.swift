@@ -20,14 +20,14 @@ final class WeaponSkins: Object, Codable {
 final class Skin: EmbeddedObject, Codable {
     @Persisted var uuid: String
     @Persisted var displayName: String
-    @Persisted var contentTierUUID: ContentTier?
+    @Persisted var contentTier: ContentTier?
     @Persisted var displayIcon: String?
     @Persisted var chromas: RealmSwift.List<Chroma>
     @Persisted var levels: RealmSwift.List<Level>
     
     enum CodingKeys: String, CodingKey {
         case uuid, displayName
-        case contentTierUUID = "contentTierUuid"
+        case contentTier = "contentTierUuid"
         case displayIcon
         case chromas, levels
     }
@@ -60,7 +60,7 @@ enum ContentTier: String, PersistableEnum, Codable {
         case .selectEdition:
             return "selectEdition"
         case .deulxeEdition:
-            return "deulxeEdition"
+            return "deluxeEdition"
         case .primeumEdition:
             return "premiumEdition"
         case .exclusiveEdition:

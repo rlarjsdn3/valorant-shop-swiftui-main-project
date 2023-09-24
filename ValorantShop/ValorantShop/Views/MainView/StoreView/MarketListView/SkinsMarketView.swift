@@ -19,7 +19,7 @@ struct SkinsMarketView: View {
         ScrollView {
             VStack(spacing: -5) {
                 HStack {
-                    Text("\(viewModel.storeRotationWeaponSkinsRemainingSeconds)")
+                    Text("\(viewModel.storeSkinsRemainingTime)")
                     
                     Spacer()
                     
@@ -35,12 +35,12 @@ struct SkinsMarketView: View {
                 .padding(.horizontal)
                 
                 VStack(spacing: -16) {
-                    ForEach(viewModel.storeRotationWeaponSkins.weaponSkins, id: \.skin.uuid) { weaponSkin in
+                    ForEach(viewModel.storeSkins.skinInfos) { skinInfo in
                         NavigationLink {
                             Text("ItemDetail View")
                         } label: {
                             VStack {
-                                if let uuid = weaponSkin.skin.chromas.first?.uuid {
+                                if let uuid = skinInfo.skin.chromas.first?.uuid {
                                     loadImage(of: ImageType.weaponSkins, uuid: uuid)
                                         .resizable()
                                         .scaledToFit()
@@ -51,7 +51,7 @@ struct SkinsMarketView: View {
                             }
                             .frame(height: 150)
                             .overlay(alignment: .bottomLeading) {
-                                Text(weaponSkin.skin.displayName)
+                                Text("\(skinInfo.skin.displayName)")
                                     .font(.headline)
                                     .frame(maxWidth: screenSize.width / 3.0, alignment: .leading)
                                     .offset(y: 5)
@@ -64,9 +64,9 @@ struct SkinsMarketView: View {
                                             .resizable()
                                             .frame(width: 20, height: 20)
                                             .offset(y: 1)
-                                        Text("\(weaponSkin.price)")
+                                        Text("\(skinInfo.price)")
                                     }
-                                    if let rankLogoName = weaponSkin.skin.contentTierUUID?.rankLogoName {
+                                    if let rankLogoName = skinInfo.skin.contentTier?.rankLogoName {
                                         Image(rankLogoName)
                                             .resizable()
                                             .frame(width: 30, height: 30)
@@ -76,7 +76,7 @@ struct SkinsMarketView: View {
                             }
                             .padding()
                             .overlay {
-                                if let hightlightColor = weaponSkin.skin.contentTierUUID?.hightlightColor {
+                                if let hightlightColor = skinInfo.skin.contentTier?.hightlightColor {
                                     RoundedRectangle(cornerRadius: 15)
                                         .strokeBorder(
                                             hightlightColor,

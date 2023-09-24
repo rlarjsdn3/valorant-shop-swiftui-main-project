@@ -38,22 +38,35 @@ struct MainView: View {
         }
         .onAppear {
             // 현재 날짜 불러오기
-            let currentDate = Date().timeIntervalSinceReferenceDate
-            // 로테이션 갱신 기간이 아직 유효하다면
-            if currentDate < viewModel.rotatedWeaponSkinsExpiryDate {
-                // Not Running → Foreground 상태 전이 시,
-                // 사용자ID, 사용자 지갑, 로테이션 스킨 데이터를 갱신하는 코드
+            let currentDate = Date()
+            // 로테이션 스킨 갱신 날짜 불러오기
+            let storeSkinExpiryDate = Date(
+                timeIntervalSinceReferenceDate: viewModel.storeSkinsExpriyDate
+            )
+            
+            // ✏️ ①로그인을 하거나 ②갱신 날짜가 아직 유효할 때 앱을 켜면
+            // ✏️ DB로부터 사용자 데이터를 갱신시키기 위해 아래 코드를 구현함.
+            
+            // For Debug
+            print(currentDate, storeSkinExpiryDate)
+            
+            // 로테이션 갱신 날짜가 아직 유효하다면
+            if currentDate < storeSkinExpiryDate {
+                print("플레이어 데이터 가져오기 - OnAppear")
+                // 사용자 데이터 불러오기
                 Task {
                     await viewModel.getPlayerData()
                 }
             }
-            // ✏️ 로그인에 성공하거나, 앱으로 들어오면 DB로부터 최신 데이터를 받아옴.
         }
         .onReceive(didBecomeActiveNotification) { _ in
             // ✏️ 앱으로 들어오면 서버로부터 최신 데이터가 있는지 확인함.
             Task {
                 await viewModel.checkValorantVersion()
             }
+            // ✏️ 앱이 완전히 꺼지지 않고, 백그라운드에 머무를 수 있기 때문에
+            // ✏️ 앱을 켜면 Timer에 의해 사용자 데이터를 불러올 수 있도록 해야함.
+            viewModel.isIntialGettingPlayerDataInTimer = true
         }
         .overlay {
             if viewModel.isPresentLoadingScreenView {

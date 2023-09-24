@@ -47,15 +47,27 @@ struct SettingsView: View {
                 }
                 
                 Section {
-                    Button("로그아웃") {
-                        viewModel.logout()
+                    HStack {
+                        Spacer()
+                        Button("로그아웃", role: .destructive) {
+                            viewModel.logout()
+                        }
+                        Spacer()
                     }
                 }
                 
+                // -- For Debug --
                 Button("시간 되돌리기") {
+                    viewModel.storeSkinsExpriyDate = 717110000.0
                     viewModel.timer?.invalidate()
-                    viewModel.rotatedWeaponSkinsExpiryDate = 717119999.0
                 }
+                Button("스킨 데이터 삭제") {
+                    viewModel.realmManager.deleteAll(of: RotatedWeaponSkins.self)
+                }
+                Button("토큰 만료 시간 초기화") {
+                    viewModel.accessTokenExpiryDate = 0.0
+                }
+                // ---------------
             }
             .navigationTitle("설정")
         }
