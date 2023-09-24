@@ -34,16 +34,16 @@ struct ReAuthTokens {
 }
 
 // ⭐️ 모든 스킨 관련 데이터를 취합 후, 화면에 출력함.
-struct StoreBundles {
+struct StoreBundle {
     let uuid: String
     let bundleBsePrice: Int
     let bundleDiscountedPrice: Int
     let bundleDiscountedPercent: Double
     let wholeSaleOnly: Bool
-    let skinInfos: [SkinInfo]
+    var skinInfos: [SkinInfo] = []
 }
 
-struct StoreSkins {
+struct StoreSkin {
     var skinInfos: [SkinInfo] = []
 }
 
@@ -103,10 +103,8 @@ final class ViewModel: ObservableObject {
     @Published var downloadingErrorText: String = ""
     @Published var downloadButtonShakeAnimation: CGFloat = 0.0
     
-    
     @Published var imagesToDownload: Int = 0
     @Published var downloadedImages: Int = 0
-    
     
     // For PlayerID
     @Published var gameName: String = ""
@@ -118,8 +116,11 @@ final class ViewModel: ObservableObject {
     @Published var kp: Int = 0
     
     // For StoreData
-    @Published var storeSkins: StoreSkins = .init()
+    @Published var storeSkins: StoreSkin = .init()
     @Published var storeSkinsRemainingTime: String = ""
+    
+    @Published var storeBundles: [StoreBundle] = []
+    @Published var storeBundlesReminingTime: [String] = []
     
     // For StoreView
     @Published var selectedStoreTab: StoreTabType = .skin
@@ -772,11 +773,11 @@ final class ViewModel: ObservableObject {
     @MainActor
     func getStoreSkins(forceLoad: Bool = false) async {
         // Realm에 저장된 로테이션 스킨 데이터 불러오기
-        let rotatedWeaponSkins = realmManager.read(of: StoreSkinsList.self)
+        var skins = realmManager.read(of: StoreSkinsList.self)
         // 강제로 다시 불러오지 안는다면
         if !forceLoad {
             // Realm에 저장된 로테이션 스킨 데이터가 있다면
-            if !rotatedWeaponSkins.isEmpty {
+            if !skins.isEmpty {
                 // 로테이션 갱신 시간이 지났다면
                 if self.isExpired(of: .skin) {
                     do {
@@ -809,7 +810,7 @@ final class ViewModel: ObservableObject {
         }
         
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
-        var storeSkins: StoreSkins = StoreSkins()
+        var storeSkins: StoreSkin = StoreSkin()
         // Realm으로부터 로테이션 스킨 데이터 불러오기
         guard let storeSkinsList = realmManager.read(of: StoreSkinsList.self).first else {
             self.isPresentLoadingScreenView = false
@@ -825,7 +826,6 @@ final class ViewModel: ObservableObject {
             self.isPresentLoadingScreenView = false
             return
         }
-        
         
         // 상점 로테이션 스킨 필터링하기
         for itemInfo in storeSkinsList.itemInfos {
@@ -850,8 +850,8 @@ final class ViewModel: ObservableObject {
                 continue
             }
             let price = Price(basePrice: basePrice)
-            let storeSkin = SkinInfo(skin: skin, price: price)
-            storeSkins.skinInfos.append(storeSkin)
+            let skinInfo = SkinInfo(skin: skin, price: price)
+            storeSkins.skinInfos.append(skinInfo)
         }
         
         // 결과 업데이트하기
@@ -887,6 +887,103 @@ final class ViewModel: ObservableObject {
     
     // MARK: - GET STORE DATA - BUNDLE
     
+    @MainActor
+    func getStoreBundles(forceLoad: Bool = false) async {
+        // Realm에 저장된 로테이션 스킨 데이터 불러오기
+        let bundles = realmManager.read(of: StoreBundlesList.self)
+        // 강제로 다시 불러오지 안는다면
+        if !forceLoad {
+            // Realm에 저장된 번들 스킨 데이터가 있다면
+            if !bundles.isEmpty {
+                // 로테이션 갱신 시간이 지났다면
+                if self.isExpired(of: .skin) { // ❗️ 임시 코드
+                    do {
+                        // 번들 스킨 데이터를 불러와 Realm에 저장하기
+                        try await self.fetchStoreBundles()
+                    } catch {
+                        self.isPresentLoadingScreenView = false
+                        return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                    }
+                }
+            // Realm에 번들 스킨 데이터가 없다면
+            } else {
+                do {
+                    // 번들 스킨 데이터를 불러와 Realm에 저장하기
+                    try await self.fetchStoreBundles()
+                } catch {
+                    self.isPresentLoadingScreenView = false
+                    return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                }
+            }
+        // 강제로 다시 불러온다면
+        } else {
+            do {
+                // 번들 스킨 데이터를 불러와 Realm에 저장하기
+                try await self.fetchStoreBundles()
+            } catch {
+                self.isPresentLoadingScreenView = false
+                return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+            }
+        }
+        
+        // Realm으로부터 로테이션 스킨 데이터 불러오기
+        let storeBundlesList = realmManager.read(of: StoreBundlesList.self)
+        // Realm으로부터 전체 스킨 데이터 불러오기
+        guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
+            self.isPresentLoadingScreenView = false
+            return
+        }
+        // Realm으로부터 가격 데이터 불러오기
+        guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
+            self.isPresentLoadingScreenView = false
+            return
+        }
+        
+        // 번들 정보를 저장할 변수 선언하기
+        var storeBundles: [StoreBundle] = []
+        // 번들 스킨 필터링하기
+        for bundle in storeBundlesList {
+            // 기초적인 번들 정보 기입하기
+            var storeBundle = StoreBundle(
+                uuid: bundle.uuid,
+                bundleBsePrice: bundle.basePrice,
+                bundleDiscountedPrice: bundle.discountedPrice,
+                bundleDiscountedPercent: bundle.discountedPercent,
+                wholeSaleOnly: bundle.wholeSaleOnly
+            )
+            
+            for itemInfo in bundle.itemInfos {
+                // 스킨 데이터를 저장할 변수 선언하기
+                var filteredSkin: Skin?
+                // 가격 데이터를 저장할 변수 선언하기
+                var filteredBasePrice: Int?
+                // 스킨 데이터 필터링하기
+                if let firstSkinIndex = skins.firstIndex(where: {
+                    $0.levels.first?.uuid == itemInfo.uuid }) {
+                    filteredSkin = skins[firstSkinIndex]
+                }
+                // 가격 데이터 필터링하기
+                if let firstBasePriceIndex = prices.firstIndex(where: {
+                    $0.offerID == itemInfo.uuid }) {
+                    filteredBasePrice = prices[firstBasePriceIndex].cost?.vp
+                }
+                
+                // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
+                guard let skin = filteredSkin,
+                      let basePrice = filteredBasePrice else {
+                    continue
+                }
+                let price = Price(basePrice: basePrice)
+                let skinInfo = SkinInfo(skin: skin, price: price)
+                storeBundle.skinInfos.append(skinInfo)
+            }
+            
+            storeBundles.append(storeBundle)
+        }
+        
+        // 결과 업데이트하기
+        self.storeBundles = storeBundles
+    }
     
     @MainActor
     func fetchStoreBundles() async throws {

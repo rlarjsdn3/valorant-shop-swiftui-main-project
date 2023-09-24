@@ -70,11 +70,7 @@ struct SettingsView: View {
                 
                 Button("번들 정보 가져오기") {
                     Task {
-                        do {
-                            try await viewModel.fetchStoreBundles()
-                        } catch {
-                            print("예외!")
-                        }
+                        await viewModel.getStoreBundles(forceLoad: true)
                     }
                 }
                 // ---------------
