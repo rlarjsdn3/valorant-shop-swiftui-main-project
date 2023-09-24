@@ -13,6 +13,7 @@ enum ImageType: String {
     case weaponSkins
     case weaponSkinChromas
     case weaponSkinSwatchs
+    case bundles
     
     var path1: String {
         switch self {
@@ -22,6 +23,8 @@ enum ImageType: String {
             fallthrough
         case .weaponSkinSwatchs:
             return "weaponskinchromas"
+        case .bundles:
+            return "bundles"
         }
     }
     
@@ -33,6 +36,8 @@ enum ImageType: String {
             return "fullrender"
         case .weaponSkinSwatchs:
             return "swatch"
+        case .bundles:
+            return "displayicon"
         }
     }
     
@@ -44,6 +49,8 @@ enum ImageType: String {
             return "chroma"
         case .weaponSkinSwatchs:
             return "swatch"
+        case .bundles: // Not Use.
+            return "bundle"
         }
     }
 }
@@ -60,10 +67,72 @@ enum ResourceError: Error {
 // MARK: - HTTP RESPONSE
 
 struct StorefrontResponse: Codable {
+    let featuredBundle: FeaturedBundle
     let skinsPanelLayout: SkinsPanelLayout
     
     enum CodingKeys: String, CodingKey {
+        case featuredBundle = "FeaturedBundle"
         case skinsPanelLayout = "SkinsPanelLayout"
+    }
+}
+
+struct FeaturedBundle: Codable {
+    let bundles: [Bundle]
+    let bundleRemainingDurationInSeconds: Int
+
+    enum CodingKeys: String, CodingKey {
+        case bundles = "Bundles"
+        case bundleRemainingDurationInSeconds = "BundleRemainingDurationInSeconds"
+    }
+}
+
+struct Bundle: Codable {
+    let uuid: String
+    let items: [Item]
+    let totalBasePrice: TotalBundleCost?
+    let totalDiscountedPrice: TotalBundleCost?
+    let totalDiscountPercent: Double
+    let durationRemainingInSeconds: Int
+    let wholeSaleOnly: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case uuid = "DataAssetID"
+        case items = "Items"
+        case totalBasePrice = "TotalBaseCost"
+        case totalDiscountedPrice = "TotalDiscountedCost"
+        case totalDiscountPercent = "TotalDiscountPercent"
+        case durationRemainingInSeconds = "DurationRemainingInSeconds"
+        case wholeSaleOnly = "WholesaleOnly"
+    }
+}
+
+struct Item: Codable {
+    let item: ItemUUID
+    let basePrice: Int
+    let discountedPrice: Int
+
+    enum CodingKeys: String, CodingKey {
+        case item = "Item"
+        case basePrice = "BasePrice"
+        case discountedPrice = "DiscountedPrice"
+    }
+}
+
+struct ItemUUID: Codable {
+    let typeId: String
+    let uuid: String
+
+    enum CodingKeys: String, CodingKey {
+        case typeId = "ItemTypeID"
+        case uuid = "ItemID"
+    }
+}
+
+struct TotalBundleCost: Codable {
+    let vp: Int
+
+    enum CodingKeys: String, CodingKey {
+        case vp = "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741"
     }
 }
 
@@ -228,6 +297,42 @@ final class ResourceManager {
         // 결과 반환하기
         return .success(storefrontResponse)
         
+    }
+    
+    func fetchBundles() async -> Result<Bundles, ResourceError> {
+        // For Debug
+        print(#function)
+        
+        // URL 설정하기
+        guard var urlComponent = URLComponents(string: ResourceURL.bundles) else { return .failure(.urlError) }
+        urlComponent.queryItems = [
+            URLQueryItem(name: "language", value: "ko-KR")
+        ]
+        // URL 만들기
+        guard let url = URL(string: urlComponent.url!.description) else { return .failure(.urlError) }
+        // URL Request 만들기
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "GET"
+        
+        // 비동기 HTTP 통신하기
+        guard let (data, response) = try? await urlSession.data(for: urlRequest) else {
+            print("네트워크 에러: \(#function)")
+            return .failure(.networkError)
+        }
+        // 상태 코드가 올바른지 확인하기
+        guard let httpResponse = (response as? HTTPURLResponse),
+              (200..<300) ~= httpResponse.statusCode else {
+            print("상태 코드 에러: \(#function)")
+            return .failure(.statusCodeError)
+        }
+        // 받아온 데이터를 파싱하기
+        guard let bundles = self.decode(of: Bundles.self, from: data) else {
+            print("파싱 에러: \(#function)")
+            return .failure(.parsingError)
+        }
+        
+        // 결과 반환하기
+        return .success(bundles)
     }
     
     func fetchWeaponSkins() async -> Result<WeaponSkins, ResourceError> {

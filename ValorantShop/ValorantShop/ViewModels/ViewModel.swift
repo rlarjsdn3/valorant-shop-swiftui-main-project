@@ -33,14 +33,34 @@ struct ReAuthTokens {
     let puuid: String
 }
 
-struct StoreSkins {
+// ⭐️ 모든 스킨 관련 데이터를 취합 후, 화면에 출력함.
+struct StoreBundle {
+    let uuid: String
+    let bundleBsePrice: Int
+    let bundleDiscountedPrice: Int
+    let bundleDiscountedPercent: Double
+    let wholeSaleOnly: Bool
+    var skinInfos: [SkinInfo] = []
+}
+
+struct StoreSkin {
     var skinInfos: [SkinInfo] = []
 }
 
 struct SkinInfo: Identifiable {
-    var id: UUID = UUID()
+    let id: UUID = UUID()
     let skin: Skin
-    let price: Int
+    let price: Price
+}
+
+struct Price {
+    let basePrice: Int
+    let discountedPrice: Int?
+    
+    init(basePrice: Int, discountedPrice: Int? = nil) {
+        self.basePrice = basePrice
+        self.discountedPrice = discountedPrice
+    }
 }
 
 // MARK: - VIEW MODEL
@@ -53,7 +73,8 @@ final class ViewModel: ObservableObject {
     @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
     @AppStorage(UserDefaults.lastUpdateCheckDate) var lastUpdateCheckDate: Double = Double.infinity
     @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
-    @AppStorage(UserDefaults.storeSkinsExpiryDate) var storeSkinsExpriyDate: Double = 0.0
+//    @AppStorage(UserDefaults.storeSkinsExpiryDate) var storeSkinsExpriyDate: Double = Double.infinity
+    @AppStorage(UserDefaults.storeBundlesExpiryDate) var storeBundlesExpiryDate: [Double] = [Double.infinity]
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -82,10 +103,8 @@ final class ViewModel: ObservableObject {
     @Published var downloadingErrorText: String = ""
     @Published var downloadButtonShakeAnimation: CGFloat = 0.0
     
-    
     @Published var imagesToDownload: Int = 0
     @Published var downloadedImages: Int = 0
-    
     
     // For PlayerID
     @Published var gameName: String = ""
@@ -97,8 +116,12 @@ final class ViewModel: ObservableObject {
     @Published var kp: Int = 0
     
     // For StoreData
-    @Published var storeSkins: StoreSkins = .init()
+    @Published var storeSkins: StoreSkin = .init()
+    var storeSkinsExpiryDate: Date = Date(timeIntervalSinceReferenceDate: Double.infinity)
     @Published var storeSkinsRemainingTime: String = ""
+    
+    @Published var storeBundles: [StoreBundle] = []
+    @Published var storeBundlesReminingTime: [String] = []
     
     // For StoreView
     @Published var selectedStoreTab: StoreTabType = .skin
@@ -124,7 +147,7 @@ final class ViewModel: ObservableObject {
         // 현재 날짜 불러오기
         let currentDate = Date()
         // 로테이션 스킨 갱신 날짜 불러오기
-        let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: storeSkinsExpriyDate)
+        let rotatedWeaponSkinsRenewalDate = storeSkinsExpiryDate
         // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
         self.storeSkinsRemainingTime = self.remainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
         
@@ -272,10 +295,10 @@ final class ViewModel: ObservableObject {
         // 로그인 여부 및 사용자 정보 삭제하기
         withAnimation(.spring()) { self.isLoggedIn = false }
         self.accessTokenExpiryDate = Double.infinity
-        self.storeSkinsExpriyDate = Double.infinity
+        self.storeBundlesExpiryDate = [Double.infinity]
         self.realmManager.deleteAll(of: PlayerID.self)
         self.realmManager.deleteAll(of: PlayerWallet.self)
-        self.realmManager.deleteAll(of: RotatedWeaponSkins.self)
+        self.realmManager.deleteAll(of: StoreSkinsList.self)
         
         // 불러온 상점 데이터 삭제하기
         self.storeSkins = .init()
@@ -373,12 +396,14 @@ final class ViewModel: ObservableObject {
             // 로딩 버튼 보이게 하기
             withAnimation(.spring()) { self.isLoadingDataDownloading = true }
             //
-            self.imagesToDownload = 3
+            self.imagesToDownload = 4
             // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
             // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
             self.storeSkins.skinInfos = []
             // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
             try await self.downloadValorantVersion(); self.downloadedImages += 1
+            // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
+            try await self.downloadBundlesData(); self.downloadedImages += 1
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
             try await self.downloadWeaponSkinsData(); self.downloadedImages += 1
             // 가격 정보 데이터 다운로드받고, Realm에 저장하기
@@ -390,7 +415,7 @@ final class ViewModel: ObservableObject {
             // ✏️ 데이터 업데이트를 하면 스킨 데이터를 갱신할 수 있는 수단이 전무하기 때문에 명시적으로 호출함.
             if update {
                 // 로테이션 스킨 데이터 불러오기
-                await self.getStoreRotationWeaponSkins()
+                await self.getStoreSkins()
                 // + 번들 스킨 데이터 불러오기
                 // + 야시장 스킨 데이터 불러오기
             }
@@ -436,6 +461,14 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
+    private func downloadBundlesData() async throws {
+        // 무기 스킨 데이터 다운로드받기
+        let bundles = try await resourceManager.fetchBundles().get()
+        // 무기 스킨 데이터를 Realm에 저장하기
+        self.overwriteRealmObject(bundles)
+    }
+    
+    @MainActor
     private func downloadWeaponSkinsData() async throws {
         // 무기 스킨 데이터 다운로드받기
         let weaponSkins = try await resourceManager.fetchWeaponSkins().get()
@@ -459,7 +492,7 @@ final class ViewModel: ObservableObject {
     @MainActor
     private func downloadWeaponSkinImages() async throws {
         // Realm으로부터 스킨 데이터 불러오기
-        guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else { return }
+        guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else { return }
         
         // 경로 접근을 위한 파일 매니저 선언하기
         let fileManager = FileManager.default
@@ -570,11 +603,21 @@ final class ViewModel: ObservableObject {
     // MARK: - GET PLAYER DATA
     
     @MainActor
+    func getRenewalDate() {
+        // 스킨 갱신 날짜 불러오기
+        if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
+            self.storeSkinsExpiryDate = renewalDate
+        }
+    }
+    
+    @MainActor
     func getPlayerData(forceLoad: Bool = false) async {
         // 사용자ID 등 사용자 데이터 불러오기
         await self.getPlayerID(forceLoad: forceLoad)
         await self.getPlayerWallet(forceLoad: forceLoad)
-        await self.getStoreRotationWeaponSkins(forceLoad: forceLoad)
+        await self.getStoreBundles(forceLoad: forceLoad)
+        await self.getStoreSkins(forceLoad: forceLoad)
+        
         // ✏️ 사용자에게 화면이 보여지고 나서도
         // ✏️ 어색하게 갑작스레 뷰가 리-렌더링되는 모습을 숨기고자 1초 딜레이를 둠.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -592,7 +635,7 @@ final class ViewModel: ObservableObject {
         // 어느 데이터를 불러올지 확인하기
         switch type {
         case .skin:
-            await self.getStoreRotationWeaponSkins(forceLoad: true)
+            await self.getStoreSkins(forceLoad: true)
         case .bndle:
             fallthrough // 임시
         case .bonus:
@@ -738,18 +781,18 @@ final class ViewModel: ObservableObject {
     // MARK: - GET STORE DATA - SKINS
     
     @MainActor
-    func getStoreRotationWeaponSkins(forceLoad: Bool = false) async {
+    func getStoreSkins(forceLoad: Bool = false) async {
         // Realm에 저장된 로테이션 스킨 데이터 불러오기
-        let rotatedWeaponSkins = realmManager.read(of: RotatedWeaponSkins.self)
+        let skins = realmManager.read(of: StoreSkinsList.self)
         // 강제로 다시 불러오지 안는다면
         if !forceLoad {
             // Realm에 저장된 로테이션 스킨 데이터가 있다면
-            if !rotatedWeaponSkins.isEmpty {
+            if !skins.isEmpty {
                 // 로테이션 갱신 시간이 지났다면
                 if self.isExpired(of: .skin) {
                     do {
                         // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
-                        try await self.fetchStoreRotationWeaponSkins()
+                        try await self.fetchStoreSkins()
                     } catch {
                         self.isPresentLoadingScreenView = false
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
@@ -759,7 +802,7 @@ final class ViewModel: ObservableObject {
             } else {
                 do {
                     // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
-                    try await self.fetchStoreRotationWeaponSkins()
+                    try await self.fetchStoreSkins()
                 } catch {
                     self.isPresentLoadingScreenView = false
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
@@ -769,7 +812,7 @@ final class ViewModel: ObservableObject {
         } else {
             do {
                 // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
-                try await self.fetchStoreRotationWeaponSkins()
+                try await self.fetchStoreSkins()
             } catch {
                 self.isPresentLoadingScreenView = false
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
@@ -777,11 +820,14 @@ final class ViewModel: ObservableObject {
         }
         
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
-        var storeSkins: StoreSkins = StoreSkins()
+        var storeSkins: StoreSkin = StoreSkin()
         // Realm으로부터 로테이션 스킨 데이터 불러오기
-        let storeSkinsUUIDs = realmManager.read(of: RotatedWeaponSkins.self)
+        guard let storeSkinsList = realmManager.read(of: StoreSkinsList.self).first else {
+            self.isPresentLoadingScreenView = false
+            return
+        }
         // Realm으로부터 전체 스킨 데이터 불러오기
-        guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else {
+        guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
             self.isPresentLoadingScreenView = false
             return
         }
@@ -791,31 +837,31 @@ final class ViewModel: ObservableObject {
             return
         }
         
-        
         // 상점 로테이션 스킨 필터링하기
-        for storeSkinUUID in storeSkinsUUIDs {
+        for itemInfo in storeSkinsList.itemInfos {
             // 스킨 데이터를 저장할 변수 선언하기
             var filteredSkin: Skin?
             // 가격 데이터를 저장할 변수 선언하기
-            var filteredPrice: Int?
+            var filteredBasePrice: Int?
             // 스킨 데이터 필터링하기
             if let firstSkinIndex = skins.firstIndex(where: {
-                $0.levels.first?.uuid == storeSkinUUID.uuid }) {
+                $0.levels.first?.uuid == itemInfo.uuid }) {
                 filteredSkin = skins[firstSkinIndex]
             }
             // 가격 데이터 필터링하기
-            if let firstPriceIndex = prices.firstIndex(where: {
-                $0.offerID == storeSkinUUID.uuid }) {
-                filteredPrice = prices[firstPriceIndex].cost?.vp
+            if let firstBasePriceIndex = prices.firstIndex(where: {
+                $0.offerID == itemInfo.uuid }) {
+                filteredBasePrice = prices[firstBasePriceIndex].cost?.vp
             }
             
             // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
             guard let skin = filteredSkin,
-                  let price = filteredPrice else {
+                  let basePrice = filteredBasePrice else {
                 continue
             }
-            let storeSkin = SkinInfo(skin: skin, price: price)
-            storeSkins.skinInfos.append(storeSkin)
+            let price = Price(basePrice: basePrice)
+            let skinInfo = SkinInfo(skin: skin, price: price)
+            storeSkins.skinInfos.append(skinInfo)
         }
         
         // 결과 업데이트하기
@@ -823,32 +869,191 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    private func fetchStoreRotationWeaponSkins() async throws {
+    private func fetchStoreSkins() async throws {
         // Realm에 저장되어 있는 기존 로테이션 스킨 데이터 삭제하기
-        realmManager.deleteAll(of: RotatedWeaponSkins.self)
+        realmManager.deleteAll(of: StoreSkinsList.self)
+        
         // 접근 토큰 등 사용자 고유 정보 가져오기
         let reAuthTokens = try await self.getReAuthTokens().get()
         // 새롭게 로테이션 스킨 데이터 불러오기
-        let rotatedWeaponSkins = try await resourceManager.fetchStorefront(
+        let skinsPanelLayouts = try await resourceManager.fetchStorefront(
             accessToken: reAuthTokens.accessToken,
             riotEntitlement: reAuthTokens.riotEntitlement,
             puuid: reAuthTokens.puuid
         ).get().skinsPanelLayout
+        
         // 로테이션 갱신 시간을 UserDefaults에 저장하기
-        self.storeSkinsExpriyDate = Date().addingTimeInterval(
-            Double(rotatedWeaponSkins.singleItemOffersRemainingDurationInSeconds)
-        ).timeIntervalSinceReferenceDate
-        // Realm에 새로운 로테이션 스킨 데이터 저장하기 (스킨의 첫 번째 레벨의 UUID)
-        for uuid in rotatedWeaponSkins.singleItemOffers {
-            let rotatedWeaponSkins = RotatedWeaponSkins(value: ["uuid": "\(uuid)"])
-            realmManager.create(rotatedWeaponSkins)
+        self.storeSkinsExpiryDate = Date().addingTimeInterval(
+            Double(skinsPanelLayouts.singleItemOffersRemainingDurationInSeconds)
+        )
+        // Realm에 새로운 로테이션 스킨 데이터 저장하기
+        let storeSkinsList = StoreSkinsList()
+        // 로테이션 스킨 갱신 날짜 저장하기
+        storeSkinsList.renewalDate = Date().addingTimeInterval(
+            Double(skinsPanelLayouts.singleItemOffersRemainingDurationInSeconds)
+        )
+        for uuid in skinsPanelLayouts.singleItemOffers {
+            // 첫 번째 레벨의 UUID 저장하기
+            let rotationSkinInfo = RotationSkinInfo()
+            rotationSkinInfo.uuid = uuid
+            storeSkinsList.itemInfos.append(rotationSkinInfo)
         }
+        realmManager.create(storeSkinsList)
     }
     
     // MARK: - GET STORE DATA - BUNDLE
     
+    @MainActor
+    func getStoreBundles(forceLoad: Bool = false) async {
+        // Realm에 저장된 로테이션 스킨 데이터 불러오기
+        let bundles = realmManager.read(of: StoreBundlesList.self)
+        // 강제로 다시 불러오지 안는다면
+        if !forceLoad {
+            // Realm에 저장된 번들 스킨 데이터가 있다면
+            if !bundles.isEmpty {
+                // 로테이션 갱신 시간이 지났다면
+                if self.isExpired(of: .skin) { // ❗️ 임시 코드
+                    do {
+                        // 번들 스킨 데이터를 불러와 Realm에 저장하기
+                        try await self.fetchStoreBundles()
+                    } catch {
+                        self.isPresentLoadingScreenView = false
+                        return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                    }
+                }
+            // Realm에 번들 스킨 데이터가 없다면
+            } else {
+                do {
+                    // 번들 스킨 데이터를 불러와 Realm에 저장하기
+                    try await self.fetchStoreBundles()
+                } catch {
+                    self.isPresentLoadingScreenView = false
+                    return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+                }
+            }
+        // 강제로 다시 불러온다면
+        } else {
+            do {
+                // 번들 스킨 데이터를 불러와 Realm에 저장하기
+                try await self.fetchStoreBundles()
+            } catch {
+                self.isPresentLoadingScreenView = false
+                return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
+            }
+        }
+        
+        // Realm으로부터 로테이션 스킨 데이터 불러오기
+        let storeBundlesList = realmManager.read(of: StoreBundlesList.self)
+        // Realm으로부터 전체 스킨 데이터 불러오기
+        guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
+            self.isPresentLoadingScreenView = false
+            return
+        }
+        // Realm으로부터 가격 데이터 불러오기
+        //guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
+        //    self.isPresentLoadingScreenView = false
+        //    return
+        //}
+        
+        // 번들 정보를 저장할 변수 선언하기
+        var storeBundles: [StoreBundle] = []
+        // 번들 스킨 필터링하기
+        for bundle in storeBundlesList {
+            // 기초적인 번들 정보 기입하기
+            var storeBundle = StoreBundle(
+                uuid: bundle.uuid,
+                bundleBsePrice: bundle.basePrice,
+                bundleDiscountedPrice: bundle.discountedPrice,
+                bundleDiscountedPercent: bundle.discountedPercent,
+                wholeSaleOnly: bundle.wholeSaleOnly
+            )
+            
+            for itemInfo in bundle.itemInfos {
+                // 스킨 데이터를 저장할 변수 선언하기
+                var filteredSkin: Skin?
+                // 가격 데이터를 저장할 변수 선언하기
+                //var filteredBasePrice: Int?
+                // 스킨 데이터 필터링하기
+                if let firstSkinIndex = skins.firstIndex(where: {
+                    $0.levels.first?.uuid == itemInfo.uuid }) {
+                    filteredSkin = skins[firstSkinIndex]
+                }
+                // 가격 데이터 필터링하기
+                //if let firstBasePriceIndex = prices.firstIndex(where: {
+                //    $0.offerID == itemInfo.uuid }) {
+                //    filteredBasePrice = prices[firstBasePriceIndex].cost?.vp
+                //}
+                
+                // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
+                guard let skin = filteredSkin
+                     /* let basePrice = filteredBasePrice */ else {
+                    continue
+                }
+                let price = Price(
+                    basePrice: itemInfo.basePrice,
+                    discountedPrice: itemInfo.discountedPrice
+                )
+                let skinInfo = SkinInfo(skin: skin, price: price)
+                storeBundle.skinInfos.append(skinInfo)
+            }
+            
+            storeBundles.append(storeBundle)
+        }
+        
+        // 결과 업데이트하기
+        self.storeBundles = storeBundles
+    }
     
-    
+    @MainActor
+    func fetchStoreBundles() async throws {
+        // 시간을 저장하기 전 UserDefaults 초기화하기
+        self.storeBundlesExpiryDate = []
+        // Realm에 저장되어 있는 기존 번들 스킨 데이터 삭제하기
+        realmManager.deleteAll(of: StoreBundlesList.self)
+        
+        // 접근 토큰 등 사용자 고유 정보 가져오기
+        let reAuthTokens = try await self.getReAuthTokens().get()
+        // 새롭게 번들 스킨 데이터 불러오기
+        let featureBundles = try await resourceManager.fetchStorefront(
+            accessToken: reAuthTokens.accessToken,
+            riotEntitlement: reAuthTokens.riotEntitlement,
+            puuid: reAuthTokens.puuid
+        ).get().featuredBundle
+        
+        for bundle in featureBundles.bundles {
+            // 번들 갱신 시간을 UserDefaults에 저장하기
+            let storeBundleExpiryDate = Date().addingTimeInterval(
+                Double(bundle.durationRemainingInSeconds)
+            ).timeIntervalSinceReferenceDate
+            self.storeBundlesExpiryDate.append(storeBundleExpiryDate)
+            
+            print(self.storeBundlesExpiryDate)
+            
+            // Realm에 번들 스킨 데이터 저장하기
+            let storeBundle = StoreBundlesList()
+            storeBundle.uuid = bundle.uuid
+            storeBundle.basePrice = bundle.totalBasePrice?.vp ?? 0
+            storeBundle.discountedPrice = bundle.totalDiscountedPrice?.vp ?? 0
+            storeBundle.discountedPercent = bundle.totalDiscountPercent
+            
+            for item in bundle.items {
+                let bundleSkinInfo = BundleSkinInfo()
+                
+                // 아이템이 무기 스킨이 아니라면 (배너, 총기 장식 등이라면)
+                guard item.item.typeId == "e7c63390-eda7-46e0-bb7a-a6abdacd2433" else {
+                    // Realm에 저장하지 않기
+                    continue
+                }
+                
+                bundleSkinInfo.uuid = item.item.uuid
+                bundleSkinInfo.basePrice = item.basePrice
+                bundleSkinInfo.discountedPrice = item.discountedPrice
+                storeBundle.itemInfos.append(bundleSkinInfo)
+            }
+            
+            realmManager.create(storeBundle)
+        }
+    }
     
     
     
@@ -867,15 +1072,15 @@ final class ViewModel: ObservableObject {
     
     private func isExpired(of type: ExpiryDateTye) -> Bool {
         // 현재 날짜 불러오기
-        let currentDate = Date().timeIntervalSinceReferenceDate
+        let currentDate = Date()
         // 체크해야 할 갱신 시간 체크하기
         switch type {
         case .token:
             // 토큰 갱신 시간이 지났다면
-            return currentDate > accessTokenExpiryDate ? true : false
+            return Date().timeIntervalSinceReferenceDate > accessTokenExpiryDate ? true : false
         case .skin:
             // 로테이션 갱신 시간이 지났다면
-            return currentDate > storeSkinsExpriyDate ? true : false
+            return currentDate > storeSkinsExpiryDate ? true : false
         case .bundle:
             return false // + 임시
         case .bonus:
@@ -897,14 +1102,12 @@ final class ViewModel: ObservableObject {
     @objc func updateStoreSkinsRemainingTime(_ timer: Timer? = nil) {
         // 현재 날짜 불러오기
         let currentDate = Date()
-        // 로테이션 스킨 갱신 날짜 불러오기
-        let storeSkinsExpiryDate = Date(timeIntervalSinceReferenceDate: storeSkinsExpriyDate)
         
         // ✏️ ①앱이 켜져 있는 동안 로테이션 스킨 갱신 날짜에 다다를 때 ②다음 날 아침에 앱을 켜면
         // ✏️ 자동으로 사용자 데이터를 갱신시키기 위해 아래 코드를 구현함.
         
         // 로테이션 갱신 날짜에 다다르고, 로그인이 되어 있으면
-        if currentDate > storeSkinsExpiryDate && self.isLoggedIn && self.isIntialGettingPlayerDataInTimer {
+        if currentDate > self.storeSkinsExpiryDate && self.isLoggedIn && self.isIntialGettingPlayerDataInTimer {
             // For Debug
             print("플레이어 데이터 갱신하기 - Timer")
             
@@ -916,7 +1119,7 @@ final class ViewModel: ObservableObject {
             }
         }
         
-        // 결과 업데이트하기
+        // 시간 업데이트하기
         self.storeSkinsRemainingTime = self.remainingTimeString(from: currentDate, to: storeSkinsExpiryDate)
     }
     
