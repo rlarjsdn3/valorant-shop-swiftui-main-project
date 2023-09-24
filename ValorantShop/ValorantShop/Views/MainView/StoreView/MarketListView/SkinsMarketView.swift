@@ -92,11 +92,6 @@ struct SkinsMarketView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                
-                Button("시간 되돌리기") {
-                    viewModel.rotatedWeaponSkinsExpiryDate = 717110000.0
-                    viewModel.timer?.invalidate()
-                }
             }
             .padding(.vertical)
         }
