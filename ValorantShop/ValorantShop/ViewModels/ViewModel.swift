@@ -33,8 +33,14 @@ struct ReAuthTokens {
     let puuid: String
 }
 
-struct StoreRotationWeaponkins {
-    var weaponSkins: [(skin: Skin, price: Int)] = []
+struct StoreSkins {
+    var skinInfos: [SkinInfo] = []
+}
+
+struct SkinInfo: Identifiable {
+    var id: UUID = UUID()
+    let skin: Skin
+    let price: Int
 }
 
 // MARK: - VIEW MODEL
@@ -91,8 +97,8 @@ final class ViewModel: ObservableObject {
     @Published var kp: Int = 0
     
     // For StoreData
-    @Published var storeRotationWeaponSkins: StoreRotationWeaponkins = .init()
-    @Published var storeRotationWeaponSkinsRemainingSeconds: String = ""
+    @Published var storeSkins: StoreSkins = .init()
+    @Published var storeSkinsRemainingTime: String = ""
     
     // For StoreView
     @Published var selectedStoreTab: StoreTabType = .skin
@@ -120,7 +126,7 @@ final class ViewModel: ObservableObject {
         // 로테이션 스킨 갱신 날짜 불러오기
         let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: storeSkinsExpriyDate)
         // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
-        self.storeRotationWeaponSkinsRemainingSeconds = self.remainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
+        self.storeSkinsRemainingTime = self.remainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
         
         // 시간을 흐르게 하면서 스킨 데이터 새로고침 확인하기
         timer = Timer.scheduledTimer(
@@ -272,7 +278,7 @@ final class ViewModel: ObservableObject {
         self.realmManager.deleteAll(of: RotatedWeaponSkins.self)
         
         // 불러온 상점 데이터 삭제하기
-        self.storeRotationWeaponSkins = .init()
+        self.storeSkins = .init()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             // 커스탬 탭 선택 초기화하기
             self.selectedCustomTab = .shop
@@ -370,7 +376,7 @@ final class ViewModel: ObservableObject {
             self.imagesToDownload = 3
             // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
             // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
-            self.storeRotationWeaponSkins.weaponSkins = []
+            self.storeSkins.skinInfos = []
             // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
             try await self.downloadValorantVersion(); self.downloadedImages += 1
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
@@ -771,9 +777,9 @@ final class ViewModel: ObservableObject {
         }
         
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
-        var storeRotationWeaponSkins: StoreRotationWeaponkins = StoreRotationWeaponkins()
+        var storeSkins: StoreSkins = StoreSkins()
         // Realm으로부터 로테이션 스킨 데이터 불러오기
-        let weaponSkinUUIDs = realmManager.read(of: RotatedWeaponSkins.self)
+        let storeSkinsUUIDs = realmManager.read(of: RotatedWeaponSkins.self)
         // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.skins else {
             self.isPresentLoadingScreenView = false
@@ -787,19 +793,19 @@ final class ViewModel: ObservableObject {
         
         
         // 상점 로테이션 스킨 필터링하기
-        for weaponSkinUUID in weaponSkinUUIDs {
+        for storeSkinUUID in storeSkinsUUIDs {
             // 스킨 데이터를 저장할 변수 선언하기
             var filteredSkin: Skin?
             // 가격 데이터를 저장할 변수 선언하기
             var filteredPrice: Int?
             // 스킨 데이터 필터링하기
             if let firstSkinIndex = skins.firstIndex(where: {
-                $0.levels.first?.uuid == weaponSkinUUID.uuid }) {
+                $0.levels.first?.uuid == storeSkinUUID.uuid }) {
                 filteredSkin = skins[firstSkinIndex]
             }
             // 가격 데이터 필터링하기
             if let firstPriceIndex = prices.firstIndex(where: {
-                $0.offerID == weaponSkinUUID.uuid }) {
+                $0.offerID == storeSkinUUID.uuid }) {
                 filteredPrice = prices[firstPriceIndex].cost?.vp
             }
             
@@ -808,11 +814,12 @@ final class ViewModel: ObservableObject {
                   let price = filteredPrice else {
                 continue
             }
-            storeRotationWeaponSkins.weaponSkins.append((skin, price))
+            let storeSkin = SkinInfo(skin: skin, price: price)
+            storeSkins.skinInfos.append(storeSkin)
         }
         
         // 결과 업데이트하기
-        self.storeRotationWeaponSkins = storeRotationWeaponSkins
+        self.storeSkins = storeSkins
     }
     
     @MainActor
@@ -910,7 +917,7 @@ final class ViewModel: ObservableObject {
         }
         
         // 결과 업데이트하기
-        self.storeRotationWeaponSkinsRemainingSeconds = self.remainingTimeString(from: currentDate, to: storeSkinsExpiryDate)
+        self.storeSkinsRemainingTime = self.remainingTimeString(from: currentDate, to: storeSkinsExpiryDate)
     }
     
     // MARK: - ETC

@@ -16,6 +16,8 @@ final class RealmManager {
             deleteRealmIfMigrationNeeded: true
         )
         realm = try! Realm(configuration: configuration)
+        
+        // For Debug
         print(realm.configuration.fileURL?.path())
     }
     
