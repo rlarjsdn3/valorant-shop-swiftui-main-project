@@ -14,6 +14,7 @@ struct UserDefaults {
     static var lastUpdateCheckDate: String = "lastUpdateCheckDate"
     static var accessTokenExpiryDate: String = "AccessTokenExpiryDate"
     static var storeSkinsExpiryDate: String = "StoreSkinsExpiryDate"
+    static var storeBundlesExpiryDate: String = "StoreBundlesExpiryDate"
     
     // For Resource
     static var isDataDownloaded: String = "isDataDownloaded"
@@ -48,6 +49,7 @@ struct ResourceURL {
     static var version: String = "https://valorant-api.com/v1/version/"
     static var playerId: String = "https://pd.kr.a.pvp.net/name-service/v2/players"
     static var wallet: String = "https://pd.kr.a.pvp.net/store/v1/wallet/"
+    static var bundles: String = "https://valorant-api.com/v1/bundles/"
     static var skins: String = "https://valorant-api.com/v1/weapons/skins/"
     static var prices: String = "https://pd.kr.a.pvp.net/store/v1/offers/"
     static var storefront: String = "https://pd.kr.a.pvp.net/store/v2/storefront/"

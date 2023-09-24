@@ -33,10 +33,13 @@ struct ReAuthTokens {
     let puuid: String
 }
 
+// ⭐️ 모든 스킨 관련 데이터를 취합 후, 화면에 출력함.
 struct StoreBundles {
     let uuid: String
-    let basePrice: Int
-    let discountedPrice: Int
+    let bundleBsePrice: Int
+    let bundleDiscountedPrice: Int
+    let bundleDiscountedPercent: Double
+    let wholeSaleOnly: Bool
     let skinInfos: [SkinInfo]
 }
 
@@ -392,14 +395,14 @@ final class ViewModel: ObservableObject {
             // 로딩 버튼 보이게 하기
             withAnimation(.spring()) { self.isLoadingDataDownloading = true }
             //
-            self.imagesToDownload = 3
+            self.imagesToDownload = 4
             // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
             // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
             self.storeSkins.skinInfos = []
             // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
             try await self.downloadValorantVersion(); self.downloadedImages += 1
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadWeaponSkinsData(); self.downloadedImages += 1
+            try await self.downloadBundlesData(); self.downloadedImages += 1
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
             try await self.downloadWeaponSkinsData(); self.downloadedImages += 1
             // 가격 정보 데이터 다운로드받고, Realm에 저장하기
@@ -808,7 +811,10 @@ final class ViewModel: ObservableObject {
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
         var storeSkins: StoreSkins = StoreSkins()
         // Realm으로부터 로테이션 스킨 데이터 불러오기
-        let storeSkinsUUIDs = realmManager.read(of: StoreSkinsList.self)
+        guard let storeSkinsList = realmManager.read(of: StoreSkinsList.self).first else {
+            self.isPresentLoadingScreenView = false
+            return
+        }
         // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
             self.isPresentLoadingScreenView = false
@@ -822,19 +828,19 @@ final class ViewModel: ObservableObject {
         
         
         // 상점 로테이션 스킨 필터링하기
-        for storeSkinUUID in storeSkinsUUIDs {
+        for itemInfo in storeSkinsList.itemInfos {
             // 스킨 데이터를 저장할 변수 선언하기
             var filteredSkin: Skin?
             // 가격 데이터를 저장할 변수 선언하기
             var filteredBasePrice: Int?
             // 스킨 데이터 필터링하기
             if let firstSkinIndex = skins.firstIndex(where: {
-                $0.levels.first?.uuid == storeSkinUUID.uuid }) {
+                $0.levels.first?.uuid == itemInfo.uuid }) {
                 filteredSkin = skins[firstSkinIndex]
             }
             // 가격 데이터 필터링하기
             if let firstBasePriceIndex = prices.firstIndex(where: {
-                $0.offerID == storeSkinUUID.uuid }) {
+                $0.offerID == itemInfo.uuid }) {
                 filteredBasePrice = prices[firstBasePriceIndex].cost?.vp
             }
             
@@ -860,7 +866,7 @@ final class ViewModel: ObservableObject {
         // 접근 토큰 등 사용자 고유 정보 가져오기
         let reAuthTokens = try await self.getReAuthTokens().get()
         // 새롭게 로테이션 스킨 데이터 불러오기
-        let storeSkins = try await resourceManager.fetchStorefront(
+        let skinsPanelLayouts = try await resourceManager.fetchStorefront(
             accessToken: reAuthTokens.accessToken,
             riotEntitlement: reAuthTokens.riotEntitlement,
             puuid: reAuthTokens.puuid
@@ -868,13 +874,15 @@ final class ViewModel: ObservableObject {
         
         // 로테이션 갱신 시간을 UserDefaults에 저장하기
         self.storeSkinsExpriyDate = Date().addingTimeInterval(
-            Double(storeSkins.singleItemOffersRemainingDurationInSeconds)
+            Double(skinsPanelLayouts.singleItemOffersRemainingDurationInSeconds)
         ).timeIntervalSinceReferenceDate
         // Realm에 새로운 로테이션 스킨 데이터 저장하기 (스킨의 첫 번째 레벨의 UUID)
-        for uuid in storeSkins.singleItemOffers {
-            let storeSkin = StoreSkinsList(value: ["uuid": "\(uuid)"])
-            realmManager.create(storeSkin)
+        let storeSkinsList = StoreSkinsList()
+        for uuid in skinsPanelLayouts.singleItemOffers {
+            let rotationSkinInfo = RotationSkinInfo(value: ["uuid": "\(uuid)"])
+            storeSkinsList.itemInfos.append(rotationSkinInfo)
         }
+        realmManager.create(storeSkinsList)
     }
     
     // MARK: - GET STORE DATA - BUNDLE
@@ -882,24 +890,21 @@ final class ViewModel: ObservableObject {
     
     @MainActor
     func fetchStoreBundles() async throws {
-        // Realm에 저장되어 있는 기존 번들 스킨 데이터 삭제하기
-        realmManager.deleteAll(of: StoreBundlesList.self)
         // 시간을 저장하기 전 UserDefaults 초기화하기
         self.storeBundlesExpiryDate = []
+        // Realm에 저장되어 있는 기존 번들 스킨 데이터 삭제하기
+        realmManager.deleteAll(of: StoreBundlesList.self)
         
         // 접근 토큰 등 사용자 고유 정보 가져오기
         let reAuthTokens = try await self.getReAuthTokens().get()
         // 새롭게 번들 스킨 데이터 불러오기
-        let storeBundles = try await resourceManager.fetchStorefront(
+        let featureBundles = try await resourceManager.fetchStorefront(
             accessToken: reAuthTokens.accessToken,
             riotEntitlement: reAuthTokens.riotEntitlement,
             puuid: reAuthTokens.puuid
         ).get().featuredBundle
         
-        // For Debug
-        dump(storeBundles)
-        
-        for bundle in storeBundles.bundles {
+        for bundle in featureBundles.bundles {
             // 번들 갱신 시간을 UserDefaults에 저장하기
             let storeBundleExpiryDate = Date().addingTimeInterval(
                 Double(bundle.durationRemainingInSeconds)
@@ -908,17 +913,31 @@ final class ViewModel: ObservableObject {
             
             // Realm에 번들 스킨 데이터 저장하기
             let storeBundle = StoreBundlesList()
-//            storeBundle.imageUrl = // 이미지 URL 찾아 저장하기
-//
-//            for item in bundle.items {
-//                storeBundle.basePrice = item.basePrice
-//                storeBundle.discountedPrice = // 할인된 가격 저장하기
-//                // 스킨 UUID 저장하기
-//            }
+            storeBundle.uuid = bundle.uuid
+            storeBundle.basePrice = bundle.totalBasePrice?.vp ?? 0
+            storeBundle.discountedPrice = bundle.totalDiscountedPrice?.vp ?? 0
+            storeBundle.discountedPercent = bundle.totalDiscountPercent
+            
+            for item in bundle.items {
+                let bundleSkinInfo = BundleSkinInfo()
+                
+                // 아이템이 무기 스킨이 아니라면 (배너, 총기 장식 등이라면)
+                guard item.item.typeId == "e7c63390-eda7-46e0-bb7a-a6abdacd2433" else {
+                    // Realm에 저장하지 않기
+                    continue
+                }
+                
+                bundleSkinInfo.uuid = item.item.uuid
+                bundleSkinInfo.basePrice = item.basePrice
+                bundleSkinInfo.discountedPrice = item.discountedPrice
+                storeBundle.itemInfos.append(bundleSkinInfo)
+            }
+            
+            realmManager.create(storeBundle)
         }
         
-        // e7c63390-eda7-46e0-bb7a-a6abdacd2433  <- 총기 타입
         
+            // e7c63390-eda7-46e0-bb7a-a6abdacd2433  <- 총기 타입
     }
     
     

@@ -10,10 +10,10 @@ import RealmSwift
 
 final class WeaponSkins: Object, Codable {
     @Persisted var status: Int
-    @Persisted var skins: RealmSwift.List<Skin>
+    @Persisted var weaponSkins: RealmSwift.List<Skin>
     
     enum CodingKeys: String, CodingKey {
-        case skins = "data"
+        case weaponSkins = "data"
     }
 }
 

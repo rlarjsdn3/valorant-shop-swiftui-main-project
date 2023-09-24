@@ -82,7 +82,8 @@ struct FeaturedBundle: Codable {
 struct Bundle: Codable {
     let uuid: String
     let items: [Item]
-    let totalBaseCost, totalDiscountedCost: TotalBundleCost?
+    let totalBasePrice: TotalBundleCost?
+    let totalDiscountedPrice: TotalBundleCost?
     let totalDiscountPercent: Double
     let durationRemainingInSeconds: Int
     let wholeSaleOnly: Bool
@@ -90,8 +91,8 @@ struct Bundle: Codable {
     enum CodingKeys: String, CodingKey {
         case uuid = "DataAssetID"
         case items = "Items"
-        case totalBaseCost = "TotalBaseCost"
-        case totalDiscountedCost = "TotalDiscountedCost"
+        case totalBasePrice = "TotalBaseCost"
+        case totalDiscountedPrice = "TotalDiscountedCost"
         case totalDiscountPercent = "TotalDiscountPercent"
         case durationRemainingInSeconds = "DurationRemainingInSeconds"
         case wholeSaleOnly = "WholesaleOnly"
@@ -111,9 +112,11 @@ struct Item: Codable {
 }
 
 struct ItemUUID: Codable {
+    let typeId: String
     let uuid: String
 
     enum CodingKeys: String, CodingKey {
+        case typeId = "ItemTypeID"
         case uuid = "ItemID"
     }
 }

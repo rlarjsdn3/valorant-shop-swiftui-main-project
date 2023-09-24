@@ -299,8 +299,8 @@
 				9EB4C5662AB4A68500AE4425 /* StorePrices.swift */,
 				9E064C342ABC0D04004A5D96 /* PlayerID.swift */,
 				9E064C362ABC1F5E004A5D96 /* PlayerWallet.swift */,
-				9E064C322ABB34E1004A5D96 /* StoreSkinsList.swift */,
 				9EDCF0B82AC0086D0057772F /* StoreBundlesList.swift */,
+				9E064C322ABB34E1004A5D96 /* StoreSkinsList.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";

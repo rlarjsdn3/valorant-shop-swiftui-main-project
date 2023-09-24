@@ -7,6 +7,10 @@
 
 import RealmSwift
 
-final class storeSkinsList: Object, Codable {
-    @Persisted var uuid: String
+final class StoreSkinsList: Object {
+    @Persisted var itemInfos: RealmSwift.List<RotationSkinInfo>
+}
+
+final class RotationSkinInfo: EmbeddedObject {
+    @Persisted var uuid: String // 첫 번째 레벨의 UUID
 }

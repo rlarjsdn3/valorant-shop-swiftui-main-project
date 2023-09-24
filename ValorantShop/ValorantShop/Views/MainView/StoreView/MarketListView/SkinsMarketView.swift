@@ -64,7 +64,7 @@ struct SkinsMarketView: View {
                                             .resizable()
                                             .frame(width: 20, height: 20)
                                             .offset(y: 1)
-                                        Text("\(skinInfo.price)")
+                                        Text("\(skinInfo.price.basePrice)")
                                     }
                                     if let rankLogoName = skinInfo.skin.contentTier?.rankLogoName {
                                         Image(rankLogoName)

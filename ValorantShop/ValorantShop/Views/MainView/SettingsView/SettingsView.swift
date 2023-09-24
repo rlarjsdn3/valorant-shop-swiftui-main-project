@@ -62,10 +62,20 @@ struct SettingsView: View {
                     viewModel.timer?.invalidate()
                 }
                 Button("스킨 데이터 삭제") {
-                    viewModel.realmManager.deleteAll(of: RotatedWeaponSkins.self)
+                    viewModel.realmManager.deleteAll(of: StoreSkinsList.self)
                 }
                 Button("토큰 만료 시간 초기화") {
                     viewModel.accessTokenExpiryDate = 0.0
+                }
+                
+                Button("번들 정보 가져오기") {
+                    Task {
+                        do {
+                            try await viewModel.fetchStoreBundles()
+                        } catch {
+                            print("예외!")
+                        }
+                    }
                 }
                 // ---------------
             }
