@@ -44,7 +44,7 @@ struct OAuthView: View {
                 }
                 
                 Button("시간 되돌리기") {
-                    viewModel.storeSkinsExpriyDate = 717110000.0
+                    viewModel.storeSkinsExpiryDate = Date()
                 }
             } label: {
                 Text("개발자")

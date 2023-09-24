@@ -5,6 +5,7 @@
 //  Created by 김건우 on 2023/09/24.
 //
 
+import Foundation
 import RealmSwift
 
 final class StoreBundlesList: Object {
@@ -13,6 +14,7 @@ final class StoreBundlesList: Object {
     @Persisted var discountedPrice: Int
     @Persisted var discountedPercent: Double
     @Persisted var wholeSaleOnly: Bool
+    @Persisted var renewalDate: Date
     @Persisted var itemInfos: RealmSwift.List<BundleSkinInfo>
 }
 

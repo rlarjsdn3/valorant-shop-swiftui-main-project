@@ -13,6 +13,7 @@ enum ImageType: String {
     case weaponSkins
     case weaponSkinChromas
     case weaponSkinSwatchs
+    case bundles
     
     var path1: String {
         switch self {
@@ -22,6 +23,8 @@ enum ImageType: String {
             fallthrough
         case .weaponSkinSwatchs:
             return "weaponskinchromas"
+        case .bundles:
+            return "bundles"
         }
     }
     
@@ -33,6 +36,8 @@ enum ImageType: String {
             return "fullrender"
         case .weaponSkinSwatchs:
             return "swatch"
+        case .bundles:
+            return "displayicon"
         }
     }
     
@@ -44,6 +49,8 @@ enum ImageType: String {
             return "chroma"
         case .weaponSkinSwatchs:
             return "swatch"
+        case .bundles: // Not Use.
+            return "bundle"
         }
     }
 }

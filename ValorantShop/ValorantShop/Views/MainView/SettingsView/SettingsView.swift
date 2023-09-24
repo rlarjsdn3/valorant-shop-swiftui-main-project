@@ -58,7 +58,7 @@ struct SettingsView: View {
                 
                 // -- For Debug --
                 Button("시간 되돌리기") {
-                    viewModel.storeSkinsExpriyDate = 717110000.0
+                    viewModel.storeSkinsExpiryDate = Date()
                     viewModel.timer?.invalidate()
                 }
                 Button("스킨 데이터 삭제") {

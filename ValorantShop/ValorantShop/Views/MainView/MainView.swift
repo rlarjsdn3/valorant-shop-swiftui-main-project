@@ -37,12 +37,11 @@ struct MainView: View {
             CustomTabView()
         }
         .onAppear {
+            viewModel.getRenewalDate()
             // 현재 날짜 불러오기
             let currentDate = Date()
             // 로테이션 스킨 갱신 날짜 불러오기
-            let storeSkinExpiryDate = Date(
-                timeIntervalSinceReferenceDate: viewModel.storeSkinsExpriyDate
-            )
+            let storeSkinExpiryDate = viewModel.storeSkinsExpiryDate
             
             // ✏️ ①로그인을 하거나 ②갱신 날짜가 아직 유효할 때 앱을 켜면
             // ✏️ DB로부터 사용자 데이터를 갱신시키기 위해 아래 코드를 구현함.

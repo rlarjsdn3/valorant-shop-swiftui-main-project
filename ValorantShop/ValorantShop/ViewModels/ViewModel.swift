@@ -73,7 +73,7 @@ final class ViewModel: ObservableObject {
     @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
     @AppStorage(UserDefaults.lastUpdateCheckDate) var lastUpdateCheckDate: Double = Double.infinity
     @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
-    @AppStorage(UserDefaults.storeSkinsExpiryDate) var storeSkinsExpriyDate: Double = Double.infinity
+//    @AppStorage(UserDefaults.storeSkinsExpiryDate) var storeSkinsExpriyDate: Double = Double.infinity
     @AppStorage(UserDefaults.storeBundlesExpiryDate) var storeBundlesExpiryDate: [Double] = [Double.infinity]
     
     // MARK: - WRAPPER PROPERTIES
@@ -117,6 +117,7 @@ final class ViewModel: ObservableObject {
     
     // For StoreData
     @Published var storeSkins: StoreSkin = .init()
+    var storeSkinsExpiryDate: Date = Date(timeIntervalSinceReferenceDate: Double.infinity)
     @Published var storeSkinsRemainingTime: String = ""
     
     @Published var storeBundles: [StoreBundle] = []
@@ -146,7 +147,7 @@ final class ViewModel: ObservableObject {
         // 현재 날짜 불러오기
         let currentDate = Date()
         // 로테이션 스킨 갱신 날짜 불러오기
-        let rotatedWeaponSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: storeSkinsExpriyDate)
+        let rotatedWeaponSkinsRenewalDate = storeSkinsExpiryDate
         // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
         self.storeSkinsRemainingTime = self.remainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
         
@@ -294,7 +295,6 @@ final class ViewModel: ObservableObject {
         // 로그인 여부 및 사용자 정보 삭제하기
         withAnimation(.spring()) { self.isLoggedIn = false }
         self.accessTokenExpiryDate = Double.infinity
-        self.storeSkinsExpriyDate = Double.infinity
         self.storeBundlesExpiryDate = [Double.infinity]
         self.realmManager.deleteAll(of: PlayerID.self)
         self.realmManager.deleteAll(of: PlayerWallet.self)
@@ -603,11 +603,21 @@ final class ViewModel: ObservableObject {
     // MARK: - GET PLAYER DATA
     
     @MainActor
+    func getRenewalDate() {
+        // 스킨 갱신 날짜 불러오기
+        if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
+            self.storeSkinsExpiryDate = renewalDate
+        }
+    }
+    
+    @MainActor
     func getPlayerData(forceLoad: Bool = false) async {
         // 사용자ID 등 사용자 데이터 불러오기
         await self.getPlayerID(forceLoad: forceLoad)
         await self.getPlayerWallet(forceLoad: forceLoad)
+        await self.getStoreBundles(forceLoad: forceLoad)
         await self.getStoreSkins(forceLoad: forceLoad)
+        
         // ✏️ 사용자에게 화면이 보여지고 나서도
         // ✏️ 어색하게 갑작스레 뷰가 리-렌더링되는 모습을 숨기고자 1초 딜레이를 둠.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -773,7 +783,7 @@ final class ViewModel: ObservableObject {
     @MainActor
     func getStoreSkins(forceLoad: Bool = false) async {
         // Realm에 저장된 로테이션 스킨 데이터 불러오기
-        var skins = realmManager.read(of: StoreSkinsList.self)
+        let skins = realmManager.read(of: StoreSkinsList.self)
         // 강제로 다시 불러오지 안는다면
         if !forceLoad {
             // Realm에 저장된 로테이션 스킨 데이터가 있다면
@@ -873,13 +883,19 @@ final class ViewModel: ObservableObject {
         ).get().skinsPanelLayout
         
         // 로테이션 갱신 시간을 UserDefaults에 저장하기
-        self.storeSkinsExpriyDate = Date().addingTimeInterval(
+        self.storeSkinsExpiryDate = Date().addingTimeInterval(
             Double(skinsPanelLayouts.singleItemOffersRemainingDurationInSeconds)
-        ).timeIntervalSinceReferenceDate
-        // Realm에 새로운 로테이션 스킨 데이터 저장하기 (스킨의 첫 번째 레벨의 UUID)
+        )
+        // Realm에 새로운 로테이션 스킨 데이터 저장하기
         let storeSkinsList = StoreSkinsList()
+        // 로테이션 스킨 갱신 날짜 저장하기
+        storeSkinsList.renewalDate = Date().addingTimeInterval(
+            Double(skinsPanelLayouts.singleItemOffersRemainingDurationInSeconds)
+        )
         for uuid in skinsPanelLayouts.singleItemOffers {
-            let rotationSkinInfo = RotationSkinInfo(value: ["uuid": "\(uuid)"])
+            // 첫 번째 레벨의 UUID 저장하기
+            let rotationSkinInfo = RotationSkinInfo()
+            rotationSkinInfo.uuid = uuid
             storeSkinsList.itemInfos.append(rotationSkinInfo)
         }
         realmManager.create(storeSkinsList)
@@ -934,10 +950,10 @@ final class ViewModel: ObservableObject {
             return
         }
         // Realm으로부터 가격 데이터 불러오기
-        guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
-            self.isPresentLoadingScreenView = false
-            return
-        }
+        //guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
+        //    self.isPresentLoadingScreenView = false
+        //    return
+        //}
         
         // 번들 정보를 저장할 변수 선언하기
         var storeBundles: [StoreBundle] = []
@@ -956,24 +972,27 @@ final class ViewModel: ObservableObject {
                 // 스킨 데이터를 저장할 변수 선언하기
                 var filteredSkin: Skin?
                 // 가격 데이터를 저장할 변수 선언하기
-                var filteredBasePrice: Int?
+                //var filteredBasePrice: Int?
                 // 스킨 데이터 필터링하기
                 if let firstSkinIndex = skins.firstIndex(where: {
                     $0.levels.first?.uuid == itemInfo.uuid }) {
                     filteredSkin = skins[firstSkinIndex]
                 }
                 // 가격 데이터 필터링하기
-                if let firstBasePriceIndex = prices.firstIndex(where: {
-                    $0.offerID == itemInfo.uuid }) {
-                    filteredBasePrice = prices[firstBasePriceIndex].cost?.vp
-                }
+                //if let firstBasePriceIndex = prices.firstIndex(where: {
+                //    $0.offerID == itemInfo.uuid }) {
+                //    filteredBasePrice = prices[firstBasePriceIndex].cost?.vp
+                //}
                 
                 // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
-                guard let skin = filteredSkin,
-                      let basePrice = filteredBasePrice else {
+                guard let skin = filteredSkin
+                     /* let basePrice = filteredBasePrice */ else {
                     continue
                 }
-                let price = Price(basePrice: basePrice)
+                let price = Price(
+                    basePrice: itemInfo.basePrice,
+                    discountedPrice: itemInfo.discountedPrice
+                )
                 let skinInfo = SkinInfo(skin: skin, price: price)
                 storeBundle.skinInfos.append(skinInfo)
             }
@@ -1006,7 +1025,9 @@ final class ViewModel: ObservableObject {
             let storeBundleExpiryDate = Date().addingTimeInterval(
                 Double(bundle.durationRemainingInSeconds)
             ).timeIntervalSinceReferenceDate
-            storeBundlesExpiryDate.append(storeBundleExpiryDate)
+            self.storeBundlesExpiryDate.append(storeBundleExpiryDate)
+            
+            print(self.storeBundlesExpiryDate)
             
             // Realm에 번들 스킨 데이터 저장하기
             let storeBundle = StoreBundlesList()
@@ -1032,9 +1053,6 @@ final class ViewModel: ObservableObject {
             
             realmManager.create(storeBundle)
         }
-        
-        
-            // e7c63390-eda7-46e0-bb7a-a6abdacd2433  <- 총기 타입
     }
     
     
@@ -1054,15 +1072,15 @@ final class ViewModel: ObservableObject {
     
     private func isExpired(of type: ExpiryDateTye) -> Bool {
         // 현재 날짜 불러오기
-        let currentDate = Date().timeIntervalSinceReferenceDate
+        let currentDate = Date()
         // 체크해야 할 갱신 시간 체크하기
         switch type {
         case .token:
             // 토큰 갱신 시간이 지났다면
-            return currentDate > accessTokenExpiryDate ? true : false
+            return Date().timeIntervalSinceReferenceDate > accessTokenExpiryDate ? true : false
         case .skin:
             // 로테이션 갱신 시간이 지났다면
-            return currentDate > storeSkinsExpriyDate ? true : false
+            return currentDate > storeSkinsExpiryDate ? true : false
         case .bundle:
             return false // + 임시
         case .bonus:
@@ -1084,14 +1102,12 @@ final class ViewModel: ObservableObject {
     @objc func updateStoreSkinsRemainingTime(_ timer: Timer? = nil) {
         // 현재 날짜 불러오기
         let currentDate = Date()
-        // 로테이션 스킨 갱신 날짜 불러오기
-        let storeSkinsExpiryDate = Date(timeIntervalSinceReferenceDate: storeSkinsExpriyDate)
         
         // ✏️ ①앱이 켜져 있는 동안 로테이션 스킨 갱신 날짜에 다다를 때 ②다음 날 아침에 앱을 켜면
         // ✏️ 자동으로 사용자 데이터를 갱신시키기 위해 아래 코드를 구현함.
         
         // 로테이션 갱신 날짜에 다다르고, 로그인이 되어 있으면
-        if currentDate > storeSkinsExpiryDate && self.isLoggedIn && self.isIntialGettingPlayerDataInTimer {
+        if currentDate > self.storeSkinsExpiryDate && self.isLoggedIn && self.isIntialGettingPlayerDataInTimer {
             // For Debug
             print("플레이어 데이터 갱신하기 - Timer")
             
@@ -1103,7 +1119,7 @@ final class ViewModel: ObservableObject {
             }
         }
         
-        // 결과 업데이트하기
+        // 시간 업데이트하기
         self.storeSkinsRemainingTime = self.remainingTimeString(from: currentDate, to: storeSkinsExpiryDate)
     }
     
