@@ -57,13 +57,23 @@ struct SettingsView: View {
                 }
                 
                 // -- For Debug --
-                Button("시간 되돌리기") {
+                Button("로테이션 시간 되돌리기") {
                     let skin = viewModel.realmManager.read(of: StoreSkinsList.self)
                     try! viewModel.realmManager.realm.write {
                         skin[0].renewalDate = Date().addingTimeInterval(-2 * 3600 * 24)
                     }
-                    viewModel.storeSkinsTimer?.invalidate()
+                    Task {
+                        await viewModel.getStoreSkins()
+                    }
                 }
+                
+                Button("번들 시간 되돌리기") {
+                    let skin = viewModel.realmManager.read(of: StoreBundlesList.self)
+                    try! viewModel.realmManager.realm.write {
+                        skin[0].renewalDate = Date().addingTimeInterval(-2 * 3600 * 24)
+                    }
+                }
+                
                 Button("스킨 데이터 삭제") {
                     viewModel.realmManager.deleteAll(of: StoreSkinsList.self)
                 }

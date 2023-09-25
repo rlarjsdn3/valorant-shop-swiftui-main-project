@@ -17,9 +17,9 @@ struct MainView: View {
     
     let realmManager: RealmManager = RealmManager.shared
     
-    let didBecomeActiveNotification = NotificationCenter.default.publisher(
-        for: UIApplication.didBecomeActiveNotification
-    )
+    let didEnterBackgroundNotification = NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+    
+    let willEnterForegroundNotification = NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
     
     // MARK: - BODY
     
@@ -39,74 +39,118 @@ struct MainView: View {
             CustomTabView()
         }
         .onAppear {
-//            print("onAppear")
-//            viewModel.getRenewalDate()
-            // 현재 날짜 불러오기
-//            let currentDate = Date()
-//            // 로테이션 스킨 갱신 날짜가 있다면 (데이터가 존재한다면)
-//            if let storeSkinRenewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
-//                // 로테이션 스킨 갱신까지 시간이 남아있으면
-//                if currentDate < storeSkinRenewalDate {
-//                    print("플레이어 데이터 가져오기 - OnAppear (로테이션 스킨)")
-//                    // 사용자 데이터 불러오기
-//                    Task {
-//                        await viewModel.getPlayerData()
-//                    }
-//                }
-//            // 로테이션 스킨 갱신 날짜가 없다면 (데이터가 존재하지 않는다면)
-//            } else {
-//                // 사용자 데이터 불러오기
-//                Task {
-//                    await viewModel.getPlayerData()
-//                }
-//            }
-//            
-//            let storeBundles = realmManager.read(of: StoreBundlesList.self)
-//            for bundle in storeBundles {
-//                if currentDate < bundle.renewalDate {
-//                    
-//                }
-//            }
-            
-            // ✏️ ①로그인을 하거나 ②갱신 날짜가 아직 유효할 때 앱을 켜면
-            // ✏️ DB로부터 사용자 데이터를 갱신시키기 위해 아래 코드를 구현함.
-            
-            // For Debug
-//            print(currentDate, storeSkinExpiryDate)
-            
-            // 로테이션 갱신 날짜가 아직 유효하다면
-            
-        }
-        .onReceive(didBecomeActiveNotification) { _ in
-            withAnimation(.spring()) {
-                viewModel.isPresentLoadingScreenView = true
+            // 사용자ID 등 기본적인 정보 불러오기
+            Task {
+                await viewModel.getPlayerID(forceLoad: true)
+                await viewModel.getPlayerWallet(forceLoad: true)
             }
-            // ✏️ 앱으로 들어오면 서버로부터 최신 데이터가 있는지 확인함.
+            
+            // 로테이션 스킨 갱신 날짜 불러오기
+            if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
+                viewModel.storeSkinsRenewalDate = renewalDate
+            }
+            // 번들 스킨 갱신 날짜 불러오기
+            viewModel.storeBundlesRenewalDate = []
+            let storeBundles = realmManager.read(of: StoreBundlesList.self)
+            for bundle in storeBundles {
+                viewModel.storeBundlesRenewalDate.append(bundle.renewalDate)
+            }
+            
+            // 현재 날짜 불러오기
+            let currentDate = Date()
+            // 로테이션 스킨을 갱신할 필요가 없다면
+            if currentDate < viewModel.storeSkinsRenewalDate {
+                print("OnAppear: Skin - Realm에서 데이터 가져오기")
+                // Realm에서 데이터 가져오기
+                Task {
+                    await viewModel.getStoreSkins()
+                }
+            } else {
+                print("OnAppear: Skin - 서버에서 데이터 가져오기")
+                // 서버에서 데이터 가져오기
+                Task {
+                    await viewModel.getStoreSkins(forceLoad: true)
+                }
+            }
+            
+            // 번들 갱신이 필요한지 확인하는 변수 선언하기
+            var needRenewalBundles: Bool = false
+            // 각 번들을 순회해보며
+            for renewalDate in viewModel.storeBundlesRenewalDate {
+                // 번들 스킨을 갱신할 필요가 없다면
+                if currentDate < renewalDate {
+                    continue
+                // 번들 스킨을 갱신할 필요가 있다면
+                } else {
+                    needRenewalBundles = true; break
+                }
+            }
+            // 번들 스킨을 갱신할 필요가 없다면
+            if !needRenewalBundles {
+                print("OnAppear: Bundle - Realm에서 데이터 가져오기")
+                // Realm에서 데이터 가져오기
+                Task {
+                    await viewModel.getStoreBundles()
+                }
+            // 번들 스킨을 갱신할 필요가 있다면
+            } else {
+                print("OnAppear: Bundle - 서버에서 데이터 가져오기")
+                // 서버에서 데이터 가져오기
+                Task {
+                    await viewModel.getStoreBundles(forceLoad: true)
+                }
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                // 타이머 작동시키기
+                viewModel.storeSkinsTimer = Timer.scheduledTimer(
+                    withTimeInterval: 1.0,
+                    repeats: true,
+                    block: viewModel.updateStoreSkinsRemainingTime(_:)
+                )
+                viewModel.storeBundlesTimer = Timer.scheduledTimer(
+                    withTimeInterval: 1.0,
+                    repeats: true,
+                    block: viewModel.updateStoreBundlesRemainingTime(_:)
+                )
+                
+                withAnimation(.spring()) {
+                    // 로딩 스크린 가리기
+                    viewModel.isPresentLoadingScreenViewFromView = false
+                }
+            }
+        }
+        .onReceive(willEnterForegroundNotification) { _ in
+            print("WillEnterForeground: 발로란트 최신 데이터 확인하기")
+            // 최신 버전의 데이터가 존재하는지 확인하기
             Task {
                 await viewModel.checkValorantVersion()
             }
-            // ✏️ 앱이 완전히 꺼지지 않고, 백그라운드에 머무를 수 있기 때문에
-            // ✏️ 앱을 켜면 Timer에 의해 사용자 데이터를 불러올 수 있도록 해야함.
-            viewModel.isIntialGettingStoreSkinsData = false
+            // 앱 실행 중 자동으로 리로드될 수 있도록 변수에 새로운 값 넣기
             viewModel.isAutoReloadedStoreSkinsData = false
-            viewModel.isIntialGettingStoreBundlesData = false
             viewModel.isAutoReloadedStoreBundlesData = false
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
-        }
-        .overlay {
-            if viewModel.isPresentLoadingScreenView {
-                VStack {
-                    Text("Valorant Shop")
-                        .font(.custom("VALORANT-Regular", size: 30))
-                    ProgressView()
-                        .progressViewStyle(.circular)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                withAnimation(.spring()) {
+                    // 로딩 화면 가리기
+                    viewModel.isPresentLoadingScreenViewFromView = false
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(uiColor: UIColor.systemBackground))
             }
         }
-        .sheet(isPresented: $viewModel.isPresentDataUpdateView) {
+        .onReceive(didEnterBackgroundNotification) { _ in
+            // 로딩 화면 띄우기
+            viewModel.isPresentLoadingScreenViewFromView = true
+            viewModel.isPresentLoadingScreenViewFromSkinsTimer = true
+            viewModel.isPresentLoadingScreenViewFromBundlesTimer = true
+        }
+        .overlay {
+            if viewModel.isPresentLoadingScreenViewFromView ||
+                viewModel.isPresentLoadingScreenViewFromSkinsTimer ||
+                viewModel.isPresentLoadingScreenViewFromBundlesTimer {
+                LoadingView()
+            }
+        }
+        .fullScreenCover(isPresented: $viewModel.isPresentDataUpdateView) {
             DataDownloadView(of: .update)
         }
     }

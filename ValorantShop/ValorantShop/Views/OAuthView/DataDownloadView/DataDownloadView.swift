@@ -81,18 +81,21 @@ struct DataDownloadView: View {
         // For Test
         VStack {
             
-            HStack {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(.title2, weight: .bold))
-                        .foregroundColor(Color.primary)
+            if type == .download {
+                HStack {
+                    Button {
+                        // + 다운로드 중단 코드
+                        dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(.title2, weight: .bold))
+                            .foregroundColor(Color.primary)
+                    }
+                    
+                    Spacer()
                 }
-                
-                Spacer()
+                .padding()
             }
-            .padding()
             
             VStack(alignment: .leading) {
                 Text("Data")

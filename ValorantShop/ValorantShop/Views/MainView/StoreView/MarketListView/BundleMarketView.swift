@@ -14,8 +14,6 @@ struct BundleMarketView: View {
     
     @EnvironmentObject var viewModel: ViewModel
     
-    @State private var isShimmering: Bool = true
-    
     // MARK: - PROPERTIES
     
     
@@ -23,13 +21,13 @@ struct BundleMarketView: View {
     
     var body: some View {
         ScrollView {
-            VStack {
-                ForEach(viewModel.storeBundles, id: \.uuid) { bundle in
+            VStack(spacing: 45) {
+                ForEach(Array(zip(viewModel.storeBundles.indices, viewModel.storeBundles)), id: \.0) { index, bundle in
                     VStack(spacing: 20) {
                         
                         VStack(spacing: 11) {
                             HStack {
-                                Text("\(viewModel.storeSkinsRemainingTime)") // ❗️임시 코드
+                                Text("\(viewModel.storeBundlesReminingTime[index])") // ❗️임시 코드
                                 
                                 Spacer()
                             }
@@ -93,6 +91,7 @@ struct BundleMarketView: View {
                         }
                     }
                 }
+                
             }
             .padding(.vertical)
         }
