@@ -51,6 +51,8 @@
 		9EDCF0C22AC111D90057772F /* SkinCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0C12AC111D90057772F /* SkinCell.swift */; };
 		9EDCF0C82AC141A80057772F /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 9EDCF0C72AC141A80057772F /* Shimmer */; };
 		9EDCF0CA2AC1A17D0057772F /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0C92AC1A17D0057772F /* LoadingView.swift */; };
+		9EDCF0CC2AC1BB080057772F /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0CB2AC1BB080057772F /* DebugView.swift */; };
+		9EDCF0CE2AC1BEFA0057772F /* DBUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0CD2AC1BEFA0057772F /* DBUpdateView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -95,6 +97,8 @@
 		9EDCF0BE2AC043A40057772F /* Bundles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bundles.swift; sourceTree = "<group>"; };
 		9EDCF0C12AC111D90057772F /* SkinCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinCell.swift; sourceTree = "<group>"; };
 		9EDCF0C92AC1A17D0057772F /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+		9EDCF0CB2AC1BB080057772F /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
+		9EDCF0CD2AC1BEFA0057772F /* DBUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBUpdateView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,6 +239,8 @@
 			isa = PBXGroup;
 			children = (
 				9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */,
+				9EDCF0CD2AC1BEFA0057772F /* DBUpdateView.swift */,
+				9EDCF0CB2AC1BB080057772F /* DebugView.swift */,
 			);
 			path = SettingsView;
 			sourceTree = "<group>";
@@ -427,6 +433,7 @@
 				9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */,
 				9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */,
 				9E611D022ABED7F300D1A310 /* SkinsMarketView.swift in Sources */,
+				9EDCF0CC2AC1BB080057772F /* DebugView.swift in Sources */,
 				9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */,
 				9EB4C5652AB4A14700AE4425 /* Version.swift in Sources */,
 				9EDCF0C22AC111D90057772F /* SkinCell.swift in Sources */,
@@ -450,6 +457,7 @@
 				9E064C352ABC0D04004A5D96 /* PlayerID.swift in Sources */,
 				9EDCF0CA2AC1A17D0057772F /* LoadingView.swift in Sources */,
 				9EDCF0B92AC0086D0057772F /* StoreBundlesList.swift in Sources */,
+				9EDCF0CE2AC1BEFA0057772F /* DBUpdateView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
