@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+//import Combine
 
 struct BundleMarketView: View {
     
@@ -21,6 +22,9 @@ struct BundleMarketView: View {
     var body: some View {
         ScrollView {
             ForEach(viewModel.storeBundles, id: \.uuid) { bundle in
+                Text("스킨 시간: \(viewModel.storeSkinsRemainingTime.description)")
+                Text("\(viewModel.storeBundlesReminingTime.description)")
+                
                 let url = URL(string: "https://media.valorant-api.com/bundles/\(bundle.uuid)/displayicon.png")
                 AsyncImage(
                     url: url,

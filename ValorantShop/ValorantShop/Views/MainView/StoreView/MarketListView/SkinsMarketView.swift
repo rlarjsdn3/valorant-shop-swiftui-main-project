@@ -22,14 +22,6 @@ struct SkinsMarketView: View {
                     Text("\(viewModel.storeSkinsRemainingTime)")
                     
                     Spacer()
-                    
-                    Image("VP")
-                        .renderingMode(.template)
-                        .resizable()
-                        .frame(width: 20, height: 20)
-                        .offset(y: 1)
-                    
-                    Text("\(viewModel.vp)")
                 }
                 .fontWeight(.bold)
                 .padding(.horizontal)

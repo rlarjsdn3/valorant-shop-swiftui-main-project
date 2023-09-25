@@ -73,8 +73,6 @@ final class ViewModel: ObservableObject {
     @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
     @AppStorage(UserDefaults.lastUpdateCheckDate) var lastUpdateCheckDate: Double = Double.infinity
     @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
-//    @AppStorage(UserDefaults.storeSkinsExpiryDate) var storeSkinsExpriyDate: Double = Double.infinity
-    @AppStorage(UserDefaults.storeBundlesExpiryDate) var storeBundlesExpiryDate: [Double] = [Double.infinity]
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -117,11 +115,12 @@ final class ViewModel: ObservableObject {
     
     // For StoreData
     @Published var storeSkins: StoreSkin = .init()
-    var storeSkinsExpiryDate: Date = Date(timeIntervalSinceReferenceDate: Double.infinity)
-    @Published var storeSkinsRemainingTime: String = ""
+    @Published var storeSkinsRenewalDate: Date = Date(timeIntervalSinceReferenceDate: Double.infinity)
+    @Published var storeSkinsRemainingTime: String = "" //
     
     @Published var storeBundles: [StoreBundle] = []
-    @Published var storeBundlesReminingTime: [String] = []
+    @Published var storeBundlesRenewalDate: [Date] = []
+    @Published var storeBundlesReminingTime: [String] = [] //
     
     // For StoreView
     @Published var selectedStoreTab: StoreTabType = .skin
@@ -137,25 +136,46 @@ final class ViewModel: ObservableObject {
     let keychain = Keychain()
     
     // For Timer
-    weak var timer: Timer?
+    weak var storeSkinsTimer: Timer?
+    weak var storeBundlesTimer: Timer?
     let calendar = Calendar.current
-    var isIntialGettingPlayerDataInTimer: Bool = true
+    var isIntialGettingStoreSkinsData: Bool = false
+    var isAutoReloadedStoreSkinsData: Bool = false
+    var isIntialGettingStoreBundlesData: Bool = false
+    var isAutoReloadedStoreBundlesData: Bool = false
     
     // MARK: - INTIALIZER
     
     init() {
         // 현재 날짜 불러오기
         let currentDate = Date()
-        // 로테이션 스킨 갱신 날짜 불러오기
-        let rotatedWeaponSkinsRenewalDate = storeSkinsExpiryDate
+
+        if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
+            print("갱신 날짜: \(renewalDate)")
+            self.storeSkinsRenewalDate = renewalDate
+        }
+        
+        let storeBundles = realmManager.read(of: StoreBundlesList.self)
+        for bundle in storeBundles {
+            self.storeBundlesRenewalDate.append( bundle.renewalDate )
+        }
+        print(self.storeBundlesRenewalDate)
+        
         // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
-        self.storeSkinsRemainingTime = self.remainingTimeString(from: currentDate, to: rotatedWeaponSkinsRenewalDate)
+        self.storeSkinsRemainingTime = self.remainingTimeString(from: currentDate, to: self.storeSkinsRenewalDate)
+        
+        
         
         // 시간을 흐르게 하면서 스킨 데이터 새로고침 확인하기
-        timer = Timer.scheduledTimer(
+        storeSkinsTimer = Timer.scheduledTimer(
             withTimeInterval: 1.0,
             repeats: true,
             block: updateStoreSkinsRemainingTime(_:)
+        )
+        storeBundlesTimer = Timer.scheduledTimer(
+            withTimeInterval: 1.0,
+            repeats: true,
+            block: updateStoreBundlesRemainingTime(_:)
         )
     }
     
@@ -295,10 +315,12 @@ final class ViewModel: ObservableObject {
         // 로그인 여부 및 사용자 정보 삭제하기
         withAnimation(.spring()) { self.isLoggedIn = false }
         self.accessTokenExpiryDate = Double.infinity
-        self.storeBundlesExpiryDate = [Double.infinity]
+        self.storeSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: Double.infinity)
         self.realmManager.deleteAll(of: PlayerID.self)
         self.realmManager.deleteAll(of: PlayerWallet.self)
         self.realmManager.deleteAll(of: StoreSkinsList.self)
+        self.isIntialGettingStoreSkinsData = false
+        self.isAutoReloadedStoreSkinsData = false
         
         // 불러온 상점 데이터 삭제하기
         self.storeSkins = .init()
@@ -604,10 +626,14 @@ final class ViewModel: ObservableObject {
     
     @MainActor
     func getRenewalDate() {
-        // 스킨 갱신 날짜 불러오기
+        // 로테이션 스킨 갱신 날짜 불러오기
         if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
-            self.storeSkinsExpiryDate = renewalDate
+            print("날짜 갱신")
+            self.storeSkinsRenewalDate = renewalDate
         }
+        // 번들 스킨 갱신 날짜 불러오기
+        let storeBundlesList = realmManager.read(of: StoreBundlesList.self)
+        
     }
     
     @MainActor
@@ -615,8 +641,8 @@ final class ViewModel: ObservableObject {
         // 사용자ID 등 사용자 데이터 불러오기
         await self.getPlayerID(forceLoad: forceLoad)
         await self.getPlayerWallet(forceLoad: forceLoad)
-        await self.getStoreBundles(forceLoad: forceLoad)
         await self.getStoreSkins(forceLoad: forceLoad)
+        await self.getStoreBundles(forceLoad: forceLoad)
         
         // ✏️ 사용자에게 화면이 보여지고 나서도
         // ✏️ 어색하게 갑작스레 뷰가 리-렌더링되는 모습을 숨기고자 1초 딜레이를 둠.
@@ -837,6 +863,8 @@ final class ViewModel: ObservableObject {
             return
         }
         
+        // 상점 로테이션 스킨 갱신 날짜 변경하기
+        self.storeSkinsRenewalDate = storeSkinsList.renewalDate
         // 상점 로테이션 스킨 필터링하기
         for itemInfo in storeSkinsList.itemInfos {
             // 스킨 데이터를 저장할 변수 선언하기
@@ -882,10 +910,6 @@ final class ViewModel: ObservableObject {
             puuid: reAuthTokens.puuid
         ).get().skinsPanelLayout
         
-        // 로테이션 갱신 시간을 UserDefaults에 저장하기
-        self.storeSkinsExpiryDate = Date().addingTimeInterval(
-            Double(skinsPanelLayouts.singleItemOffersRemainingDurationInSeconds)
-        )
         // Realm에 새로운 로테이션 스킨 데이터 저장하기
         let storeSkinsList = StoreSkinsList()
         // 로테이션 스킨 갱신 날짜 저장하기
@@ -1006,8 +1030,6 @@ final class ViewModel: ObservableObject {
     
     @MainActor
     func fetchStoreBundles() async throws {
-        // 시간을 저장하기 전 UserDefaults 초기화하기
-        self.storeBundlesExpiryDate = []
         // Realm에 저장되어 있는 기존 번들 스킨 데이터 삭제하기
         realmManager.deleteAll(of: StoreBundlesList.self)
         
@@ -1021,20 +1043,16 @@ final class ViewModel: ObservableObject {
         ).get().featuredBundle
         
         for bundle in featureBundles.bundles {
-            // 번들 갱신 시간을 UserDefaults에 저장하기
-            let storeBundleExpiryDate = Date().addingTimeInterval(
-                Double(bundle.durationRemainingInSeconds)
-            ).timeIntervalSinceReferenceDate
-            self.storeBundlesExpiryDate.append(storeBundleExpiryDate)
-            
-            print(self.storeBundlesExpiryDate)
-            
             // Realm에 번들 스킨 데이터 저장하기
             let storeBundle = StoreBundlesList()
             storeBundle.uuid = bundle.uuid
             storeBundle.basePrice = bundle.totalBasePrice?.vp ?? 0
             storeBundle.discountedPrice = bundle.totalDiscountedPrice?.vp ?? 0
             storeBundle.discountedPercent = bundle.totalDiscountPercent
+            // 번들 갱신 시간을 Realm에 저장하기
+            storeBundle.renewalDate = Date().addingTimeInterval(
+                Double(bundle.durationRemainingInSeconds)
+            )
             
             for item in bundle.items {
                 let bundleSkinInfo = BundleSkinInfo()
@@ -1055,10 +1073,6 @@ final class ViewModel: ObservableObject {
         }
     }
     
-    
-    
-    
-    
     // MARK: - GET STORE DATA - BONUS
     
     
@@ -1068,7 +1082,7 @@ final class ViewModel: ObservableObject {
     
     
     
-    
+    // ...
     
     private func isExpired(of type: ExpiryDateTye) -> Bool {
         // 현재 날짜 불러오기
@@ -1080,7 +1094,7 @@ final class ViewModel: ObservableObject {
             return Date().timeIntervalSinceReferenceDate > accessTokenExpiryDate ? true : false
         case .skin:
             // 로테이션 갱신 시간이 지났다면
-            return currentDate > storeSkinsExpiryDate ? true : false
+            return currentDate > storeSkinsRenewalDate ? true : false
         case .bundle:
             return false // + 임시
         case .bonus:
@@ -1099,28 +1113,82 @@ final class ViewModel: ObservableObject {
     
     // MARK: - TIMER
     
+    // ❗️ 미완성 코드
+    
     @objc func updateStoreSkinsRemainingTime(_ timer: Timer? = nil) {
+        // ✏️ ①앱을 새로 켜거나 ②실행 중 갱신 시간에 다다르면 자동으로 스킨 데이터를 갱신하기 위해 아래 코드를 구현함.
+        
         // 현재 날짜 불러오기
         let currentDate = Date()
-        
-        // ✏️ ①앱이 켜져 있는 동안 로테이션 스킨 갱신 날짜에 다다를 때 ②다음 날 아침에 앱을 켜면
-        // ✏️ 자동으로 사용자 데이터를 갱신시키기 위해 아래 코드를 구현함.
+        // 로테이션 갱신 날짜가 남아있고, 로그인이 되어 있으면
+        if currentDate < self.storeSkinsRenewalDate && self.isLoggedIn && !self.isIntialGettingStoreSkinsData {
+            // - For Debug -----
+            print("플레이어 데이터 갱신하기 - Timer 1")
+            // -----------------
+            
+            // 플레이어 데이터 강제로 불러오기
+            Task {
+                await self.getPlayerData()
+            }
+            // ✏️ 아래 변수를 false로 바꾸지 않으면 불필요한 서버 호출이 발생할 수 있음. (함수 호출이 완료되는 데 시간이 걸리기 때문)
+            self.isIntialGettingStoreSkinsData = true
+        }
         
         // 로테이션 갱신 날짜에 다다르고, 로그인이 되어 있으면
-        if currentDate > self.storeSkinsExpiryDate && self.isLoggedIn && self.isIntialGettingPlayerDataInTimer {
-            // For Debug
-            print("플레이어 데이터 갱신하기 - Timer")
+        if currentDate > self.storeSkinsRenewalDate && self.isLoggedIn && !self.isAutoReloadedStoreSkinsData {
+            // - For Debug -----
+            print("플레이어 데이터 갱신하기 - Timer 2")
+            // -----------------
             
-            // ✏️ 아래 변수를 false로 바꾸지 않으면 불필요한 서버 호출이 발생할 수 있음. (이는 Timer와 호출이 완료되는 시간(비동기) 특성에 기인함)
-            self.isIntialGettingPlayerDataInTimer = false
             // 플레이어 데이터 강제로 불러오기
             Task {
                 await self.getPlayerData(forceLoad: true)
             }
+            // ✏️ 아래 변수를 false로 바꾸지 않으면 불필요한 서버 호출이 발생할 수 있음. (함수 호출이 완료되는 데 시간이 걸리기 때문)
+            self.isIntialGettingStoreSkinsData = true
+            self.isAutoReloadedStoreSkinsData = true
         }
         
         // 시간 업데이트하기
-        self.storeSkinsRemainingTime = self.remainingTimeString(from: currentDate, to: storeSkinsExpiryDate)
+        self.storeSkinsRemainingTime = self.remainingTimeString(from: currentDate, to: self.storeSkinsRenewalDate)
+    }
+    
+    @objc func updateStoreBundlesRemainingTime(_ timer: Timer? = nil) {
+        // ✏️ ①앱을 새로 켜거나 ②실행 중 갱신 시간에 다다르면 자동으로 스킨 데이터를 갱신하기 위해 아래 코드를 구현함.
+        // ✏️ 번들은 1개일 수도 있고, 2개 이상일 수도 있기 때문에 하나라도 요건에 충족되면 스킨 데이터를 갱신함.
+        
+        // 현재 날짜 불러오기
+        let currentDate = Date()
+        
+
+        
+//        if currentDate < self.storeSkinsRenewalDate && self.isLoggedIn && self.isIntialGettingPlayerDataInTimer {
+//            // For Debug
+//            print("플레이어 데이터 갱신하기 - Timer 1")
+//            // 플레이어 데이터 강제로 불러오기
+//            Task {
+//                await self.getPlayerData()
+//            }
+//            self.isIntialGettingPlayerDataInTimer = false
+//        }
+//
+//        // 로테이션 갱신 날짜에 다다르고, 로그인이 되어 있으면
+//        if currentDate > self.storeSkinsRenewalDate && self.isLoggedIn {
+//            // For Debug
+//            print("플레이어 데이터 갱신하기 - Timer 2")
+//            // 플레이어 데이터 강제로 불러오기
+//            Task {
+//                await self.getPlayerData(forceLoad: true)
+//            }
+//            // ✏️ 아래 변수를 false로 바꾸지 않으면 불필요한 서버 호출이 발생할 수 있음.
+//            self.isIntialGettingPlayerDataInTimer = false
+//        }
+        
+        
+        self.storeBundlesReminingTime = []
+        for bundle in storeBundlesRenewalDate {
+            storeBundlesReminingTime.append(self.remainingTimeString(from: currentDate, to: bundle))
+        }
     }
     
     // MARK: - ETC
