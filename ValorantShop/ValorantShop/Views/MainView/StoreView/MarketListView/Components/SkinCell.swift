@@ -65,9 +65,8 @@ struct SkinCell: View {
                         )
                 }
             }
-            .background(Color(uiColor: UIColor.systemBackground), in: RoundedRectangle(cornerRadius: 15))
+            .background(Color.systemBackground, in: RoundedRectangle(cornerRadius: 15))
             .clipped()
-            .padding()
         }
         .buttonStyle(.plain)
     }

@@ -49,6 +49,7 @@
 		9EDCF0BD2AC011A40057772F /* Array+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0BC2AC011A40057772F /* Array+Extension.swift */; };
 		9EDCF0BF2AC043A40057772F /* Bundles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0BE2AC043A40057772F /* Bundles.swift */; };
 		9EDCF0C22AC111D90057772F /* SkinCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0C12AC111D90057772F /* SkinCell.swift */; };
+		9EDCF0C82AC141A80057772F /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 9EDCF0C72AC141A80057772F /* Shimmer */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -100,6 +101,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E611CE12ABDDD9C00D1A310 /* AZVideoPlayer in Frameworks */,
+				9EDCF0C82AC141A80057772F /* Shimmer in Frameworks */,
 				9E266EB62AB34E8B00178F25 /* RealmSwift in Frameworks */,
 				9E266EB42AB34E8B00178F25 /* Realm in Frameworks */,
 				9E266EB12AB34E6B00178F25 /* KeychainAccess in Frameworks */,
@@ -345,6 +347,7 @@
 				9E266EB32AB34E8B00178F25 /* Realm */,
 				9E266EB52AB34E8B00178F25 /* RealmSwift */,
 				9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */,
+				9EDCF0C72AC141A80057772F /* Shimmer */,
 			);
 			productName = ValorantShop;
 			productReference = 9E2922842AB0A9D200D6FE07 /* ValorantShop.app */;
@@ -378,6 +381,8 @@
 				9E266EAF2AB34E6B00178F25 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				9E266EB22AB34E8B00178F25 /* XCRemoteSwiftPackageReference "realm-swift" */,
 				9E611CDF2ABDDD9C00D1A310 /* XCRemoteSwiftPackageReference "AZVideoPlayer" */,
+				9EDCF0C32AC140850057772F /* XCRemoteSwiftPackageReference "CachedAsyncImage" */,
+				9EDCF0C62AC141A80057772F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
 			);
 			productRefGroup = 9E2922852AB0A9D200D6FE07 /* Products */;
 			projectDirPath = "";
@@ -677,6 +682,22 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		9EDCF0C32AC140850057772F /* XCRemoteSwiftPackageReference "CachedAsyncImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/bullinnyc/CachedAsyncImage";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		9EDCF0C62AC141A80057772F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/markiv/SwiftUI-Shimmer";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -699,6 +720,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9E611CDF2ABDDD9C00D1A310 /* XCRemoteSwiftPackageReference "AZVideoPlayer" */;
 			productName = AZVideoPlayer;
+		};
+		9EDCF0C72AC141A80057772F /* Shimmer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9EDCF0C62AC141A80057772F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
+			productName = Shimmer;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

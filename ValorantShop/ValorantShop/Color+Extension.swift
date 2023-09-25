@@ -13,6 +13,10 @@ extension Color {
         Color(uiColor: UIColor.systemBackground)
     }
     
+    static var secondarySystemBackground: Color {
+        Color(uiColor: UIColor.secondarySystemBackground)
+    }
+    
     static var valorant: Color {
         Color(red: 235.0 / 255.0, green: 86.0 / 255.0, blue: 91.0 / 255.0)
     }

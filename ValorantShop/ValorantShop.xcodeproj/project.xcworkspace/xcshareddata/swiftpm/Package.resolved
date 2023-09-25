@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "cachedasyncimage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bullinnyc/CachedAsyncImage",
+      "state" : {
+        "revision" : "66202c05e8b501358fc90f158034cc03f16670c7",
+        "version" : "1.4.0"
+      }
+    },
+    {
       "identity" : "keychainaccess",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kishikawakatsumi/KeychainAccess",
@@ -34,6 +43,15 @@
       "state" : {
         "branch" : "master",
         "revision" : "ecee9c56d1ce79a56aab3e8ad24cacaa0f14fcce"
+      }
+    },
+    {
+      "identity" : "swiftui-shimmer",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/markiv/SwiftUI-Shimmer",
+      "state" : {
+        "revision" : "1f3a620e4abe890d00008cb2af7023d810b433a7",
+        "version" : "1.4.0"
       }
     }
   ],

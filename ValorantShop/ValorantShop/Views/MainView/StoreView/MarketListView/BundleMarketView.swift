@@ -6,13 +6,15 @@
 //
 
 import SwiftUI
-//import Combine
+import Shimmer
 
 struct BundleMarketView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
     @EnvironmentObject var viewModel: ViewModel
+    
+    @State private var isShimmering: Bool = true
     
     // MARK: - PROPERTIES
     
@@ -23,7 +25,7 @@ struct BundleMarketView: View {
         ScrollView {
             VStack {
                 ForEach(viewModel.storeBundles, id: \.uuid) { bundle in
-                    VStack(spacing: 1) {
+                    VStack(spacing: 20) {
                         
                         VStack(spacing: 11) {
                             HStack {
@@ -36,20 +38,32 @@ struct BundleMarketView: View {
                             
                             AsyncImage(
                                 url: URL(string: ResourceURL.displayIcon(of: ImageType.bundles, uuid: bundle.uuid)),
-                                transaction: .init()
+                                transaction: .init(animation: .spring())
                             ) { phase in
                                 switch phase {
                                 case .success(let image):
                                     image
                                         .resizable()
-                                        .scaledToFit()
+                                        .frame(height: 180)
                                         .cornerRadius(15)
                                 case .failure(_):
-                                    EmptyView()
+                                    Color.systemBackground
+                                        .frame(height: 180)
+                                        .frame(maxWidth: .infinity)
+                                        .cornerRadius(15)
+                                        .shimmering()
                                 case .empty:
-                                    EmptyView()
+                                    Color.systemBackground
+                                        .frame(height: 180)
+                                        .frame(maxWidth: .infinity)
+                                        .cornerRadius(15)
+                                        .shimmering()
                                 @unknown default:
-                                    EmptyView()
+                                    Color.systemBackground
+                                        .frame(height: 180)
+                                        .frame(maxWidth: .infinity)
+                                        .cornerRadius(15)
+                                        .shimmering()
                                 }
                             }
                             .overlay(alignment: .bottomTrailing) {
@@ -68,13 +82,13 @@ struct BundleMarketView: View {
                                 .background(Color.systemBackground, in: Capsule())
                                 .padding(5)
                             }
-                            .clipped()
                             .padding(.horizontal)
                         }
                         
-                        VStack(spacing: -16) {
+                        VStack(spacing: 20) {
                             ForEach(bundle.skinInfos) { skinInfo in
                                 SkinCell(skinInfo)
+                                    .padding(.horizontal)
                             }
                         }
                     }
@@ -83,7 +97,7 @@ struct BundleMarketView: View {
             .padding(.vertical)
         }
         .frame(maxWidth: .infinity)
-        .background(Color(uiColor: UIColor.secondarySystemBackground))
+        .background(Color.secondarySystemBackground)
         .scrollIndicators(.hidden)
     }
 }

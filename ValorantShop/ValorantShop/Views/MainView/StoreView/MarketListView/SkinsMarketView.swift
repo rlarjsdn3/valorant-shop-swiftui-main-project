@@ -17,7 +17,7 @@ struct SkinsMarketView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: -5) {
+            VStack {
                 HStack {
                     Text("\(viewModel.storeSkinsRemainingTime)")
                     
@@ -26,9 +26,10 @@ struct SkinsMarketView: View {
                 .fontWeight(.bold)
                 .padding(.horizontal)
                 
-                VStack(spacing: -16) {
+                VStack(spacing: 20) {
                     ForEach(viewModel.storeSkins.skinInfos) { skinInfo in
                         SkinCell(skinInfo)
+                            .padding(.horizontal)
                     }
                 }
             }
