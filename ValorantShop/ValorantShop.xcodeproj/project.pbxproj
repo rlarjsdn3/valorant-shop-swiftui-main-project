@@ -48,6 +48,7 @@
 		9EDCF0B92AC0086D0057772F /* StoreBundlesList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0B82AC0086D0057772F /* StoreBundlesList.swift */; };
 		9EDCF0BD2AC011A40057772F /* Array+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0BC2AC011A40057772F /* Array+Extension.swift */; };
 		9EDCF0BF2AC043A40057772F /* Bundles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0BE2AC043A40057772F /* Bundles.swift */; };
+		9EDCF0C22AC111D90057772F /* SkinCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0C12AC111D90057772F /* SkinCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -90,6 +91,7 @@
 		9EDCF0B82AC0086D0057772F /* StoreBundlesList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreBundlesList.swift; sourceTree = "<group>"; };
 		9EDCF0BC2AC011A40057772F /* Array+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extension.swift"; sourceTree = "<group>"; };
 		9EDCF0BE2AC043A40057772F /* Bundles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bundles.swift; sourceTree = "<group>"; };
+		9EDCF0C12AC111D90057772F /* SkinCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -277,6 +279,7 @@
 				9E611D012ABED7F300D1A310 /* SkinsMarketView.swift */,
 				9E611D042ABED81100D1A310 /* BundleMarketView.swift */,
 				9E611D062ABED81700D1A310 /* NightMarketView.swift */,
+				9EDCF0C02AC111D00057772F /* Components */,
 			);
 			path = MarketListView;
 			sourceTree = "<group>";
@@ -311,6 +314,14 @@
 				9ED5095A2AB7358400149206 /* Valorant-Font.ttf */,
 			);
 			name = Fonts;
+			sourceTree = "<group>";
+		};
+		9EDCF0C02AC111D00057772F /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				9EDCF0C12AC111D90057772F /* SkinCell.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -410,6 +421,7 @@
 				9E611D022ABED7F300D1A310 /* SkinsMarketView.swift in Sources */,
 				9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */,
 				9EB4C5652AB4A14700AE4425 /* Version.swift in Sources */,
+				9EDCF0C22AC111D90057772F /* SkinCell.swift in Sources */,
 				9E611D072ABED81700D1A310 /* NightMarketView.swift in Sources */,
 				9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */,
 				9E064C372ABC1F5E004A5D96 /* PlayerWallet.swift in Sources */,

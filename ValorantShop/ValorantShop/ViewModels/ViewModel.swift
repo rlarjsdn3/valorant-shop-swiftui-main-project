@@ -544,17 +544,17 @@ final class ViewModel: ObservableObject {
                 let uuid = chroma.uuid
                 // 경로 설정하기
                 let chromaPath = documents.appending(path: makeImageFileName(of: ImageType.weaponSkinChromas, uuid: uuid)).path()
-                let swatchPath = documents.appending(path: makeImageFileName(of: ImageType.weaponSkinSwatchs, uuid: uuid)).path()
+                //let swatchPath = documents.appending(path: makeImageFileName(of: ImageType.weaponSkinSwatchs, uuid: uuid)).path()
                 // 파일 매니저의 경로에 해당 파일이 존재하지 않으면
                 if !fileManager.fileExists(atPath: chromaPath) {
                     // 저장되지 않은 스킨 UUID값 저장하기
                     notDownloadedImages.append((ImageType.weaponSkinChromas, uuid))
                 }
                 // 파일 매너지의 경로에 해당 파일이 존재하지 않으면
-                if !fileManager.fileExists(atPath: swatchPath) {
+                //if !fileManager.fileExists(atPath: swatchPath) {
                     // 저장되지 않은 스킨 UUID값 저장하기
-                    notDownloadedImages.append((ImageType.weaponSkinSwatchs, uuid))
-                }
+                //    notDownloadedImages.append((ImageType.weaponSkinSwatchs, uuid))
+                //}
             }
         }
             

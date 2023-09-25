@@ -152,11 +152,15 @@ final class ResourceManager {
     
     // MARK: - SINGLETONE
     static let shared = ResourceManager()
-    private init() { }
+    private init() {
+        let configuration = URLSessionConfiguration.default
+        configuration.httpMaximumConnectionsPerHost = 50
+        self.urlSession = URLSession(configuration: configuration)
+    }
     
     // MARK: - PROPERTIES
     
-    var urlSession = URLSession.shared
+    var urlSession: URLSession
     
     // MARK: - FUNCTIONS
     
@@ -407,6 +411,7 @@ final class ResourceManager {
     func fetchSkinImageData(of type: ImageType, uuid: String) async -> Result<Data, ResourceError> {
         // For Debug
         print(#function)
+        urlSession.configuration.httpMaximumConnectionsPerHost = 50
         
         // URL 만들기
         guard let url = URL(string: ResourceURL.displayIcon(of: type, uuid: uuid)) else { return .failure(.urlError) }

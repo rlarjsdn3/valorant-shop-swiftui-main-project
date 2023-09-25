@@ -132,7 +132,7 @@ struct DataDownloadView: View {
             .padding()
             
             Button {
-                Task {
+                Task(priority: .high) {
                     switch type {
                     case .update:
                         await viewModel.downloadValorantData(update: true)

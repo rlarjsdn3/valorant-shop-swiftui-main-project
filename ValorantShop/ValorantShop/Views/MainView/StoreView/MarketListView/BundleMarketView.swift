@@ -21,36 +21,70 @@ struct BundleMarketView: View {
     
     var body: some View {
         ScrollView {
-            ForEach(viewModel.storeBundles, id: \.uuid) { bundle in
-                Text("스킨 시간: \(viewModel.storeSkinsRemainingTime.description)")
-                Text("\(viewModel.storeBundlesReminingTime.description)")
-                
-                let url = URL(string: "https://media.valorant-api.com/bundles/\(bundle.uuid)/displayicon.png")
-                AsyncImage(
-                    url: url,
-                    transaction: .init()
-                ) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFit()
-                    case .failure(_):
-                        EmptyView()
-                    case .empty:
-                        EmptyView()
-                    @unknown default:
-                        EmptyView()
+            VStack {
+                ForEach(viewModel.storeBundles, id: \.uuid) { bundle in
+                    VStack(spacing: 1) {
+                        
+                        VStack(spacing: 11) {
+                            HStack {
+                                Text("\(viewModel.storeSkinsRemainingTime)") // ❗️임시 코드
+                                
+                                Spacer()
+                            }
+                            .fontWeight(.bold)
+                            .padding(.horizontal)
+                            
+                            AsyncImage(
+                                url: URL(string: ResourceURL.displayIcon(of: ImageType.bundles, uuid: bundle.uuid)),
+                                transaction: .init()
+                            ) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .cornerRadius(15)
+                                case .failure(_):
+                                    EmptyView()
+                                case .empty:
+                                    EmptyView()
+                                @unknown default:
+                                    EmptyView()
+                                }
+                            }
+                            .overlay(alignment: .bottomTrailing) {
+                                HStack {
+                                    HStack(spacing: 5) {
+                                        Image("VP")
+                                            .renderingMode(.template)
+                                            .resizable()
+                                            .frame(width: 20, height: 20)
+                                        Text("\(bundle.bundleDiscountedPrice)")
+                                            .foregroundColor(Color.primary)
+                                    }
+                                }
+                                .padding(.vertical, 5)
+                                .padding(.horizontal, 10)
+                                .background(Color.systemBackground, in: Capsule())
+                                .padding(5)
+                            }
+                            .clipped()
+                            .padding(.horizontal)
+                        }
+                        
+                        VStack(spacing: -16) {
+                            ForEach(bundle.skinInfos) { skinInfo in
+                                SkinCell(skinInfo)
+                            }
+                        }
                     }
                 }
-                
-                ForEach(bundle.skinInfos) { skinInfo in
-                    Text("\(skinInfo.skin.displayName)")
-                    Text("\(skinInfo.price.basePrice)")
-                    Text("\(skinInfo.price.discountedPrice ?? -999)")
-                }
             }
+            .padding(.vertical)
         }
+        .frame(maxWidth: .infinity)
+        .background(Color(uiColor: UIColor.secondarySystemBackground))
+        .scrollIndicators(.hidden)
     }
 }
 
