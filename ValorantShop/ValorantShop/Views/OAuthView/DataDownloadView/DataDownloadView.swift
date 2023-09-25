@@ -22,6 +22,8 @@ struct DataDownloadView: View {
     
     @EnvironmentObject var viewModel: ViewModel
     
+    @State private var isDownloading: Bool = false
+    
     // MARK: - PROPERTIES
     
     let type: DataDownloadViewType
@@ -70,7 +72,7 @@ struct DataDownloadView: View {
             buttonLabel = "업데이트"
         case .download:
             titleText = "Downloading..."
-            descriptionText = "앱을 이용하기 위해 발로란트 상점 데이터를 먼저 다운로드해야 합니다. 이 작업은 몇 분 정도 소요됩니다."
+            descriptionText = "앱을 이용하기 위해 발로란트 상점 데이터를 먼저 다운로드해야 합니다. 이 작업은 몇 분 정도 소요됩니다.\n(약 100MB)"
             buttonLabel = "다운로드"
         }
     }
@@ -78,24 +80,24 @@ struct DataDownloadView: View {
     // MARK: - BODY
     
     var body: some View {
-        // For Test
         VStack {
             
-            if type == .download {
-                HStack {
-                    Button {
-                        // + 다운로드 중단 코드
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.system(.title2, weight: .bold))
-                            .foregroundColor(Color.primary)
-                    }
-                    
-                    Spacer()
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(.title2, weight: .bold))
+                        .foregroundColor(Color.primary)
                 }
-                .padding()
+                .opacity(type == .download ? 1 : 0)
+                .disabled(type == .download ? false : true)
+                
+                Spacer()
             }
+            .padding()
+            .opacity(isDownloading ? 0 : 1)
+            .disabled(isDownloading)
             
             VStack(alignment: .leading) {
                 Text("Data")
@@ -135,6 +137,8 @@ struct DataDownloadView: View {
             .padding()
             
             Button {
+                isDownloading.toggle()
+                
                 Task(priority: .high) {
                     switch type {
                     case .update:
@@ -160,6 +164,7 @@ struct DataDownloadView: View {
                 .padding(.vertical, hasBezel ? 20 : 0)
             }
             .modifier(ShakeEffect(animatableData: viewModel.downloadButtonShakeAnimation))
+            .disabled(isDownloading)
         }
         .onDisappear {
             viewModel.downloadingErrorText = ""

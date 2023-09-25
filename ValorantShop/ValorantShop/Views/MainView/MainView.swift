@@ -39,6 +39,11 @@ struct MainView: View {
             CustomTabView()
         }
         .onAppear {
+            // 최신 버전의 데이터가 존재하는지 확인하기
+            Task {
+                await viewModel.checkValorantVersion()
+            }
+            
             // 사용자ID 등 기본적인 정보 불러오기
             Task {
                 await viewModel.getPlayerID(forceLoad: true)

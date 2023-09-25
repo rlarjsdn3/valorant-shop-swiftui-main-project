@@ -410,12 +410,10 @@ final class ViewModel: ObservableObject {
             // 로딩 버튼 보이게 하기
             withAnimation(.spring()) { self.isLoadingDataDownloading = true }
             //
-            self.imagesToDownload = 4
+            self.imagesToDownload = 3
             // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
             // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
             self.storeSkins.skinInfos = []
-            // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadValorantVersion(); self.downloadedImages += 1
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
             try await self.downloadBundlesData(); self.downloadedImages += 1
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
@@ -446,8 +444,13 @@ final class ViewModel: ObservableObject {
                         self.isLoadingDataDownloading = false
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        Task {
+                            // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
+                            try await self.downloadValorantVersion()
+                        }
                         // 다운로드 화면을 가리기
                         self.isPresentDataDownloadView = false
+                        self.isPresentDataUpdateView = false
                         // ✏️ false로 수정해주지 않으면 상점 화면에 진입하면 다운로드 풀스크린 커버가 나타남.
                         // ✏️ 팝 내비게이션 스택 애니메이션이 보이게 하지 않기 위해 1촣 딜레이를 둠.
                     }
@@ -1114,8 +1117,6 @@ final class ViewModel: ObservableObject {
     
     // MARK: - TIMER
     
-    // ❗️ 미완성 코드
-    
     @objc func updateStoreSkinsRemainingTime(_ timer: Timer? = nil) {
         // 현재 날짜 불러오기
         let currentDate = Date()
@@ -1145,8 +1146,6 @@ final class ViewModel: ObservableObject {
     }
     
     @objc func updateStoreBundlesRemainingTime(_ timer: Timer? = nil) {
-        print("타이머 작동 중 - Skin")
-        
         // 현재 날짜 불러오기
         let currentDate = Date()
         // 각 번들을 순회해보며
@@ -1183,8 +1182,6 @@ final class ViewModel: ObservableObject {
     }
     
     private func remainingSkinsTimeString(from date1: Date, to date2: Date) -> String {
-        print("타이머 작동 중 - Bundle")
-        
         // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
         let dateComponents = self.calendar.dateComponents(
             [.hour, .minute, .second],

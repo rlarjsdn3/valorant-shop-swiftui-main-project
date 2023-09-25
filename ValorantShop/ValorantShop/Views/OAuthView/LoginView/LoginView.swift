@@ -150,6 +150,7 @@ struct LoginView: View {
                     }
                     .padding(.top, 1)
                     .offset(y: loginButtonAnimation ? 0 : screenSize.height)
+                    .disabled(viewModel.isLoadingLogin)
                     .modifier(ShakeEffect(animatableData: viewModel.loginButtonShakeAnimation))
                     
                     Spacer()
