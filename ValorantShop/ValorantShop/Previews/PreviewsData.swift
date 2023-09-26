@@ -8,7 +8,7 @@
 import Foundation
 import RealmSwift
 
-struct Previews {
+struct PreviewsData {
     
     static var skinInfo: SkinInfo = {
         
