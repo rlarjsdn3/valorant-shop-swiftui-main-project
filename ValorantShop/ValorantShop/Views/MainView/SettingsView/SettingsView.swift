@@ -13,6 +13,17 @@ struct SettingsView: View {
     
     @EnvironmentObject var viewModel: ViewModel
     
+    // MARK: - COMPUTED PROPERTIES
+    
+    var lastUpdateCheckDateString: String {
+        let lastUpdateCheckDate: Date = Date(timeIntervalSinceReferenceDate: viewModel.lastUpdateCheckDate)
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M월 d일(E) HH:mm"
+        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        return formatter.string(from: lastUpdateCheckDate)
+    }
+    
     // MARK: - BODY
     
     var body: some View {
@@ -37,55 +48,48 @@ struct SettingsView: View {
                 }
                 
                 Section {
-                    HStack {
-                        Image("VP")
-                            .renderingMode(.template)
-                            .resizable()
-                            .frame(width: 28, height: 28)
-                        rowLabel("VP")
-                        
-                        Spacer()
-                        
-                        Text("\(viewModel.vp)")
-                            .foregroundColor(.secondary)
-                    }
+                    rowLabel(
+                        "VP",
+                        subText: "\(viewModel.vp)",
+                        ImageName: "VP"
+                    )
                     
-                    HStack {
-                        Image("RP")
-                            .renderingMode(.template)
-                            .resizable()
-                            .frame(width: 28, height: 28)
-                        rowLabel("RP")
-                        
-                        Spacer()
-                        
-                        Text("\(viewModel.rp)")
-                            .foregroundColor(.secondary)
-                    }
+                    rowLabel(
+                        "RP",
+                        subText: "\(viewModel.rp)",
+                        ImageName: "RP"
+                    )
                     
-                    HStack {
-                        Image("KP")
-                            .renderingMode(.template)
-                            .resizable()
-                            .frame(width: 28, height: 28)
-                        rowLabel("KP")
-                        
-                        Spacer()
-                        
-                        Text("\(viewModel.kp)")
-                            .foregroundColor(.secondary)
-                    }
+                    rowLabel(
+                        "KP",
+                        subText: "\(viewModel.kp)",
+                        ImageName: "KP"
+                    )
                 }
                 
-                NavigationLink {
-                    DBUpdateView()
-                        .navigationBarTitleDisplayMode(.inline)
-                        .navigationTitle("DB 업데이트")
-                } label: {
-                    rowLabel("DB 업데이트", systemName: "externaldrive", accentColor: Color.gray)
+                Section {
+                    NavigationLink {
+                        DBUpdateView()
+                            .navigationBarTitleDisplayMode(.inline)
+                            .navigationTitle("DB 업데이트")
+                    } label: {
+                        rowLabel("DB 업데이트", systemName: "externaldrive", accentColor: Color.gray)
+                    }
+                } footer: {
+                    Text("최근 업데이트 확인: \(lastUpdateCheckDateString)")
                 }
 
-                
+                // - For Debug -----
+                Section {
+                    NavigationLink {
+                        DebugView()
+                            .navigationBarTitleDisplayMode(.inline)
+                            .navigationTitle("개발자")
+                    } label: {
+                        rowLabel("개발자", systemName: "hammer", accentColor: Color.blue)
+                    }
+                }
+                // -----------------
                 
                 Section {
                     HStack {
@@ -96,17 +100,6 @@ struct SettingsView: View {
                         Spacer()
                     }
                 }
-                
-                NavigationLink {
-                    DebugView()
-                        .navigationBarTitleDisplayMode(.inline)
-                        .navigationTitle("개발자")
-                } label: {
-                    rowLabel("개발자", systemName: "hammer", accentColor: Color.blue)
-                }
-
-                
-                
             }
             .navigationTitle("설정")
         }
@@ -116,6 +109,27 @@ struct SettingsView: View {
     }
     
     // MARK: - FUNCTIONS
+    
+    @ViewBuilder
+    func rowLabel(_ text: String, subText: String? = nil, ImageName name: String? = nil) -> some View {
+        HStack {
+            if let imageName = name {
+                Image(imageName)
+                    .renderingMode(.template)
+                    .resizable()
+                    .frame(width: 28, height: 28)
+            }
+            
+            Text("\(text)")
+            
+            Spacer()
+            
+            if let subText = subText {
+                Text("\(subText)")
+                    .foregroundColor(Color.secondary)
+            }
+        }
+    }
     
     @ViewBuilder
     func rowLabel(_ text: String, subText: String? = nil, systemName name: String? = nil, accentColor color: Color? = nil) -> some View {
@@ -138,8 +152,6 @@ struct SettingsView: View {
             }
         }
     }
-    
-    
 }
 
 // MARK: - PREVIEW

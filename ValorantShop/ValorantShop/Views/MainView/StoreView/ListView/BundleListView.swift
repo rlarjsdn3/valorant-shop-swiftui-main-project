@@ -8,7 +8,7 @@
 import SwiftUI
 import Shimmer
 
-struct BundleMarketView: View {
+struct BundleListView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -103,9 +103,9 @@ struct BundleMarketView: View {
 
 // MARK: - PREBIEW
 
-struct BundleView_Previews: PreviewProvider {
+struct BundleListView_Previews: PreviewProvider {
     static var previews: some View {
-        BundleMarketView()
+        BundleListView()
             .environmentObject(ViewModel())
     }
 }

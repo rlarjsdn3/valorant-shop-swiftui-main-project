@@ -101,11 +101,11 @@ struct StoreView: View {
                 
                 switch viewModel.selectedStoreTab {
                 case .skin:
-                    SkinsMarketView()
+                    SkinListView()
                 case .bundle:
-                    BundleMarketView()
+                    BundleListView()
                 case .bonus:
-                    NightMarketView()
+                    BonusListView()
                 }
             }
         }

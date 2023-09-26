@@ -31,9 +31,9 @@
 		9E611CD52ABC7B4400D1A310 /* OAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611CD42ABC7B4400D1A310 /* OAuthView.swift */; };
 		9E611CE12ABDDD9C00D1A310 /* AZVideoPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */; };
 		9E611D002ABEA45600D1A310 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611CFF2ABEA45600D1A310 /* MainView.swift */; };
-		9E611D022ABED7F300D1A310 /* SkinsMarketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D012ABED7F300D1A310 /* SkinsMarketView.swift */; };
-		9E611D052ABED81100D1A310 /* BundleMarketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D042ABED81100D1A310 /* BundleMarketView.swift */; };
-		9E611D072ABED81700D1A310 /* NightMarketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D062ABED81700D1A310 /* NightMarketView.swift */; };
+		9E611D022ABED7F300D1A310 /* SkinListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D012ABED7F300D1A310 /* SkinListView.swift */; };
+		9E611D052ABED81100D1A310 /* BundleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D042ABED81100D1A310 /* BundleListView.swift */; };
+		9E611D072ABED81700D1A310 /* BonusListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D062ABED81700D1A310 /* BonusListView.swift */; };
 		9E7638712AB894A600BD0AB4 /* MultifactorAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */; };
 		9E7638742ABAF9B000BD0AB4 /* ShakeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */; };
 		9E8A86BF2ABC37A6006A61FA /* CodeBoxModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8A86BE2ABC37A6006A61FA /* CodeBoxModifier.swift */; };
@@ -77,9 +77,9 @@
 		9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		9E611CD42ABC7B4400D1A310 /* OAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthView.swift; sourceTree = "<group>"; };
 		9E611CFF2ABEA45600D1A310 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
-		9E611D012ABED7F300D1A310 /* SkinsMarketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinsMarketView.swift; sourceTree = "<group>"; };
-		9E611D042ABED81100D1A310 /* BundleMarketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleMarketView.swift; sourceTree = "<group>"; };
-		9E611D062ABED81700D1A310 /* NightMarketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightMarketView.swift; sourceTree = "<group>"; };
+		9E611D012ABED7F300D1A310 /* SkinListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinListView.swift; sourceTree = "<group>"; };
+		9E611D042ABED81100D1A310 /* BundleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleListView.swift; sourceTree = "<group>"; };
+		9E611D062ABED81700D1A310 /* BonusListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonusListView.swift; sourceTree = "<group>"; };
 		9E7638702AB894A600BD0AB4 /* MultifactorAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultifactorAuthView.swift; sourceTree = "<group>"; };
 		9E7638732ABAF9B000BD0AB4 /* ShakeEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeEffect.swift; sourceTree = "<group>"; };
 		9E8A86BE2ABC37A6006A61FA /* CodeBoxModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeBoxModifier.swift; sourceTree = "<group>"; };
@@ -221,7 +221,7 @@
 			isa = PBXGroup;
 			children = (
 				9E2922A12AB0B51D00D6FE07 /* StoreView.swift */,
-				9E611D032ABED7FF00D1A310 /* MarketListView */,
+				9E611D032ABED7FF00D1A310 /* ListView */,
 			);
 			path = StoreView;
 			sourceTree = "<group>";
@@ -284,15 +284,15 @@
 			path = DataDownloadView;
 			sourceTree = "<group>";
 		};
-		9E611D032ABED7FF00D1A310 /* MarketListView */ = {
+		9E611D032ABED7FF00D1A310 /* ListView */ = {
 			isa = PBXGroup;
 			children = (
-				9E611D012ABED7F300D1A310 /* SkinsMarketView.swift */,
-				9E611D042ABED81100D1A310 /* BundleMarketView.swift */,
-				9E611D062ABED81700D1A310 /* NightMarketView.swift */,
+				9E611D012ABED7F300D1A310 /* SkinListView.swift */,
+				9E611D042ABED81100D1A310 /* BundleListView.swift */,
+				9E611D062ABED81700D1A310 /* BonusListView.swift */,
 				9EDCF0C02AC111D00057772F /* Components */,
 			);
-			path = MarketListView;
+			path = ListView;
 			sourceTree = "<group>";
 		};
 		9E7638722ABAF9A100BD0AB4 /* Modifier */ = {
@@ -432,19 +432,19 @@
 				9ED509582AB71D8700149206 /* View+Extension.swift in Sources */,
 				9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */,
 				9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */,
-				9E611D022ABED7F300D1A310 /* SkinsMarketView.swift in Sources */,
+				9E611D022ABED7F300D1A310 /* SkinListView.swift in Sources */,
 				9EDCF0CC2AC1BB080057772F /* DebugView.swift in Sources */,
 				9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */,
 				9EB4C5652AB4A14700AE4425 /* Version.swift in Sources */,
 				9EDCF0C22AC111D90057772F /* SkinCell.swift in Sources */,
-				9E611D072ABED81700D1A310 /* NightMarketView.swift in Sources */,
+				9E611D072ABED81700D1A310 /* BonusListView.swift in Sources */,
 				9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */,
 				9E064C372ABC1F5E004A5D96 /* PlayerWallet.swift in Sources */,
 				9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */,
 				9E266EAE2AB34A7400178F25 /* LoginView.swift in Sources */,
 				9E266EA92AB3436600178F25 /* Constants.swift in Sources */,
 				9E611CD52ABC7B4400D1A310 /* OAuthView.swift in Sources */,
-				9E611D052ABED81100D1A310 /* BundleMarketView.swift in Sources */,
+				9E611D052ABED81100D1A310 /* BundleListView.swift in Sources */,
 				9EB4C5692AB4A85D00AE4425 /* RealmManager.swift in Sources */,
 				9EB4C5632AB49DB500AE4425 /* WeaponSkins.swift in Sources */,
 				9E611D002ABEA45600D1A310 /* MainView.swift in Sources */,

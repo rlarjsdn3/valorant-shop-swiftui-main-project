@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SkinsMarketView: View {
+struct SkinListView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -45,7 +45,7 @@ struct SkinsMarketView: View {
 
 struct SkinsView_Previews: PreviewProvider {
     static var previews: some View {
-        SkinsMarketView()
+        SkinListView()
             .environmentObject(ViewModel())
     }
 }
