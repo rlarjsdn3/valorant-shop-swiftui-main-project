@@ -27,6 +27,8 @@
 		9E2922A22AB0B51D00D6FE07 /* StoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A12AB0B51D00D6FE07 /* StoreView.swift */; };
 		9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A32AB0B54400D6FE07 /* CollectionView.swift */; };
 		9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */; };
+		9E5E7FF92AC2A4660035C622 /* SkinDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5E7FF82AC2A4660035C622 /* SkinDetailView.swift */; };
+		9E5E7FFC2AC321390035C622 /* Previews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5E7FFB2AC321390035C622 /* Previews.swift */; };
 		9E611CD22ABC58E400D1A310 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */; };
 		9E611CD52ABC7B4400D1A310 /* OAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611CD42ABC7B4400D1A310 /* OAuthView.swift */; };
 		9E611CE12ABDDD9C00D1A310 /* AZVideoPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */; };
@@ -74,6 +76,8 @@
 		9E2922A12AB0B51D00D6FE07 /* StoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreView.swift; sourceTree = "<group>"; };
 		9E2922A32AB0B54400D6FE07 /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
 		9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		9E5E7FF82AC2A4660035C622 /* SkinDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinDetailView.swift; sourceTree = "<group>"; };
+		9E5E7FFB2AC321390035C622 /* Previews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Previews.swift; sourceTree = "<group>"; };
 		9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		9E611CD42ABC7B4400D1A310 /* OAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthView.swift; sourceTree = "<group>"; };
 		9E611CFF2ABEA45600D1A310 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -147,6 +151,7 @@
 				9E7638722ABAF9A100BD0AB4 /* Modifier */,
 				9E2922982AB0AE3300D6FE07 /* Extensions */,
 				9E2922992AB0AE4100D6FE07 /* Constants */,
+				9E5E7FFA2AC3212B0035C622 /* Previews */,
 				9ED509592AB7356D00149206 /* Fonts */,
 				9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */,
 				9E29228D2AB0A9D200D6FE07 /* Preview Content */,
@@ -222,6 +227,7 @@
 			children = (
 				9E2922A12AB0B51D00D6FE07 /* StoreView.swift */,
 				9E611D032ABED7FF00D1A310 /* ListView */,
+				9E5E7FFD2AC327760035C622 /* DetailView */,
 			);
 			path = StoreView;
 			sourceTree = "<group>";
@@ -243,6 +249,22 @@
 				9EDCF0CB2AC1BB080057772F /* DebugView.swift */,
 			);
 			path = SettingsView;
+			sourceTree = "<group>";
+		};
+		9E5E7FFA2AC3212B0035C622 /* Previews */ = {
+			isa = PBXGroup;
+			children = (
+				9E5E7FFB2AC321390035C622 /* Previews.swift */,
+			);
+			path = Previews;
+			sourceTree = "<group>";
+		};
+		9E5E7FFD2AC327760035C622 /* DetailView */ = {
+			isa = PBXGroup;
+			children = (
+				9E5E7FF82AC2A4660035C622 /* SkinDetailView.swift */,
+			);
+			path = DetailView;
 			sourceTree = "<group>";
 		};
 		9E611CD32ABC7B2C00D1A310 /* OAuthView */ = {
@@ -428,6 +450,7 @@
 				9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */,
 				9E7638712AB894A600BD0AB4 /* MultifactorAuthView.swift in Sources */,
 				9EDCF0BD2AC011A40057772F /* Array+Extension.swift in Sources */,
+				9E5E7FFC2AC321390035C622 /* Previews.swift in Sources */,
 				9E064C332ABB34E1004A5D96 /* StoreSkinsList.swift in Sources */,
 				9ED509582AB71D8700149206 /* View+Extension.swift in Sources */,
 				9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */,
@@ -439,6 +462,7 @@
 				9EDCF0C22AC111D90057772F /* SkinCell.swift in Sources */,
 				9E611D072ABED81700D1A310 /* BonusListView.swift in Sources */,
 				9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */,
+				9E5E7FF92AC2A4660035C622 /* SkinDetailView.swift in Sources */,
 				9E064C372ABC1F5E004A5D96 /* PlayerWallet.swift in Sources */,
 				9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */,
 				9E266EAE2AB34A7400178F25 /* LoginView.swift in Sources */,

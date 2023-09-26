@@ -17,7 +17,7 @@ struct SkinCell: View {
     
     var body: some View {
         NavigationLink {
-            Text("ItemDetail View")
+            SkinDetailView(skinInfo)
         } label: {
             VStack {
                 if let uuid = skinInfo.skin.chromas.first?.uuid {

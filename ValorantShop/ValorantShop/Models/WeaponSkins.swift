@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 import RealmSwift
 
 final class WeaponSkins: Object, Codable {
@@ -73,11 +74,13 @@ enum ContentTier: String, PersistableEnum, Codable {
 
 final class Chroma: EmbeddedObject, Codable {
     @Persisted var uuid: String
+    @Persisted var displayName: String
     @Persisted var displayIcon: String?
     @Persisted var swatch: String?
     
     enum CodingKeys: String, CodingKey {
         case uuid
+        case displayName
         case displayIcon
         case swatch
     }
