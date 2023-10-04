@@ -16,7 +16,7 @@ struct SkinDetailView: View {
     @State private var selectedChroma: Int = 0
     
     @State private var streammedVideoUrl: URL?
-    @State var play: Bool = true
+    @State var play: Bool = false
     
     @Environment(\.dismiss) var dismiss
     
@@ -164,12 +164,36 @@ struct SkinDetailView: View {
                     .padding([.horizontal, .top])
                     
                     VStack(spacing: 0) {
-                        if let uuid = skinInfo.skin.chromas.first?.uuid {
-                            loadImage(of: .weaponSkins, uuid: uuid)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 150)
-                                .padding()
+                        AsyncImage(
+                            url: URL(string: ResourceURL.displayIcon(of: ImageType.weaponSkinChromas, uuid: skinInfo.skin.chromas[selectedChroma].uuid)),
+                            transaction: .init(animation: .spring())
+                        ) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 150)
+                                    .padding()
+                            case .failure(_):
+                                Color.systemBackground
+                                    .frame(height: 150)
+                                    .frame(maxWidth: .infinity)
+                                    .cornerRadius(15)
+                                    .shimmering()
+                            case .empty:
+                                Color.systemBackground
+                                    .frame(height: 150)
+                                    .frame(maxWidth: .infinity)
+                                    .cornerRadius(15)
+                                    .shimmering()
+                            @unknown default:
+                                Color.systemBackground
+                                    .frame(height: 150)
+                                    .frame(maxWidth: .infinity)
+                                    .cornerRadius(15)
+                                    .shimmering()
+                            }
                         }
                         
                         HStack {
