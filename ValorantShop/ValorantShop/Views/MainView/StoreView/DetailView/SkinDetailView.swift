@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import AZVideoPlayer
+import VideoPlayer
 
 struct SkinDetailView: View {
     
@@ -14,6 +14,9 @@ struct SkinDetailView: View {
     
     @State private var selectedLevel: Int = 0
     @State private var selectedChroma: Int = 0
+    
+    @State private var streammedVideoUrl: URL?
+    @State var play: Bool = true
     
     @Environment(\.dismiss) var dismiss
     
@@ -98,6 +101,21 @@ struct SkinDetailView: View {
                         Text("레벨")
                             .font(.system(.title3, weight: .semibold))
                         
+                        Button {
+                            play.toggle()
+                        } label: {
+                            Group {
+                                if play {
+                                    Image(systemName: "pause.fill")
+                                } else {
+                                    Image(systemName: "play.fill")
+                                }
+                            }
+                            .font(.title3)
+                            .foregroundColor(Color.primary)
+                        }
+
+                        
                         Spacer()
                         
                         // 미완성 코드
@@ -107,12 +125,13 @@ struct SkinDetailView: View {
                         .padding([.horizontal, .top])
                     
                     VStack(spacing: 0) {
-                        if let uuid = skinInfo.skin.chromas.first?.uuid {
-                            loadImage(of: .weaponSkins, uuid: uuid)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 150)
-                                .padding()
+                        if let url = streammedVideoUrl {
+                            VideoPlayer(url: url, play: $play)
+                                .autoReplay(true)
+                                .aspectRatio(16/9, contentMode: .fill)
+                                .cornerRadius(10)
+                                .padding([.horizontal, .top])
+                                .padding(.bottom, 5)
                         }
                         
                         HStack {
@@ -142,9 +161,9 @@ struct SkinDetailView: View {
                         Text("-")
                             .font(.system(.title3))
                     }
-                        .padding([.horizontal, .top])
+                    .padding([.horizontal, .top])
                     
-                    VStack(spacing: 0) {                        
+                    VStack(spacing: 0) {
                         if let uuid = skinInfo.skin.chromas.first?.uuid {
                             loadImage(of: .weaponSkins, uuid: uuid)
                                 .resizable()
@@ -176,6 +195,24 @@ struct SkinDetailView: View {
             }
             .background(Color.secondarySystemBackground)
             .scrollIndicators(.never)
+        }
+        .onAppear {
+            // 스킨 세부 정보가 보이면
+            // 첫 번째 레벨의 스트리밍 비디오를 불러오기
+            guard let url = URL(string: skinInfo.skin.levels.first?.streamedVideo ?? "") else {
+                return
+            }
+            // 화면에 출력하기
+            streammedVideoUrl = url
+        }
+        .onChange(of: selectedLevel) { newValue in
+            // 클릭한 레벨이 바뀌면
+            // 해당하는 레벨의 스트리밍 비디오를 불러오기
+            guard let url = URL(string: skinInfo.skin.levels[newValue].streamedVideo ?? "") else {
+                return
+            }
+            // 화면에 출력하기
+            streammedVideoUrl = url
         }
     }
 }

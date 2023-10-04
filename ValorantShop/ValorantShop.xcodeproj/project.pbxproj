@@ -29,6 +29,7 @@
 		9E2922A62AB0B55F00D6FE07 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A52AB0B55F00D6FE07 /* SettingsView.swift */; };
 		9E5E7FF92AC2A4660035C622 /* SkinDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5E7FF82AC2A4660035C622 /* SkinDetailView.swift */; };
 		9E5E7FFC2AC321390035C622 /* PreviewsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5E7FFB2AC321390035C622 /* PreviewsData.swift */; };
+		9E5E80002ACD2D750035C622 /* VideoPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 9E5E7FFF2ACD2D750035C622 /* VideoPlayer */; };
 		9E611CD22ABC58E400D1A310 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */; };
 		9E611CD52ABC7B4400D1A310 /* OAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611CD42ABC7B4400D1A310 /* OAuthView.swift */; };
 		9E611CE12ABDDD9C00D1A310 /* AZVideoPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */; };
@@ -111,6 +112,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E611CE12ABDDD9C00D1A310 /* AZVideoPlayer in Frameworks */,
+				9E5E80002ACD2D750035C622 /* VideoPlayer in Frameworks */,
 				9EDCF0C82AC141A80057772F /* Shimmer in Frameworks */,
 				9E266EB62AB34E8B00178F25 /* RealmSwift in Frameworks */,
 				9E266EB42AB34E8B00178F25 /* Realm in Frameworks */,
@@ -379,6 +381,7 @@
 				9E266EB52AB34E8B00178F25 /* RealmSwift */,
 				9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */,
 				9EDCF0C72AC141A80057772F /* Shimmer */,
+				9E5E7FFF2ACD2D750035C622 /* VideoPlayer */,
 			);
 			productName = ValorantShop;
 			productReference = 9E2922842AB0A9D200D6FE07 /* ValorantShop.app */;
@@ -414,6 +417,7 @@
 				9E611CDF2ABDDD9C00D1A310 /* XCRemoteSwiftPackageReference "AZVideoPlayer" */,
 				9EDCF0C32AC140850057772F /* XCRemoteSwiftPackageReference "CachedAsyncImage" */,
 				9EDCF0C62AC141A80057772F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
+				9E5E7FFE2ACD2D750035C622 /* XCRemoteSwiftPackageReference "VideoPlayer" */,
 			);
 			productRefGroup = 9E2922852AB0A9D200D6FE07 /* Products */;
 			projectDirPath = "";
@@ -710,6 +714,14 @@
 				kind = branch;
 			};
 		};
+		9E5E7FFE2ACD2D750035C622 /* XCRemoteSwiftPackageReference "VideoPlayer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/wxxsw/VideoPlayer.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 		9E611CDF2ABDDD9C00D1A310 /* XCRemoteSwiftPackageReference "AZVideoPlayer" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/adamzarn/AZVideoPlayer";
@@ -751,6 +763,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9E266EB22AB34E8B00178F25 /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		9E5E7FFF2ACD2D750035C622 /* VideoPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9E5E7FFE2ACD2D750035C622 /* XCRemoteSwiftPackageReference "VideoPlayer" */;
+			productName = VideoPlayer;
 		};
 		9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */ = {
 			isa = XCSwiftPackageProductDependency;
