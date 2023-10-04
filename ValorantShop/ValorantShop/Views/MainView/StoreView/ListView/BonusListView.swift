@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct NightMarketView: View {
+struct BonusListView: View {
     var body: some View {
         Text("NightMarket View")
             .font(.largeTitle)
@@ -16,8 +16,8 @@ struct NightMarketView: View {
     }
 }
 
-struct BonusView_Previews: PreviewProvider {
+struct BonusStoreView_Previews: PreviewProvider {
     static var previews: some View {
-        NightMarketView()
+        BonusListView()
     }
 }

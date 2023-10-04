@@ -90,7 +90,9 @@ struct StoreView: View {
                     
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
+                .padding(.top, 10)
+                .padding(.bottom, 15)
+                .padding(.horizontal)
                 .background(
                     Color.systemBackground
                         .ignoresSafeArea()
@@ -101,11 +103,11 @@ struct StoreView: View {
                 
                 switch viewModel.selectedStoreTab {
                 case .skin:
-                    SkinsMarketView()
+                    SkinListView()
                 case .bundle:
-                    BundleMarketView()
+                    BundleListView()
                 case .bonus:
-                    NightMarketView()
+                    BonusListView()
                 }
             }
         }

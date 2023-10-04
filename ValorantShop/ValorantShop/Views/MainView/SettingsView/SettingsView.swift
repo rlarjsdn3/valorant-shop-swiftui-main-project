@@ -30,21 +30,66 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section {
-                    Text("\(viewModel.gameName)")
-                    Text("#\(viewModel.tagLine)")
+                    rowLabel(
+                        "Riot ID",
+                        subText: "\(viewModel.gameName)",
+                        systemName: "person",
+                        accentColor: Color.red
+                    )
+                    
+                    rowLabel(
+                        "Tag Line",
+                        subText: "#\(viewModel.tagLine)",
+                        systemName: "tag",
+                        accentColor: Color.green
+                    )
                 } header: {
-                    Text("사용자 정보")
+                    Text("계정 정보")
                 }
                 
                 Section {
-                    Button("업데이트 확인") {
-                        Task {
-                            await viewModel.checkValorantVersion()
-                        }
+                    rowLabel(
+                        "VP",
+                        subText: "\(viewModel.vp)",
+                        ImageName: "VP"
+                    )
+                    
+                    rowLabel(
+                        "RP",
+                        subText: "\(viewModel.rp)",
+                        ImageName: "RP"
+                    )
+                    
+                    rowLabel(
+                        "KP",
+                        subText: "\(viewModel.kp)",
+                        ImageName: "KP"
+                    )
+                }
+                
+                Section {
+                    NavigationLink {
+                        DBUpdateView()
+                            .navigationBarTitleDisplayMode(.inline)
+                            .navigationTitle("DB 업데이트")
+                    } label: {
+                        rowLabel("DB 업데이트", systemName: "externaldrive", accentColor: Color.gray)
                     }
                 } footer: {
                     Text("최근 업데이트 확인: \(lastUpdateCheckDateString)")
                 }
+
+                // - For Debug -----
+                Section {
+                    NavigationLink {
+                        DebugView()
+                            .navigationBarTitleDisplayMode(.inline)
+                            .navigationTitle("개발자")
+                    } label: {
+                        rowLabel("개발자", systemName: "hammer", accentColor: Color.blue)
+                    }
+                }
+                // -----------------
                 
                 Section {
                     HStack {
@@ -55,43 +100,56 @@ struct SettingsView: View {
                         Spacer()
                     }
                 }
-                
-                // -- For Debug --
-                Button("로테이션 시간 되돌리기") {
-                    let skin = viewModel.realmManager.read(of: StoreSkinsList.self)
-                    try! viewModel.realmManager.realm.write {
-                        skin[0].renewalDate = Date().addingTimeInterval(-2 * 3600 * 24)
-                    }
-                    Task {
-                        await viewModel.getStoreSkins()
-                    }
-                }
-                
-                Button("번들 시간 되돌리기") {
-                    let skin = viewModel.realmManager.read(of: StoreBundlesList.self)
-                    try! viewModel.realmManager.realm.write {
-                        skin[0].renewalDate = Date().addingTimeInterval(-2 * 3600 * 24)
-                    }
-                }
-                
-                Button("스킨 데이터 삭제") {
-                    viewModel.realmManager.deleteAll(of: StoreSkinsList.self)
-                }
-                Button("토큰 만료 시간 초기화") {
-                    viewModel.accessTokenExpiryDate = 0.0
-                }
-                
-                Button("번들 정보 가져오기") {
-                    Task {
-                        await viewModel.getStoreBundles(forceLoad: true)
-                    }
-                }
-                // ---------------
             }
             .navigationTitle("설정")
         }
         .sheet(isPresented: $viewModel.isPresentDataDownloadView) {
             DataDownloadView(of: .update)
+        }
+    }
+    
+    // MARK: - FUNCTIONS
+    
+    @ViewBuilder
+    func rowLabel(_ text: String, subText: String? = nil, ImageName name: String? = nil) -> some View {
+        HStack {
+            if let imageName = name {
+                Image(imageName)
+                    .renderingMode(.template)
+                    .resizable()
+                    .frame(width: 28, height: 28)
+            }
+            
+            Text("\(text)")
+            
+            Spacer()
+            
+            if let subText = subText {
+                Text("\(subText)")
+                    .foregroundColor(Color.secondary)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    func rowLabel(_ text: String, subText: String? = nil, systemName name: String? = nil, accentColor color: Color? = nil) -> some View {
+        HStack {
+            if let systemName = name,
+               let accentColor = color {
+                Image(systemName: systemName)
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(Color.white)
+                    .background(accentColor, in: RoundedRectangle(cornerRadius: 10))
+            }
+            
+            Text("\(text)")
+            
+            Spacer()
+            
+            if let subText = subText {
+                Text("\(subText)")
+                    .foregroundColor(Color.secondary)
+            }
         }
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 import RealmSwift
 
 final class WeaponSkins: Object, Codable {
@@ -73,11 +74,13 @@ enum ContentTier: String, PersistableEnum, Codable {
 
 final class Chroma: EmbeddedObject, Codable {
     @Persisted var uuid: String
+    @Persisted var displayName: String
     @Persisted var displayIcon: String?
     @Persisted var swatch: String?
     
     enum CodingKeys: String, CodingKey {
         case uuid
+        case displayName
         case displayIcon
         case swatch
     }
@@ -111,4 +114,39 @@ enum LevelItem: String, PersistableEnum, Codable {
     case transformation = "EEquippableSkinLevelItem::Transformation"
     case vfx = "EEquippableSkinLevelItem::VFX"
     case voiceover = "EEquippableSkinLevelItem::Voiceover"
+    
+    var displayName: String {
+        switch self {
+        case .animation:
+            return "애니메이션"
+        case .attackerDefenderSwap:
+            return "-"
+        case .finisher:
+            return "마무리"
+        case .fishAnimation:
+            return "-"
+        case .heartbeatAndMapSensor:
+            return "-"
+        case .inspectAndKill:
+            return "-"
+        case .killBanner:
+            return "-"
+        case .killCounter:
+            return "-"
+        case .killEffect:
+            return "-"
+        case .randomizer:
+            return "-"
+        case .soundEffects:
+            return "-"
+        case .etopFrag:
+            return "-"
+        case .transformation:
+            return "-"
+        case .vfx:
+            return "-"
+        case .voiceover:
+            return "-"
+        }
+    }
 }
