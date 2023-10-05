@@ -134,6 +134,9 @@ final class ViewModel: ObservableObject {
     @Published var selectedStoreTab: StoreTabType = .skin
     @Published var refreshButtonRotateAnimation: Bool = false
     
+    // For CollectionView
+    @Published var selectedCollectionTab: CollectionTabType = .collection
+    
     // MARK: - PROPERTIES
     
     let oauthManager = OAuthManager.shared
@@ -1191,17 +1194,6 @@ final class ViewModel: ObservableObject {
         
         // 결과 업데이트하기
         self.ownedWeaponSkins = ownedWeaponSkins
-    }
-    
-    func fetchOwnedWeaponSkins() async throws {
-        // 접근 토큰 등 사용자 고유 정보 가져오기
-        let reAuthTokens = try await self.getReAuthTokens().get()
-        // 새롭게 번들 스킨 데이터 불러오기
-        let ownedWeaponSkins = try await resourceManager.fetchOwnedItems(
-            accessToken: reAuthTokens.accessToken,
-            riotEntitlement: reAuthTokens.riotEntitlement,
-            puuid: reAuthTokens.puuid
-        ).get().entitlements
     }
     
     // MARK: - REALM CRUD
