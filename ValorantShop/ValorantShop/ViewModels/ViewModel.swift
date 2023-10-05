@@ -124,15 +124,19 @@ final class ViewModel: ObservableObject {
     // For StoreData
     @Published var storeSkins: StoreSkin = StoreSkin(renewalDate: Date())
     @Published var storeSkinsRenewalDate: Date = Date(timeIntervalSinceReferenceDate: Double.infinity)
-    @Published var storeSkinsRemainingTime: String = "" //
+    @Published var storeSkinsRemainingTime: String = ""
     
     @Published var storeBundles: [StoreBundle] = []
     @Published var storeBundlesRenewalDate: [Date] = []
-    @Published var storeBundlesReminingTime: [String] = [] //
+    @Published var storeBundlesReminingTime: [String] = []
     
     // For StoreView
     @Published var selectedStoreTab: StoreTabType = .skin
     @Published var refreshButtonRotateAnimation: Bool = false
+    
+    // For CollectionView
+    @Published var selectedCollectionTab: CollectionTabType = .collection
+    @Published var isAscendingOrder: Bool = true
     
     // MARK: - PROPERTIES
     
@@ -147,10 +151,7 @@ final class ViewModel: ObservableObject {
     weak var storeSkinsTimer: Timer?
     weak var storeBundlesTimer: Timer?
     let calendar = Calendar.current
-    
-    
-    
-    
+
     var isIntialGettingStoreSkinsData: Bool = false
     var isAutoReloadedStoreSkinsData: Bool = false
     var isIntialGettingStoreBundlesData: Bool = false
@@ -1127,6 +1128,11 @@ final class ViewModel: ObservableObject {
             collections.append(skinInfo)
         }
         
+        // 컬렉션 정렬하기
+        collections.sort {
+            $0.skin.displayName < $1.skin.displayName
+        }
+        
         // 결과 업데이트하기
         self.collections = collections
     }
@@ -1189,19 +1195,13 @@ final class ViewModel: ObservableObject {
             ownedWeaponSkins.append(skinInfo)
         }
         
+        // 컬렉션 정렬하기
+        ownedWeaponSkins.sort {
+            $0.skin.displayName < $1.skin.displayName
+        }
+        
         // 결과 업데이트하기
         self.ownedWeaponSkins = ownedWeaponSkins
-    }
-    
-    func fetchOwnedWeaponSkins() async throws {
-        // 접근 토큰 등 사용자 고유 정보 가져오기
-        let reAuthTokens = try await self.getReAuthTokens().get()
-        // 새롭게 번들 스킨 데이터 불러오기
-        let ownedWeaponSkins = try await resourceManager.fetchOwnedItems(
-            accessToken: reAuthTokens.accessToken,
-            riotEntitlement: reAuthTokens.riotEntitlement,
-            puuid: reAuthTokens.puuid
-        ).get().entitlements
     }
     
     // MARK: - REALM CRUD
