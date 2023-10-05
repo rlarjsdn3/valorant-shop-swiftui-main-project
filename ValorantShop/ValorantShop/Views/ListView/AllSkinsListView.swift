@@ -13,12 +13,27 @@ struct AllSkinsListView: View {
     
     @EnvironmentObject var viewModel: ViewModel
     
+    // MARK: - COMPUTED PROPERTIES
+    
+    var sortedCollections: [SkinInfo] {
+        // 정렬된 스킨 데이터를 저장하는 배열 선언하기
+        var sortedCollections: [SkinInfo] = []
+        // 정렬 기준 확인하기
+        if viewModel.isAscendingOrder {
+            sortedCollections = viewModel.collections.sorted(by: { $0.skin.displayName < $1.skin.displayName })
+        } else {
+            sortedCollections = viewModel.collections.sorted(by: { $0.skin.displayName > $1.skin.displayName })
+        }
+        // 결과 반환하기
+        return sortedCollections
+    }
+    
     // MARK: - BODY
     
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 20) {
-                ForEach(viewModel.collections) { skinInfo in
+                ForEach(sortedCollections) { skinInfo in
                     SkinCell(skinInfo)
                         .padding(.horizontal)
                 }

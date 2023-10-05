@@ -124,11 +124,11 @@ final class ViewModel: ObservableObject {
     // For StoreData
     @Published var storeSkins: StoreSkin = StoreSkin(renewalDate: Date())
     @Published var storeSkinsRenewalDate: Date = Date(timeIntervalSinceReferenceDate: Double.infinity)
-    @Published var storeSkinsRemainingTime: String = "" //
+    @Published var storeSkinsRemainingTime: String = ""
     
     @Published var storeBundles: [StoreBundle] = []
     @Published var storeBundlesRenewalDate: [Date] = []
-    @Published var storeBundlesReminingTime: [String] = [] //
+    @Published var storeBundlesReminingTime: [String] = []
     
     // For StoreView
     @Published var selectedStoreTab: StoreTabType = .skin
@@ -136,6 +136,7 @@ final class ViewModel: ObservableObject {
     
     // For CollectionView
     @Published var selectedCollectionTab: CollectionTabType = .collection
+    @Published var isAscendingOrder: Bool = true
     
     // MARK: - PROPERTIES
     
@@ -150,10 +151,7 @@ final class ViewModel: ObservableObject {
     weak var storeSkinsTimer: Timer?
     weak var storeBundlesTimer: Timer?
     let calendar = Calendar.current
-    
-    
-    
-    
+
     var isIntialGettingStoreSkinsData: Bool = false
     var isAutoReloadedStoreSkinsData: Bool = false
     var isIntialGettingStoreBundlesData: Bool = false

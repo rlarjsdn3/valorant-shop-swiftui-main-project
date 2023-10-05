@@ -23,7 +23,7 @@ enum CollectionTabType: CaseIterable {
     }
 }
 
-// MARK: - VIEW=
+// MARK: - VIEW
 
 struct CollectionView: View {
     
@@ -63,25 +63,18 @@ struct CollectionView: View {
                     
                     Spacer()
                     
-                    Menu {
-                        Section {
-                            Button {
-                                
-                            } label: {
-                                Text("테스트")
-                            }
-
-                        } header: {
-                            Text("필터링")
+                    Button {
+                        withAnimation(.spring()) {
+                            viewModel.isAscendingOrder.toggle()
                         }
-
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Image(systemName: "arrow.up")
                             .resizable()
                             .scaledToFit()
                             .font(.title)
                             .foregroundColor(Color.primary)
                             .frame(width: 28, height: 28)
+                            .rotationEffect(.degrees(viewModel.isAscendingOrder ? 0 : 180))
                     }
                     
                 }
@@ -107,6 +100,8 @@ struct CollectionView: View {
         }
     }
 }
+
+// MARK: - PREVIEW
 
 struct CollectionView_Previews: PreviewProvider {
     static var previews: some View {
