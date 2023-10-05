@@ -146,6 +146,28 @@ struct SkinsPanelLayout: Codable {
     }
 }
 
+// MARK: - Welcome
+struct OwnedItemsResponse: Codable {
+    let itemTypeID: String
+    let entitlements: [Entitlement]
+
+    enum CodingKeys: String, CodingKey {
+        case itemTypeID = "ItemTypeID"
+        case entitlements = "Entitlements"
+    }
+}
+
+// MARK: - Entitlement
+struct Entitlement: Codable {
+    let typeID, itemID: String
+
+    enum CodingKeys: String, CodingKey {
+        case typeID = "TypeID"
+        case itemID = "ItemID"
+    }
+}
+
+
 // MARK: - MANAGER
 
 final class ResourceManager {
@@ -301,6 +323,40 @@ final class ResourceManager {
         // 결과 반환하기
         return .success(storefrontResponse)
         
+    }
+    
+    func fetchOwnedItems(accessToken: String, riotEntitlement: String, puuid: String) async -> Result<OwnedItemsResponse, ResourceError> {
+        // For Debug
+        print(#function)
+        
+        // URL 만들기
+        guard let url = URL(string: ResourceURL.ownedItems(puuid: puuid)) else { return .failure(.urlError) }
+        // URL Reqeust 만들기
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "GET"
+        urlRequest.setValue("\(riotEntitlement)", forHTTPHeaderField: "X-Riot-Entitlements-JWT")
+        urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        
+        // 비동기 HTTP 통신하기
+        guard let (data, response) = try? await urlSession.data(for: urlRequest) else {
+            print("네트워크 에러: \(#function)")
+            return .failure(.networkError)
+        }
+        // 상태 코드가 올바른지 확인하기
+        guard let httpResponse = (response as? HTTPURLResponse),
+              (200..<300) ~= httpResponse.statusCode else {
+            print("상태 코드 에러: \(#function)")
+            return .failure(.statusCodeError)
+        }
+        // 받아온 데이터를 파싱하기
+        guard let ownedItemsResponse = self.decode(of: OwnedItemsResponse.self, from: data) else {
+            print("파싱 에러: \(#function)")
+            return .failure(.parsingError)
+        }
+
+        print("함수 종료")
+        // 결과 반환하기
+        return .success(ownedItemsResponse)
     }
     
     func fetchBundles() async -> Result<Bundles, ResourceError> {
