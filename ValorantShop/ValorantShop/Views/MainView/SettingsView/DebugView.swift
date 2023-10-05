@@ -47,6 +47,12 @@ struct DebugView: View {
                     await viewModel.getStoreBundles(forceLoad: true)
                 }
             }
+            
+            Button("내가 가진 스킨 가져오기") {
+                Task {
+                    await viewModel.getOwnedWeaponSkins()
+                }
+            }
             // ---------------
         }
     }

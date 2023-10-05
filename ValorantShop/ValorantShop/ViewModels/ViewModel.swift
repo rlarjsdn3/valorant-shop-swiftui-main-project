@@ -1130,6 +1130,21 @@ final class ViewModel: ObservableObject {
         self.collections = collections
     }
     
+    func getOwnedWeaponSkins() async {
+        do {
+            // 접근 토큰 등 사용자 고유 정보 가져오기
+            let reAuthTokens = try await self.getReAuthTokens().get()
+            let ownedItems = try await resourceManager.fetchOwnedItems(
+                accessToken: reAuthTokens.accessToken,
+                riotEntitlement: reAuthTokens.riotEntitlement,
+                puuid: reAuthTokens.puuid
+            ).get()
+            print(ownedItems)
+        } catch {
+            print("에러")
+        }
+    }
+    
     // MARK: - REALM CRUD
     
     private func overwriteRealmObject<T: Object>(_ object: T) {

@@ -53,6 +53,12 @@ struct ResourceURL {
     static var skins: String = "https://valorant-api.com/v1/weapons/skins/"
     static var prices: String = "https://pd.kr.a.pvp.net/store/v1/offers/"
     static var storefront: String = "https://pd.kr.a.pvp.net/store/v2/storefront/"
+    static var ownedItems: String = "https://pd.kr.a.pvp.net/store/v1/entitlements/{puuid}/{ItemTypeID}"
+    
+    static func ownedItems(puuid: String) -> String {
+        let urlString = "https://pd.kr.a.pvp.net/store/v1/entitlements/\(puuid)/e7c63390-eda7-46e0-bb7a-a6abdacd2433"
+        return urlString
+    }
     
     static func displayIcon(of type: ImageType, uuid: String) -> String {
         let urlString = "https://media.valorant-api.com/\(type.path1)/\(uuid)/\(type.path2).png"
