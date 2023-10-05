@@ -12,7 +12,7 @@ import SwiftUI
 enum StoreTabType: CaseIterable {
     case skin
     case bundle
-    case bonus
+    //case bonus
     
     var tabName: String {
         switch self {
@@ -20,8 +20,8 @@ enum StoreTabType: CaseIterable {
             return "스킨"
         case .bundle:
             return "번들"
-        case .bonus:
-            return "야시장"
+        //case .bonus:
+        //    return "야시장"
         }
     }
 }
@@ -73,8 +73,8 @@ struct StoreView: View {
                                 await viewModel.reloadPlayerData(of: .skin)
                             case .bundle:
                                 print("d")
-                            case .bonus:
-                                print("d")
+                            //case .bonus:
+                            //    -
                             }
                         }
                     } label: {
@@ -106,8 +106,8 @@ struct StoreView: View {
                     SkinListView()
                 case .bundle:
                     BundleListView()
-                case .bonus:
-                    BonusListView()
+                //case .bonus:
+                //    BonusListView()
                 }
             }
         }
