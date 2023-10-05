@@ -63,26 +63,25 @@ struct CollectionView: View {
                     
                     Spacer()
                     
-                    Button {
-                        Task {
-                            switch viewModel.selectedStoreTab {
-                            case .skin:
-                                await viewModel.reloadPlayerData(of: .skin)
-                            case .bundle:
-                                print("d")
-                            case .bonus:
-                                print("d")
+                    Menu {
+                        Section {
+                            Button {
+                                
+                            } label: {
+                                Text("테스트")
                             }
+
+                        } header: {
+                            Text("필터링")
                         }
+
                     } label: {
-                        Image(systemName: "arrow.clockwise")
+                        Image(systemName: "ellipsis.circle")
                             .resizable()
                             .scaledToFit()
                             .font(.title)
                             .foregroundColor(Color.primary)
-                            .frame(width: 30, height: 30)
-                            .offset(y: -3)
-                            .rotationEffect(Angle(degrees: viewModel.refreshButtonRotateAnimation ? 360 : 0))
+                            .frame(width: 28, height: 28)
                     }
                     
                 }
@@ -100,9 +99,9 @@ struct CollectionView: View {
                 
                 switch viewModel.selectedCollectionTab {
                 case .collection:
-                    SkinListView()
+                    AllSkinsListView()
                 case .owned:
-                    BundleListView()
+                    OwnedSkinsListView()
                 }
             }
         }

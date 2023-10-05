@@ -8,8 +8,26 @@
 import SwiftUI
 
 struct OwnedSkinsListView: View {
+    
+    // MARK: - WRAPPER PROPERTIES
+    
+    @EnvironmentObject var viewModel: ViewModel
+    
+    // MARK: - BODY
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ScrollView {
+            LazyVStack(spacing: 20) {
+                ForEach(viewModel.ownedWeaponSkins) { skinInfo in
+                    SkinCell(skinInfo)
+                        .padding(.horizontal)
+                }
+            }
+            .padding(.vertical)
+        }
+        .frame(maxWidth: .infinity)
+        .background(Color(uiColor: UIColor.secondarySystemBackground))
+        .scrollIndicators(.hidden)
     }
 }
 

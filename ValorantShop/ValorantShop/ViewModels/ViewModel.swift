@@ -1130,6 +1130,11 @@ final class ViewModel: ObservableObject {
             collections.append(skinInfo)
         }
         
+        // 컬렉션 정렬하기
+        collections.sort {
+            $0.skin.displayName < $1.skin.displayName
+        }
+        
         // 결과 업데이트하기
         self.collections = collections
     }
@@ -1190,6 +1195,11 @@ final class ViewModel: ObservableObject {
             let price = Price(basePrice: basePrice)
             let skinInfo = SkinInfo(skin: skin, price: price)
             ownedWeaponSkins.append(skinInfo)
+        }
+        
+        // 컬렉션 정렬하기
+        ownedWeaponSkins.sort {
+            $0.skin.displayName < $1.skin.displayName
         }
         
         // 결과 업데이트하기

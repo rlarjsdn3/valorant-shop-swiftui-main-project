@@ -52,6 +52,9 @@ struct MainView: View {
             
             // 컬렉션 정보 불러오기
             viewModel.getCollection()
+            Task {
+                await viewModel.getOwnedWeaponSkins()
+            }
             
             // 로테이션 스킨 갱신 날짜 불러오기
             if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
