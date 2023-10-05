@@ -50,6 +50,9 @@ struct MainView: View {
                 await viewModel.getPlayerWallet(forceLoad: true)
             }
             
+            // 컬렉션 정보 불러오기
+            viewModel.getCollection()
+            
             // 로테이션 스킨 갱신 날짜 불러오기
             if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
                 viewModel.storeSkinsRenewalDate = renewalDate
