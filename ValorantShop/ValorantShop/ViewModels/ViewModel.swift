@@ -117,6 +117,9 @@ final class ViewModel: ObservableObject {
     @Published var vp: Int = 0
     @Published var kp: Int = 0
     
+    // For Collection
+    @Published var collections: [SkinInfo] = []
+    
     // For StoreData
     @Published var storeSkins: StoreSkin = StoreSkin(renewalDate: Date())
     @Published var storeSkinsRenewalDate: Date = Date(timeIntervalSinceReferenceDate: Double.infinity)
@@ -620,18 +623,7 @@ final class ViewModel: ObservableObject {
     
     // MARK: - GET PLAYER DATA
     
-    @MainActor
-    func getRenewalDate() {
-        // 로테이션 스킨 갱신 날짜 불러오기
-        if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
-            print("날짜 갱신")
-            self.storeSkinsRenewalDate = renewalDate
-        }
-        // 번들 스킨 갱신 날짜 불러오기
-        let storeBundlesList = realmManager.read(of: StoreBundlesList.self)
-        
-    }
-    
+    // Deprecated
     @MainActor
     func getPlayerData(forceLoad: Bool = false) async {
         // 사용자ID 등 사용자 데이터 불러오기
@@ -1079,13 +1071,6 @@ final class ViewModel: ObservableObject {
     
     // MARK: - GET STORE DATA - BONUS
     
-    
-    
-    
-    
-    
-    
-    
     // ...
     
     private func isExpired(of type: ExpiryDateTye) -> Bool {
@@ -1104,6 +1089,45 @@ final class ViewModel: ObservableObject {
         case .bonus:
             return false // + 임시
         }
+    }
+    
+    // MARK: - GET COLLECTION
+    
+    func getCollection() {
+        // Realm으로부터 전체 스킨 데이터 불러오기
+        guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
+            self.isPresentLoadingScreenViewFromView = false
+            return
+        }
+        // Realm으로부터 가격 데이터 불러오기
+        guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
+            self.isPresentLoadingScreenViewFromView = false
+            return
+        }
+        // 스킨 컬렉션을 저장할 배열 변수 선언하기
+        var collections: [SkinInfo] = []
+        
+        // 상점 로테이션 스킨 필터링하기
+        for skin in skins {
+            // 가격 데이터를 저장할 변수 선언하기
+            var filteredBasePrice: Int?
+            // 가격 데이터 필터링하기
+            if let firstBasePriceIndex = prices.firstIndex(where: {
+                $0.offerID == skin.levels.first?.uuid }) {
+                filteredBasePrice = prices[firstBasePriceIndex].cost?.vp
+            }
+            
+            // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
+            guard let basePrice = filteredBasePrice else {
+                continue
+            }
+            let price = Price(basePrice: basePrice)
+            let skinInfo = SkinInfo(skin: skin, price: price)
+            collections.append(skinInfo)
+        }
+        
+        // 결과 업데이트하기
+        self.collections = collections
     }
     
     // MARK: - REALM CRUD
