@@ -119,6 +119,7 @@ final class ViewModel: ObservableObject {
     
     // For Collection
     @Published var collections: [SkinInfo] = []
+    @Published var ownedWeaponSkins: [SkinInfo] = []
     
     // For StoreData
     @Published var storeSkins: StoreSkin = StoreSkin(renewalDate: Date())
@@ -1130,19 +1131,77 @@ final class ViewModel: ObservableObject {
         self.collections = collections
     }
     
+    @MainActor
     func getOwnedWeaponSkins() async {
+        // 내가 가진 스킨 컬렉션을 저장할 배열 변수 선언하기
+        var ownedItems: [Entitlement] = []
+        
         do {
             // 접근 토큰 등 사용자 고유 정보 가져오기
             let reAuthTokens = try await self.getReAuthTokens().get()
-            let ownedItems = try await resourceManager.fetchOwnedItems(
+            // 새롭게 번들 스킨 데이터 불러오기
+            ownedItems = try await resourceManager.fetchOwnedItems(
                 accessToken: reAuthTokens.accessToken,
                 riotEntitlement: reAuthTokens.riotEntitlement,
                 puuid: reAuthTokens.puuid
-            ).get()
-            print(ownedItems)
+            ).get().entitlements
         } catch {
-            print("에러")
+            return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
+        
+        // Realm으로부터 전체 스킨 데이터 불러오기
+        guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
+            self.isPresentLoadingScreenViewFromView = false
+            return
+        }
+        // Realm으로부터 가격 데이터 불러오기
+        guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
+            self.isPresentLoadingScreenViewFromView = false
+            return
+        }
+        // 스킨 컬렉션을 저장할 배열 변수 선언하기
+        var ownedWeaponSkins: [SkinInfo] = []
+        
+        // 상점 로테이션 스킨 필터링하기
+        for item in ownedItems {
+            // 스킨 데이터를 저장할 변수 선언하기
+            var filteredSkin: Skin?
+            // 가격 데이터를 저장할 변수 선언하기
+            var filteredBasePrice: Int?
+            // 스킨 데이터 필터링하기
+            if let firstSkinIndex = skins.firstIndex(where: {
+                $0.levels.first?.uuid == item.itemID }) {
+                filteredSkin = skins[firstSkinIndex]
+            }
+            // 가격 데이터 필터링하기
+            if let firstBasePriceIndex = prices.firstIndex(where: {
+                $0.offerID == item.itemID }) {
+                filteredBasePrice = prices[firstBasePriceIndex].cost?.vp
+            }
+            
+            // 필터링한 스킨과 가격 데이터 옵셔널 바인딩하기
+            guard let skin = filteredSkin,
+                  let basePrice = filteredBasePrice else {
+                continue
+            }
+            let price = Price(basePrice: basePrice)
+            let skinInfo = SkinInfo(skin: skin, price: price)
+            ownedWeaponSkins.append(skinInfo)
+        }
+        
+        // 결과 업데이트하기
+        self.ownedWeaponSkins = ownedWeaponSkins
+    }
+    
+    func fetchOwnedWeaponSkins() async throws {
+        // 접근 토큰 등 사용자 고유 정보 가져오기
+        let reAuthTokens = try await self.getReAuthTokens().get()
+        // 새롭게 번들 스킨 데이터 불러오기
+        let ownedWeaponSkins = try await resourceManager.fetchOwnedItems(
+            accessToken: reAuthTokens.accessToken,
+            riotEntitlement: reAuthTokens.riotEntitlement,
+            puuid: reAuthTokens.puuid
+        ).get().entitlements
     }
     
     // MARK: - REALM CRUD
