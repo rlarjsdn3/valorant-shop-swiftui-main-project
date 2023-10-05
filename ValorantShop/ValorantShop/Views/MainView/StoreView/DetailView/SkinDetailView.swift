@@ -96,60 +96,63 @@ struct SkinDetailView: View {
                     }
                     .background(Color.systemBackground)
                     
-                    // - 레벨
-                    HStack {
-                        Text("레벨")
-                            .font(.system(.title3, weight: .semibold))
-                        
-                        Button {
-                            play.toggle()
-                        } label: {
-                            Group {
-                                if play {
-                                    Image(systemName: "pause.fill")
-                                } else {
-                                    Image(systemName: "play.fill")
-                                }
-                            }
-                            .font(.title3)
-                            .foregroundColor(Color.primary)
-                        }
-
-                        
-                        Spacer()
-                        
-                        // 미완성 코드
-                        Text("\(skinInfo.skin.levels[selectedLevel].levelItem?.displayName ?? "")")
-                            .font(.system(.title3))
-                    }
-                        .padding([.horizontal, .top])
-                    
-                    VStack(spacing: 0) {
-                        if let url = streammedVideoUrl {
-                            VideoPlayer(url: url, play: $play)
-                                .autoReplay(true)
-                                .aspectRatio(16/9, contentMode: .fill)
-                                .cornerRadius(10)
-                                .padding([.horizontal, .top])
-                                .padding(.bottom, 5)
-                        }
-                        
+                    if skinInfo.skin.levels.count != 1 {
+                        // - 레벨
                         HStack {
-                            Picker("Level Picker", selection: $selectedLevel) {
-                                ForEach(skinInfo.skin.levels.indices, id: \.self) { index in
-                                    Text("\(index+1)레벨")
-                                        .tag(index)
+                            Text("레벨")
+                                .font(.system(.title3, weight: .semibold))
+                            
+                            Button {
+                                play.toggle()
+                            } label: {
+                                Group {
+                                    if play {
+                                        Image(systemName: "pause.fill")
+                                    } else {
+                                        Image(systemName: "play.fill")
+                                    }
                                 }
+                                .font(.title3)
+                                .foregroundColor(Color.primary)
                             }
-                            .pickerStyle(.segmented)
+                            
+                            
+                            Spacer()
+                            
+                            // 미완성 코드
+                            Text("\(skinInfo.skin.levels[selectedLevel].levelItem?.displayName ?? "")")
+                                .font(.system(.title3))
                         }
-                        .fontWeight(.semibold)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal)
+                        .padding([.horizontal, .top])
                         
+                        VStack(spacing: 0) {
+                            if let url = streammedVideoUrl {
+                                VideoPlayer(url: url, play: $play)
+                                    .autoReplay(true)
+                                    .aspectRatio(16/9, contentMode: .fill)
+                                    .cornerRadius(10)
+                                    .padding([.horizontal, .top])
+                                    .padding(.bottom, 5)
+                            }
+                            
+                            HStack {
+                                Picker("Level Picker", selection: $selectedLevel) {
+                                    ForEach(skinInfo.skin.levels.indices, id: \.self) { index in
+                                        Text("\(index+1)레벨")
+                                            .tag(index)
+                                    }
+                                }
+                                .pickerStyle(.segmented)
+                            }
+                            .fontWeight(.semibold)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal)
+                            
+                        }
+                        .background(Color.systemBackground)
                     }
-                    .background(Color.systemBackground)
                     
+                    if skinInfo.skin.chromas.count != 1 {
                     // - 변형
                     HStack {
                         Text("변형")
@@ -163,57 +166,57 @@ struct SkinDetailView: View {
                     }
                     .padding([.horizontal, .top])
                     
-                    VStack(spacing: 0) {
-                        AsyncImage(
-                            url: URL(string: ResourceURL.displayIcon(of: ImageType.weaponSkinChromas, uuid: skinInfo.skin.chromas[selectedChroma].uuid)),
-                            transaction: .init(animation: .spring())
-                        ) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 150)
-                                    .padding()
-                            case .failure(_):
-                                Color.systemBackground
-                                    .frame(height: 150)
-                                    .frame(maxWidth: .infinity)
-                                    .cornerRadius(15)
-                                    .shimmering()
-                            case .empty:
-                                Color.systemBackground
-                                    .frame(height: 150)
-                                    .frame(maxWidth: .infinity)
-                                    .cornerRadius(15)
-                                    .shimmering()
-                            @unknown default:
-                                Color.systemBackground
-                                    .frame(height: 150)
-                                    .frame(maxWidth: .infinity)
-                                    .cornerRadius(15)
-                                    .shimmering()
-                            }
-                        }
-                        
-                        HStack {
-                            Picker("Chroma Picker", selection: $selectedChroma) {
-                                ForEach(skinInfo.skin.chromas.indices, id: \.self) { index in
-                                    Text("\(index+1)레벨")
-                                        .tag(index)
-                                        .onAppear {
-                                            print("\(skinInfo.skin.chromas[index].displayName)")
-                                        }
+                        VStack(spacing: 0) {
+                            AsyncImage(
+                                url: URL(string: ResourceURL.displayIcon(of: ImageType.weaponSkinChromas, uuid: skinInfo.skin.chromas[selectedChroma].uuid)),
+                                transaction: .init(animation: .spring())
+                            ) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 150)
+                                        .padding()
+                                case .failure(_):
+                                    Color.systemBackground
+                                        .frame(height: 150)
+                                        .frame(maxWidth: .infinity)
+                                        .cornerRadius(15)
+                                        .shimmering()
+                                case .empty:
+                                    Color.systemBackground
+                                        .frame(height: 150)
+                                        .frame(maxWidth: .infinity)
+                                        .cornerRadius(15)
+                                        .shimmering()
+                                @unknown default:
+                                    Color.systemBackground
+                                        .frame(height: 150)
+                                        .frame(maxWidth: .infinity)
+                                        .cornerRadius(15)
+                                        .shimmering()
                                 }
                             }
-                            .pickerStyle(.segmented)
+                            
+                            HStack {
+                                Picker("Chroma Picker", selection: $selectedChroma) {
+                                    ForEach(skinInfo.skin.chromas.indices, id: \.self) { index in
+                                        Text("\(index+1)레벨")
+                                            .tag(index)
+                                            .onAppear {
+                                                print("\(skinInfo.skin.chromas[index].displayName)")
+                                            }
+                                    }
+                                }
+                                .pickerStyle(.segmented)
+                            }
+                            .fontWeight(.semibold)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal)
                         }
-                        .fontWeight(.semibold)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal)
-                        
+                        .background(Color.systemBackground)
                     }
-                    .background(Color.systemBackground)
                 }
                 .padding(.vertical)
             }
