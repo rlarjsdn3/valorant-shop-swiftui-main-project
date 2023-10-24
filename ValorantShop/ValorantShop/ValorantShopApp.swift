@@ -22,4 +22,5 @@ struct ValorantShopApp: App {
                 .environmentObject(viewModel)
         }
     }
+    
 }

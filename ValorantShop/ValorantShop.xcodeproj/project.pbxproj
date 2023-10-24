@@ -35,7 +35,6 @@
 		9E5E80002ACD2D750035C622 /* VideoPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 9E5E7FFF2ACD2D750035C622 /* VideoPlayer */; };
 		9E611CD22ABC58E400D1A310 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9E611CD12ABC58E400D1A310 /* Launch Screen.storyboard */; };
 		9E611CD52ABC7B4400D1A310 /* OAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611CD42ABC7B4400D1A310 /* OAuthView.swift */; };
-		9E611CE12ABDDD9C00D1A310 /* AZVideoPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */; };
 		9E611D002ABEA45600D1A310 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611CFF2ABEA45600D1A310 /* MainView.swift */; };
 		9E611D022ABED7F300D1A310 /* SkinListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D012ABED7F300D1A310 /* SkinListView.swift */; };
 		9E611D052ABED81100D1A310 /* BundleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E611D042ABED81100D1A310 /* BundleListView.swift */; };
@@ -117,7 +116,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E611CE12ABDDD9C00D1A310 /* AZVideoPlayer in Frameworks */,
 				9E5E80002ACD2D750035C622 /* VideoPlayer in Frameworks */,
 				9EDCF0C82AC141A80057772F /* Shimmer in Frameworks */,
 				9E266EB62AB34E8B00178F25 /* RealmSwift in Frameworks */,
@@ -396,7 +394,6 @@
 				9E266EB02AB34E6B00178F25 /* KeychainAccess */,
 				9E266EB32AB34E8B00178F25 /* Realm */,
 				9E266EB52AB34E8B00178F25 /* RealmSwift */,
-				9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */,
 				9EDCF0C72AC141A80057772F /* Shimmer */,
 				9E5E7FFF2ACD2D750035C622 /* VideoPlayer */,
 			);
@@ -431,7 +428,6 @@
 			packageReferences = (
 				9E266EAF2AB34E6B00178F25 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				9E266EB22AB34E8B00178F25 /* XCRemoteSwiftPackageReference "realm-swift" */,
-				9E611CDF2ABDDD9C00D1A310 /* XCRemoteSwiftPackageReference "AZVideoPlayer" */,
 				9EDCF0C32AC140850057772F /* XCRemoteSwiftPackageReference "CachedAsyncImage" */,
 				9EDCF0C62AC141A80057772F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
 				9E5E7FFE2ACD2D750035C622 /* XCRemoteSwiftPackageReference "VideoPlayer" */,
@@ -742,14 +738,6 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		9E611CDF2ABDDD9C00D1A310 /* XCRemoteSwiftPackageReference "AZVideoPlayer" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/adamzarn/AZVideoPlayer";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
 		9EDCF0C32AC140850057772F /* XCRemoteSwiftPackageReference "CachedAsyncImage" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bullinnyc/CachedAsyncImage";
@@ -788,11 +776,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9E5E7FFE2ACD2D750035C622 /* XCRemoteSwiftPackageReference "VideoPlayer" */;
 			productName = VideoPlayer;
-		};
-		9E611CE02ABDDD9C00D1A310 /* AZVideoPlayer */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 9E611CDF2ABDDD9C00D1A310 /* XCRemoteSwiftPackageReference "AZVideoPlayer" */;
-			productName = AZVideoPlayer;
 		};
 		9EDCF0C72AC141A80057772F /* Shimmer */ = {
 			isa = XCSwiftPackageProductDependency;

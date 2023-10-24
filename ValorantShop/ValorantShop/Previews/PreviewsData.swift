@@ -54,6 +54,7 @@ struct PreviewsData {
         
         let skinInfo = SkinInfo(skin: skin, price: price)
         return skinInfo
+        
     }()
     
 }

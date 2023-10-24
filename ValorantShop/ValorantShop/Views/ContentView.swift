@@ -30,6 +30,7 @@ struct ContentView: View {
             MainView()
         }
     }
+    
 }
 
 // MARK: - PREVIEW
