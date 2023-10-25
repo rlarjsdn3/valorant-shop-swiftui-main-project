@@ -47,6 +47,7 @@
 		9EB4C5652AB4A14700AE4425 /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5642AB4A14700AE4425 /* Version.swift */; };
 		9EB4C5672AB4A68500AE4425 /* StorePrices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5662AB4A68500AE4425 /* StorePrices.swift */; };
 		9EB4C5692AB4A85D00AE4425 /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */; };
+		9EBDD3D72AE8D41A00D81410 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 9EBDD3D62AE8D41A00D81410 /* Kingfisher */; };
 		9ED509562AB6A6F200149206 /* DataDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509552AB6A6F200149206 /* DataDownloadView.swift */; };
 		9ED509582AB71D8700149206 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509572AB71D8700149206 /* View+Extension.swift */; };
 		9ED5095B2AB7358400149206 /* Valorant-Font.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ED5095A2AB7358400149206 /* Valorant-Font.ttf */; };
@@ -116,6 +117,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9EBDD3D72AE8D41A00D81410 /* Kingfisher in Frameworks */,
 				9E5E80002ACD2D750035C622 /* VideoPlayer in Frameworks */,
 				9EDCF0C82AC141A80057772F /* Shimmer in Frameworks */,
 				9E266EB62AB34E8B00178F25 /* RealmSwift in Frameworks */,
@@ -396,6 +398,7 @@
 				9E266EB52AB34E8B00178F25 /* RealmSwift */,
 				9EDCF0C72AC141A80057772F /* Shimmer */,
 				9E5E7FFF2ACD2D750035C622 /* VideoPlayer */,
+				9EBDD3D62AE8D41A00D81410 /* Kingfisher */,
 			);
 			productName = ValorantShop;
 			productReference = 9E2922842AB0A9D200D6FE07 /* ValorantShop.app */;
@@ -428,9 +431,9 @@
 			packageReferences = (
 				9E266EAF2AB34E6B00178F25 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				9E266EB22AB34E8B00178F25 /* XCRemoteSwiftPackageReference "realm-swift" */,
-				9EDCF0C32AC140850057772F /* XCRemoteSwiftPackageReference "CachedAsyncImage" */,
 				9EDCF0C62AC141A80057772F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
 				9E5E7FFE2ACD2D750035C622 /* XCRemoteSwiftPackageReference "VideoPlayer" */,
+				9EBDD3D52AE8D41A00D81410 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			productRefGroup = 9E2922852AB0A9D200D6FE07 /* Products */;
 			projectDirPath = "";
@@ -738,12 +741,12 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		9EDCF0C32AC140850057772F /* XCRemoteSwiftPackageReference "CachedAsyncImage" */ = {
+		9EBDD3D52AE8D41A00D81410 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/bullinnyc/CachedAsyncImage";
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				minimumVersion = 7.9.1;
 			};
 		};
 		9EDCF0C62AC141A80057772F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */ = {
@@ -776,6 +779,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9E5E7FFE2ACD2D750035C622 /* XCRemoteSwiftPackageReference "VideoPlayer" */;
 			productName = VideoPlayer;
+		};
+		9EBDD3D62AE8D41A00D81410 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9EBDD3D52AE8D41A00D81410 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 		9EDCF0C72AC141A80057772F /* Shimmer */ = {
 			isa = XCSwiftPackageProductDependency;

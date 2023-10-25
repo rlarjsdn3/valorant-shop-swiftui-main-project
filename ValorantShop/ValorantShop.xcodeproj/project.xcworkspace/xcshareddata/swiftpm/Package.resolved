@@ -1,15 +1,6 @@
 {
   "pins" : [
     {
-      "identity" : "cachedasyncimage",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/bullinnyc/CachedAsyncImage",
-      "state" : {
-        "revision" : "66202c05e8b501358fc90f158034cc03f16670c7",
-        "version" : "1.4.0"
-      }
-    },
-    {
       "identity" : "gsplayer",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/wxxsw/GSPlayer.git",
@@ -25,6 +16,15 @@
       "state" : {
         "branch" : "master",
         "revision" : "ecb18d8ce4d88277cc4fb103973352d91e18c535"
+      }
+    },
+    {
+      "identity" : "kingfisher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Kingfisher",
+      "state" : {
+        "revision" : "b6f62758f21a8c03cd64f4009c037cfa580a256e",
+        "version" : "7.9.1"
       }
     },
     {
