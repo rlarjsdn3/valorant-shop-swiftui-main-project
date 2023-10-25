@@ -69,7 +69,7 @@ struct SkinDetailView: View {
                     
                     VStack(spacing: 0) {
                         if let uuid = skinInfo.skin.chromas.first?.uuid {
-                            loadImage(of: .weaponSkins, uuid: uuid)
+                            kingFisherImage(of: ImageType.weaponSkins, uuid: uuid)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: 150)
@@ -97,7 +97,6 @@ struct SkinDetailView: View {
                     .background(Color.systemBackground)
                     
                     if skinInfo.skin.levels.count != 1 {
-                        // - 레벨
                         HStack {
                             Text("레벨")
                                 .font(.system(.title3, weight: .semibold))
@@ -119,7 +118,7 @@ struct SkinDetailView: View {
                             
                             Spacer()
                             
-                            // 미완성 코드
+                            // ❗️ 미완성 코드
                             Text("\(skinInfo.skin.levels[selectedLevel].levelItem?.displayName ?? "")")
                                 .font(.system(.title3))
                         }
@@ -153,69 +152,42 @@ struct SkinDetailView: View {
                     }
                     
                     if skinInfo.skin.chromas.count != 1 {
-                    // - 변형
-                    HStack {
-                        Text("변형")
-                            .font(.system(.title3, weight: .semibold))
-                        
-                        Spacer()
-                        
-                        // 미완성 코드
-                        Text("-")
-                            .font(.system(.title3))
-                    }
-                    .padding([.horizontal, .top])
-                    
-                        VStack(spacing: 0) {
-                            AsyncImage(
-                                url: URL(string: ResourceURL.displayIcon(of: ImageType.weaponSkinChromas, uuid: skinInfo.skin.chromas[selectedChroma].uuid)),
-                                transaction: .init(animation: .spring())
-                            ) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: 150)
-                                        .padding()
-                                case .failure(_):
-                                    Color.systemBackground
-                                        .frame(height: 150)
-                                        .frame(maxWidth: .infinity)
-                                        .cornerRadius(15)
-                                        .shimmering()
-                                case .empty:
-                                    Color.systemBackground
-                                        .frame(height: 150)
-                                        .frame(maxWidth: .infinity)
-                                        .cornerRadius(15)
-                                        .shimmering()
-                                @unknown default:
-                                    Color.systemBackground
-                                        .frame(height: 150)
-                                        .frame(maxWidth: .infinity)
-                                        .cornerRadius(15)
-                                        .shimmering()
-                                }
-                            }
-                            
                             HStack {
-                                Picker("Chroma Picker", selection: $selectedChroma) {
-                                    ForEach(skinInfo.skin.chromas.indices, id: \.self) { index in
-                                        Text("\(index+1)레벨")
-                                            .tag(index)
-                                            .onAppear {
-                                                print("\(skinInfo.skin.chromas[index].displayName)")
-                                            }
-                                    }
-                                }
-                                .pickerStyle(.segmented)
+                                Text("변형")
+                                    .font(.system(.title3, weight: .semibold))
+                                
+                                Spacer()
+                                
+                                // ❗️ 미완성 코드
+                                Text("-")
+                                    .font(.system(.title3))
                             }
-                            .fontWeight(.semibold)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal)
-                        }
-                        .background(Color.systemBackground)
+                            .padding([.horizontal, .top])
+                            
+                            VStack(spacing: 0) {
+                                kingFisherImage(of: ImageType.weaponSkins, uuid: skinInfo.skin.chromas[selectedChroma].uuid)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 150)
+                                    .padding()
+                                
+                                HStack {
+                                    Picker("Chroma Picker", selection: $selectedChroma) {
+                                        ForEach(skinInfo.skin.chromas.indices, id: \.self) { index in
+                                            Text("\(index+1)레벨")
+                                                .tag(index)
+                                                .onAppear {
+                                                    print("\(skinInfo.skin.chromas[index].displayName)")
+                                                }
+                                        }
+                                    }
+                                    .pickerStyle(.segmented)
+                                }
+                                .fontWeight(.semibold)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal)
+                            }
+                            .background(Color.systemBackground)
                     }
                 }
                 .padding(.vertical)

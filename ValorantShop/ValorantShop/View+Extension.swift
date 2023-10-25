@@ -7,10 +7,18 @@
 
 import UIKit
 import SwiftUI
+import Kingfisher
 
 extension View {
     
-    // For Load Image Data
+    func kingFisherImage(of type: ImageType, uuid: String) -> KFImage {
+        KFImage(URL(string: ResourceURL.displayIcon(of: type, uuid: uuid)))
+            .fade(duration: 0.25)
+            .retry(maxCount: 3, interval: .seconds(3))
+            .diskCacheExpiration(.days(3))
+    }
+    
+    // Deprecated
     func loadImage(of type: ImageType, uuid: String) -> Image {
         // 경로 접근을 위한 파일 매니저 선언하기
         let fileManager = FileManager.default
@@ -28,6 +36,7 @@ extension View {
         return image
     }
     
+    // Deprecated
     private func makeImageFileName(of type: ImageType, uuid: String) -> String {
         return "\(type.prefixFileName)-\(uuid).png"
     }

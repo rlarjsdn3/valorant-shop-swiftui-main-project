@@ -21,7 +21,6 @@
 		9E266EB62AB34E8B00178F25 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 9E266EB52AB34E8B00178F25 /* RealmSwift */; };
 		9E2922882AB0A9D200D6FE07 /* ValorantShopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */; };
 		9E29228A2AB0A9D200D6FE07 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922892AB0A9D200D6FE07 /* ContentView.swift */; };
-		9E29228C2AB0A9D200D6FE07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */; };
 		9E29228F2AB0A9D200D6FE07 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E29228E2AB0A9D200D6FE07 /* Preview Assets.xcassets */; };
 		9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E29229B2AB0AF3D00D6FE07 /* CustomTabView.swift */; };
 		9E2922A22AB0B51D00D6FE07 /* StoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2922A12AB0B51D00D6FE07 /* StoreView.swift */; };
@@ -48,6 +47,7 @@
 		9EB4C5672AB4A68500AE4425 /* StorePrices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5662AB4A68500AE4425 /* StorePrices.swift */; };
 		9EB4C5692AB4A85D00AE4425 /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EB4C5682AB4A85D00AE4425 /* RealmManager.swift */; };
 		9EBDD3D72AE8D41A00D81410 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 9EBDD3D62AE8D41A00D81410 /* Kingfisher */; };
+		9EBDD3D82AE8D77C00D81410 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E29228B2AB0A9D200D6FE07 /* Assets.xcassets */; };
 		9ED509562AB6A6F200149206 /* DataDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509552AB6A6F200149206 /* DataDownloadView.swift */; };
 		9ED509582AB71D8700149206 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED509572AB71D8700149206 /* View+Extension.swift */; };
 		9ED5095B2AB7358400149206 /* Valorant-Font.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ED5095A2AB7358400149206 /* Valorant-Font.ttf */; };
@@ -451,8 +451,8 @@
 			files = (
 				9E29228F2AB0A9D200D6FE07 /* Preview Assets.xcassets in Resources */,
 				9ED5095B2AB7358400149206 /* Valorant-Font.ttf in Resources */,
+				9EBDD3D82AE8D77C00D81410 /* Assets.xcassets in Resources */,
 				9E611CD22ABC58E400D1A310 /* Launch Screen.storyboard in Resources */,
-				9E29228C2AB0A9D200D6FE07 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -515,6 +515,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -575,6 +576,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";

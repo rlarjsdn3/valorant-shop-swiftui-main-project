@@ -22,7 +22,7 @@ struct SkinCell: View {
         } label: {
             VStack {
                 if let uuid = skinInfo.skin.chromas.first?.uuid {
-                    loadImage(of: ImageType.weaponSkins, uuid: uuid)
+                    kingFisherImage(of: ImageType.weaponSkins, uuid: uuid)
                         .resizable()
                         .scaledToFit()
                         .frame(maxWidth: .infinity)
@@ -71,4 +71,5 @@ struct SkinCell: View {
         }
         .buttonStyle(.plain)
     }
+    
 }
