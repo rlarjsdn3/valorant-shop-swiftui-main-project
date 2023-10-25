@@ -6,7 +6,7 @@
 `기술스택` <img src="https://img.shields.io/badge/Swift-F05138?style=flat-square&logo=Swift&logoColor=white"/> <img src="https://img.shields.io/badge/Xcode-147EFB?style=flat-square&logo=Xcode&logoColor=white"/> <br>
 `게시일자` 2023년 9월 22일(금) <br>
 
-> 앱스토어에 출시되었습니다. [여기](https://apps.apple.com/kr/app/%EB%B6%80%ED%81%AC%EB%B6%80%ED%81%AC/id6458191612)를 클릭하시면 다운로드 받으실 수 있습니다.
+> ⚠️ 저작권 이슈로 앱스토어에 출시되지 않았습니다.
 
 ## ✅Features
 
