@@ -32,6 +32,7 @@ struct AuthRequestBody: Encodable {
     let type: String = "auth"
     let username: String
     let password: String
+    //let remember: Bool = true
 }
 
 struct MultifactorAuthenticationBody: Encodable {

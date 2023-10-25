@@ -13,13 +13,11 @@ struct LoadingView: View {
     
     var body: some View {
         VStack {
-            Text("Valorant Shop")
-                .font(.custom("VALORANT-Regular", size: 30))
             ProgressView()
-                .progressViewStyle(.circular)
+                .scaleEffect(2.0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(uiColor: UIColor.systemBackground))
+        .background(Color.systemBackground)
     }
 }
 
