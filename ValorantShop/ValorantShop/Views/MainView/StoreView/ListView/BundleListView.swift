@@ -27,60 +27,34 @@ struct BundleListView: View {
                         
                         VStack(spacing: 11) {
                             HStack {
-                                Text("\(viewModel.storeBundlesReminingTime[index])") // ❗️임시 코드
+                                Text("\(viewModel.storeBundlesReminingTime[index])")
                                 
                                 Spacer()
                             }
                             .fontWeight(.bold)
                             .padding(.horizontal)
                             
-                            AsyncImage(
-                                url: URL(string: ResourceURL.displayIcon(of: ImageType.bundles, uuid: bundle.uuid)),
-                                transaction: .init(animation: .spring())
-                            ) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .frame(height: 180)
-                                        .cornerRadius(15)
-                                case .failure(_):
-                                    Color.systemBackground
-                                        .frame(height: 180)
-                                        .frame(maxWidth: .infinity)
-                                        .cornerRadius(15)
-                                        .shimmering()
-                                case .empty:
-                                    Color.systemBackground
-                                        .frame(height: 180)
-                                        .frame(maxWidth: .infinity)
-                                        .cornerRadius(15)
-                                        .shimmering()
-                                @unknown default:
-                                    Color.systemBackground
-                                        .frame(height: 180)
-                                        .frame(maxWidth: .infinity)
-                                        .cornerRadius(15)
-                                        .shimmering()
-                                }
-                            }
-                            .overlay(alignment: .bottomTrailing) {
-                                HStack {
-                                    HStack(spacing: 5) {
-                                        Image("VP")
-                                            .renderingMode(.template)
-                                            .resizable()
-                                            .frame(width: 20, height: 20)
-                                        Text("\(bundle.bundleDiscountedPrice)")
-                                            .foregroundColor(Color.primary)
+                            kingFisherImage(of: ImageType.bundles, uuid: bundle.uuid)
+                                .resizable()
+                                .frame(height: 180)
+                                .cornerRadius(15)
+                                .overlay(alignment: .bottomTrailing) {
+                                    HStack {
+                                        HStack(spacing: 5) {
+                                            Image("VP")
+                                                .renderingMode(.template)
+                                                .resizable()
+                                                .frame(width: 20, height: 20)
+                                            Text("\(bundle.bundleDiscountedPrice)")
+                                                .foregroundColor(Color.primary)
+                                        }
                                     }
+                                    .padding(.vertical, 5)
+                                    .padding(.horizontal, 10)
+                                    .background(Color.systemBackground, in: Capsule())
+                                    .padding(5)
                                 }
-                                .padding(.vertical, 5)
-                                .padding(.horizontal, 10)
-                                .background(Color.systemBackground, in: Capsule())
-                                .padding(5)
-                            }
-                            .padding(.horizontal)
+                                .padding(.horizontal)
                         }
                         
                         VStack(spacing: 20) {

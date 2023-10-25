@@ -13,17 +13,6 @@ struct SettingsView: View {
     
     @EnvironmentObject var viewModel: ViewModel
     
-    // MARK: - COMPUTED PROPERTIES
-    
-    var lastUpdateCheckDateString: String {
-        let lastUpdateCheckDate: Date = Date(timeIntervalSinceReferenceDate: viewModel.lastUpdateCheckDate)
-        
-        let formatter = DateFormatter()
-        formatter.dateFormat = "M월 d일(E) HH:mm"
-        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        return formatter.string(from: lastUpdateCheckDate)
-    }
-    
     // MARK: - BODY
     
     var body: some View {
@@ -69,14 +58,14 @@ struct SettingsView: View {
                 
                 Section {
                     NavigationLink {
-                        DBUpdateView()
+                        DataManagementView()
                             .navigationBarTitleDisplayMode(.inline)
-                            .navigationTitle("DB 업데이트")
+                            .navigationTitle("데이터 관리")
                     } label: {
-                        rowLabel("DB 업데이트", systemName: "externaldrive", accentColor: Color.gray)
+                        rowLabel("데이터 관리", systemName: "externaldrive", accentColor: Color.gray)
                     }
-                } footer: {
-                    Text("최근 업데이트 확인: \(lastUpdateCheckDateString)")
+                } header: {
+                    Text("데이터 관리")
                 }
 
                 // - For Debug -----

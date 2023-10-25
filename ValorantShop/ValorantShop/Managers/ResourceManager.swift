@@ -354,7 +354,6 @@ final class ResourceManager {
             return .failure(.parsingError)
         }
 
-        print("함수 종료")
         // 결과 반환하기
         return .success(ownedItemsResponse)
     }

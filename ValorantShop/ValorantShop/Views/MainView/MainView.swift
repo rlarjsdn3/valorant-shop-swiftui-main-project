@@ -129,6 +129,10 @@ struct MainView: View {
                     // 로딩 스크린 가리기
                     viewModel.isPresentLoadingScreenViewFromView = false
                 }
+                
+                // 다운로드 화면을 가리기
+                viewModel.isPresentDataDownloadView = false
+                // ✏️ 팝 내비게이션 스택 애니메이션이 보이게 하지 않기 위해 1초 딜레이를 둠.
             }
         }
         .onReceive(willEnterForegroundNotification) { _ in
