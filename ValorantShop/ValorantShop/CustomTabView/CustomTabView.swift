@@ -50,7 +50,7 @@ struct CustomTabView: View {
                 Spacer()
                 
                 Button {
-                    haptics.play(.rigid)
+                    haptics.play(.medium)
                     viewModel.selectedCustomTab = type
                 } label: {
                     Image(systemName: type.imageName)

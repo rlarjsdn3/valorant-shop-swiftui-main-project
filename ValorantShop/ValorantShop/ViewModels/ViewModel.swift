@@ -24,7 +24,7 @@ enum ExpiryDateTye {
 
 enum ReloadDataType {
     case skin
-    case bndle
+    case bundle
     case bonus
 }
 
@@ -650,8 +650,8 @@ final class ViewModel: ObservableObject {
         switch type {
         case .skin:
             await self.getStoreSkins(forceLoad: true)
-        case .bndle:
-            fallthrough // 임시
+        case .bundle:
+            await self.getStoreBundles(forceLoad: true)
         case .bonus:
             break // 임시
         }
