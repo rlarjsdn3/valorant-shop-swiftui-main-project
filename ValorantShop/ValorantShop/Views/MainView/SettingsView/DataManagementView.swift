@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct DBUpdateView: View {
+struct DataManagementView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -47,7 +47,7 @@ struct DBUpdateView: View {
 
 struct DBUpdateView_Previews: PreviewProvider {
     static var previews: some View {
-        DBUpdateView()
+        DataManagementView()
             .environmentObject(ViewModel())
     }
 }
