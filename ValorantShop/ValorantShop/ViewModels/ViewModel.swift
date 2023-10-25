@@ -5,10 +5,13 @@
 //  Created by 김건우 on 2023/09/14.
 //
 
+// ⚡️ 하나의 거대한 ViewModel을 LoginViewModel, ResourceViewModel과 SettingsViewModel로 나누는 방안 고민해보기
+
 import SwiftUI
 import Foundation
 import RealmSwift
 import KeychainAccess
+import Kingfisher
 
 // MARK: - ENUM
 
@@ -16,7 +19,7 @@ enum ExpiryDateTye {
     case token
     case skin
     case bundle
-    case bonus
+    //case bonus
 }
 
 enum ReloadDataType {
@@ -138,14 +141,18 @@ final class ViewModel: ObservableObject {
     @Published var selectedCollectionTab: CollectionTabType = .collection
     @Published var isAscendingOrder: Bool = true
     
+    // For ImageCache
+    @Published var diskCacheSize: String = "0.0"
+    
     // MARK: - PROPERTIES
+    
+    let keychain = Keychain()
+    let imageCache = ImageCache.default
     
     let oauthManager = OAuthManager.shared
     let realmManager = RealmManager.shared
     let resourceManager = ResourceManager.shared
     let hapticManager = HapticManager.shared
-    
-    let keychain = Keychain()
     
     // For Timer
     weak var storeSkinsTimer: Timer?
@@ -159,12 +166,7 @@ final class ViewModel: ObservableObject {
     
     // MARK: - INTIALIZER
     
-    init() {
-//        // 현재 날짜 불러오기
-//        let currentDate = Date()
-//        // 현재 날짜부터 갱신 날짜까지 날짜 요소(시/분/초) 차이 구하기
-//        self.storeSkinsRemainingTime = self.remainingSkinsTimeString(from: currentDate, to: self.storeSkinsRenewalDate)
-    }
+    init() { }
     
     // MARK: - LOGIN
     
@@ -927,7 +929,7 @@ final class ViewModel: ObservableObject {
             // Realm에 저장된 번들 스킨 데이터가 있다면
             if !bundles.isEmpty {
                 // 로테이션 갱신 시간이 지났다면
-                if self.isExpired(of: .skin) { // ❗️ 임시 코드
+                if self.isExpired(of: .bundle) {
                     do {
                         // 번들 스킨 데이터를 불러와 Realm에 저장하기
                         try await self.fetchStoreBundles()
@@ -1070,11 +1072,7 @@ final class ViewModel: ObservableObject {
             realmManager.create(storeBundle)
         }
     }
-    
-    // MARK: - GET STORE DATA - BONUS
-    
-    // ...
-    
+
     private func isExpired(of type: ExpiryDateTye) -> Bool {
         // 현재 날짜 불러오기
         let currentDate = Date()
@@ -1087,9 +1085,9 @@ final class ViewModel: ObservableObject {
             // 로테이션 갱신 시간이 지났다면
             return currentDate > storeSkinsRenewalDate ? true : false
         case .bundle:
-            return false // + 임시
-        case .bonus:
-            return false // + 임시
+            // 로테이션 갱신 시간이 지났다면
+            // ⭐️ 번들 시간은 아니지만, 구현 편의를 위해 스킨 갱신 시간을 사용함.
+            return currentDate > storeSkinsRenewalDate ? true : false
         }
     }
     
@@ -1211,6 +1209,28 @@ final class ViewModel: ObservableObject {
         realmManager.deleteAll(of: T.self)
         // 새로운 데이터 저장하기
         realmManager.create(object)
+    }
+    
+    // MARK: - CACHE
+    
+    func calculateDiskCache() {
+        imageCache.calculateDiskStorageSize { result in
+            switch result {
+            case .success(let size):
+                let formatter = NumberFormatter()
+                formatter.minimumFractionDigits = 1
+                // ✏️ 업-캐스팅을 하므로 as?, as!와 같은 키워드는 안 써도 됨.
+                self.diskCacheSize = formatter.string(from: size as NSNumber) ?? "0.0"
+            case .failure:
+                self.diskCacheSize = "0.0"
+            }
+        }
+    }
+    
+    func clearDiskCache() {
+        imageCache.clearDiskCache {
+            self.diskCacheSize = "0.0"
+        }
     }
     
     // MARK: - TIMER
