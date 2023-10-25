@@ -1217,10 +1217,11 @@ final class ViewModel: ObservableObject {
         imageCache.calculateDiskStorageSize { result in
             switch result {
             case .success(let size):
+                let mb = Float(size) / 1024.0 / 1024.0
                 let formatter = NumberFormatter()
                 formatter.minimumFractionDigits = 1
                 // ✏️ 업-캐스팅을 하므로 as?, as!와 같은 키워드는 안 써도 됨.
-                self.diskCacheSize = formatter.string(from: size as NSNumber) ?? "0.0"
+                self.diskCacheSize = formatter.string(from: mb as NSNumber) ?? "0.0"
             case .failure:
                 self.diskCacheSize = "0.0"
             }
