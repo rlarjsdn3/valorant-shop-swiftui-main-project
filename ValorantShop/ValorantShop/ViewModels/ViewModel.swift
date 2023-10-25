@@ -428,7 +428,7 @@ final class ViewModel: ObservableObject {
             // 가격 정보 데이터 다운로드받고, Realm에 저장하기
             try await self.downloadStorePricesData(); self.downloadedImages += 1
             // 스킨 이미지 데이터 다운로드받고, 로컬 Document 폴더에 저장하기
-            try await self.downloadWeaponSkinImages()
+            //try await self.downloadWeaponSkinImages()
             // 스킨 데이터를 업데이트하면
             // ✏️ 최초 다운로드를 끝내면 onAppear로 자동으로 스킨 데이터를 불러올 수 있는 반면에,
             // ✏️ 데이터 업데이트를 하면 스킨 데이터를 갱신할 수 있는 수단이 전무하기 때문에 명시적으로 호출함.
@@ -441,26 +441,21 @@ final class ViewModel: ObservableObject {
             }
             
             withAnimation(.spring()) {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
-                    withAnimation(.spring()) {
-                        // 로그인에 성공하면 성공 여부 수정하기
-                        self.isLoggedIn = true
-                        // 다운로드를 모두 마치면 성공 여부 수정하기
-                        self.isDataDownloaded = true
-                        // 로딩 버튼 가리기
-                        self.isLoadingDataDownloading = false
+                // 로그인에 성공하면 성공 여부 수정하기
+                self.isLoggedIn = true
+                // 다운로드를 모두 마치면 성공 여부 수정하기
+                self.isDataDownloaded = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                withAnimation(.spring()) {
+                    Task {
+                        // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
+                        try await self.downloadValorantVersion()
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        Task {
-                            // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
-                            try await self.downloadValorantVersion()
-                        }
-                        // 다운로드 화면을 가리기
-                        self.isPresentDataDownloadView = false
-                        self.isPresentDataUpdateView = false
-                        // ✏️ false로 수정해주지 않으면 상점 화면에 진입하면 다운로드 풀스크린 커버가 나타남.
-                        // ✏️ 팝 내비게이션 스택 애니메이션이 보이게 하지 않기 위해 1촣 딜레이를 둠.
-                    }
+                    
+                    // 로딩 버튼 가리기
+                    self.isLoadingDataDownloading = false
+                    
                 }
             }
         } catch {
@@ -514,6 +509,7 @@ final class ViewModel: ObservableObject {
         self.overwriteRealmObject(storePrices)
     }
     
+    // Deprecated
     @MainActor
     private func downloadWeaponSkinImages() async throws {
         // Realm으로부터 스킨 데이터 불러오기

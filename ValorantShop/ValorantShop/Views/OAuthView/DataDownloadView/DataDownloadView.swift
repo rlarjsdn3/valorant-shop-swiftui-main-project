@@ -72,7 +72,7 @@ struct DataDownloadView: View {
             buttonLabel = "업데이트"
         case .download:
             titleText = "Downloading..."
-            descriptionText = "앱을 이용하기 위해 발로란트 상점 데이터를 먼저 다운로드해야 합니다. 이 작업은 몇 분 정도 소요됩니다.\n(약 100MB)"
+            descriptionText = "앱을 이용하기 위해 발로란트 상점 데이터를 먼저 다운로드해야 합니다. 이 작업은 몇 분 정도 소요됩니다."
             buttonLabel = "다운로드"
         }
     }
@@ -96,8 +96,8 @@ struct DataDownloadView: View {
                 Spacer()
             }
             .padding()
-            .opacity(isDownloading ? 0 : 1)
-            .disabled(isDownloading)
+            .opacity(viewModel.isLoadingDataDownloading ? 0 : 1)
+            .disabled(viewModel.isLoadingDataDownloading)
             
             VStack(alignment: .leading) {
                 Text("Data")
@@ -137,8 +137,6 @@ struct DataDownloadView: View {
             .padding()
             
             Button {
-                isDownloading.toggle()
-                
                 Task(priority: .high) {
                     switch type {
                     case .update:
@@ -164,7 +162,7 @@ struct DataDownloadView: View {
                 .padding(.vertical, hasBezel ? 20 : 0)
             }
             .modifier(ShakeEffect(animatableData: viewModel.downloadButtonShakeAnimation))
-            .disabled(isDownloading)
+            .disabled(viewModel.isLoadingDataDownloading)
         }
         .onDisappear {
             viewModel.downloadingErrorText = ""
