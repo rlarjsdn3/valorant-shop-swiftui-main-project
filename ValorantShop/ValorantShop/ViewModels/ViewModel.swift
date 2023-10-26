@@ -166,7 +166,16 @@ final class ViewModel: ObservableObject {
     
     // MARK: - INTIALIZER
     
-    init() { }
+    init() { 
+        // 이미지 캐시 설정하기
+        imageCache.memoryStorage.config.expiration = .seconds(300)
+        imageCache.memoryStorage.config.countLimit = 256
+        imageCache.memoryStorage.config.totalCostLimit = 128 * 1024 * 1024 // 128MB
+        imageCache.memoryStorage.config.keepWhenEnteringBackground = true
+        
+        imageCache.diskStorage.config.expiration = .days(3)
+        imageCache.diskStorage.config.sizeLimit = 512 * 1024 * 1024 // 512MB
+    }
     
     // MARK: - LOGIN
     
@@ -298,6 +307,9 @@ final class ViewModel: ObservableObject {
         oauthManager.urlSession = URLSession(configuration: .ephemeral)
         resourceManager.urlSession = URLSession.shared
         
+        // 이미지 메모리・디스크 캐시 비우기
+        imageCache.clearMemoryCache()
+        imageCache.clearDiskCache()
         // 쿠키 정보 및 사용자 고유 정보 삭제하기
         try? keychain.removeAll()
         

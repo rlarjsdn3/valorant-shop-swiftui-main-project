@@ -29,6 +29,7 @@ struct Keychains {
     
     // For Cookie
     static var ssid: String = "SSID"
+    static var tdid: String = "TDID"
     
 }
 

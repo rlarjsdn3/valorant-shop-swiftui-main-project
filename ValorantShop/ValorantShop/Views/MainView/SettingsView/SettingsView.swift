@@ -62,10 +62,10 @@ struct SettingsView: View {
                             .navigationBarTitleDisplayMode(.inline)
                             .navigationTitle("데이터 관리")
                     } label: {
-                        rowLabel("데이터 관리", systemName: "externaldrive", accentColor: Color.gray)
+                        rowLabel("캐시 및 데이터 관리", systemName: "externaldrive", accentColor: Color.gray)
                     }
                 } header: {
-                    Text("데이터 관리")
+                    Text("문서 및 데이터")
                 }
 
                 // - For Debug -----

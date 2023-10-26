@@ -8,6 +8,16 @@
 import Foundation
 import KeychainAccess
 
+// MARK: - ENUM
+
+enum Cookie: String, CaseIterable {
+    case tdid
+    case ssid
+    case clid
+    case csid
+    case sub
+}
+
 // MARK: - ERROR
 
 enum OAuthError: Error {
@@ -38,6 +48,7 @@ struct AuthRequestBody: Encodable {
 struct MultifactorAuthenticationBody: Encodable {
     let type: String = "multifactor"
     let code: String
+    let rememberDevice: Bool = true
 }
 
 // MARK: - HTTP RESPONSE
@@ -135,12 +146,13 @@ final class OAuthManager {
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.httpBody = self.encode(reAuthCookiesBody)
-        // 키체인으로부터 SSID를 가져와 쿠키로 설정하기
-        guard let ssid = keychain[Keychains.ssid] else {
-            print("SSID 없음 에러: \(#function)")
-            return .failure(.noTokenError)
+        
+        // 쿠키를 세션에 구성하기
+        for cookieKey in Cookie.allCases {
+            if let cookieValue = keychain[cookieKey.rawValue] {
+                configureSetCookie(cookieValue, key: cookieKey.rawValue)
+            }
         }
-        self.setCookie(ssid, key: "ssid")
         
         // 비동기 HTTP 통신하기
         guard let (data, response) = try? await urlSession.data(for: urlRequest) else {
@@ -171,6 +183,9 @@ final class OAuthManager {
             return .failure(.noTokenError)
         }
         let accessToken = String(uri[range].split(separator: "&")[0].split(separator: "=")[1])
+        
+        // ReAuth를 위해 Cookie를 키체인에 저장하기
+        saveSetCookie(httpResponse)
         
         // 결과 반환하기
         return .success(accessToken)
@@ -221,8 +236,8 @@ final class OAuthManager {
         }
         let accessToken = String(uri[range].split(separator: "&")[0].split(separator: "=")[1])
 
-        // ReAuth를 위해 SSID와 TDID값을 키체인에 저장하기
-        saveSSIDToKeychain(httpResponse)
+        // ReAuth를 위해 Cookie를 키체인에 저장하기
+        saveSetCookie(httpResponse)
         
         // 결과 반환하기
         return .success(accessToken)
@@ -280,8 +295,8 @@ final class OAuthManager {
         }
         let accessToken = String(uri[range].split(separator: "&")[0].split(separator: "=")[1])
 
-        // ReAuth를 위해 SSID와 TDID값을 키체인에 저장하기
-        saveSSIDToKeychain(httpResponse)
+        // ReAuth를 위해 Cookie를 키체인에 저장하기
+        saveSetCookie(httpResponse)
         
         // 결과 반환하기
         return .success(accessToken)
@@ -354,24 +369,25 @@ final class OAuthManager {
         return .success(playerInfoResponse.uuid)
     }
     
-    private func saveSSIDToKeychain(_ httpResponse: HTTPURLResponse) {
+    // MARK: - COOKIE
+    
+    private func saveSetCookie(_ httpResponse: HTTPURLResponse) {
         // For Dubug
         print(#function)
         
-        // ReAuth를 위해 SSID와 TDID값을 키체인에 저장하기
-        guard let setCookie = (httpResponse.allHeaderFields["Set-Cookie"] as? String) else {
-            return
+        let cookies = HTTPCookie.cookies(
+            withResponseHeaderFields: httpResponse.allHeaderFields as! [String: String],
+            for: httpResponse.url!
+        )
+        for cookie in cookies {
+            // For Debug
+            print("\(cookie.name): \(cookie.value) - \(cookie.expiresDate!)")
+            // 키체인에 개별 Cookie 정보 저장하기
+            keychain[cookie.name] = cookie.value
         }
-        
-        let cookiePattern: String = #"ssid=((?:[a-zA-Z]|\d|\.|-|_)*)"#
-        guard let range = setCookie.range(of: cookiePattern, options: .regularExpression) else {
-            return
-        }
-        let ssid = String(setCookie[range].split(separator: "=")[1])
-        keychain[Keychains.ssid] = ssid
     }
     
-    private func setCookie(_ value: String, key: String) {
+    private func configureSetCookie(_ value: String, key: String) {
         // For Debug
         print(#function)
         
@@ -381,7 +397,7 @@ final class OAuthManager {
                 .name: key,
                 .value: value,
                 .path: "/",
-                .domain: "auth.riotgames.com"
+                .domain: "riotgames.com"
             ])!
         )
         
