@@ -487,10 +487,14 @@ final class ResourceManager {
         return .success(data)
     }
     
+    // MARK: - ENCODE
+    
     private func encode<T: Encodable>(_ data: T) -> Data? {
         let encoder = JSONEncoder()
         return try? encoder.encode(data)
     }
+    
+    // MARK: - DECODE
     
     private func decode<T: Decodable>(of type: T.Type, from data: Data) -> T? {
         let decoder = JSONDecoder()

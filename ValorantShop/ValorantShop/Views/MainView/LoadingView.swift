@@ -20,7 +20,7 @@ struct LoadingView: View {
         .background(Color.systemBackground)
         .overlay(alignment: .bottom) {
             Text("Loading...")
-                .font(.custom(Fonts.valorantFont, size: 30))
+                .font(.custom(Fonts.valorant, size: 30))
                 .offset(y: -45)
         }
     }

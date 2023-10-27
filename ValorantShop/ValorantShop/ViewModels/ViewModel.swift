@@ -364,7 +364,7 @@ final class ViewModel: ObservableObject {
     
     @MainActor
     @discardableResult
-    func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
+    private func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
         // ⭐️ 최초 로그인을 하면 사용자 고유 정보를 불러온 후, 키체인에 저장함.
         // ⭐️ 이후 HTTP 통신을 위해 사용자 고유 정보가 필요하다면 키체인에 저장된 데이터를 불러와 사용함.
         // ⭐️ 만약 토큰이 만료된다면 새롭게 사용자 고유 정보를 불러온 후, 키체인에 저장함.
@@ -382,8 +382,7 @@ final class ViewModel: ObservableObject {
                     // 저장된 사용자 고유 정보 반환하기
                     return .success(reAuthTokens)
                 } catch {
-                    // 토큰 정보 불러오기에 실패하면 로그인 화면으로 되돌아가기
-//                    self.logout()
+                    // 토큰 정보 불러오기에 실패하면 예외 던지기
                     return .failure(.noTokenError)
                 }
             }
@@ -404,8 +403,7 @@ final class ViewModel: ObservableObject {
                 // 저장된 사용자 고유 정보 반환하기
                 return .success(reAuthTokens)
             } catch {
-                // 토큰 정보 불러오기에 실패하면 로그인 화면으로 되돌아가기
-//                self.logout()
+                // 토큰 정보 불러오기에 실패하면 예외 던지기
                 return .failure(.noTokenError)
             }
         }

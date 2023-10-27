@@ -101,9 +101,9 @@ struct DataDownloadView: View {
             
             VStack(alignment: .leading) {
                 Text("Data")
-                    .font(.custom(Fonts.valorantFont, size: 50))
+                    .font(.custom(Fonts.valorant, size: 50))
                 Text("\(titleText)")
-                    .font(.custom(Fonts.valorantFont, size: 35))
+                    .font(.custom(Fonts.valorant, size: 35))
                 
                 Text("\(descriptionText)")
                     .foregroundColor(Color.secondary)
