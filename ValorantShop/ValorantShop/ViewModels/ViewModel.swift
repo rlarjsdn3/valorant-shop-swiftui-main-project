@@ -7,6 +7,22 @@
 
 // ⚡️ 하나의 거대한 ViewModel을 LoginViewModel, ResourceViewModel과 SettingsViewModel로 나누는 방안 고민해보기
 
+// ❗️ 확인된 문제:
+// - 토큰이 만료되어 새로운 토큰을 발급받고, 사용자 데이터를 불러오는 과정에서 관련 함수를 중복으로 호출되는 문제가 확인됨.
+// log)
+//  fetchReAuthCookies()
+//  fetchReAuthCookies()
+//  loadSetCookie()
+//  loadSetCookie()
+//  saveSetCookie(_:)
+//  saveSetCookie(_:)
+//  fetchRiotEntitlement(accessToken:)
+//  fetchRiotEntitlement(accessToken:)
+//  fetchRiotAccountPUUID(accessToken:)
+//  fetchRiotAccountPUUID(accessToken:)
+// - 이는 비동기적으로 메서드가 호출되는 과정에서 기인하는 걸로 추정됨.
+// - 이를 해결하기 위해 CallBack과 같은 기법을 적용해서 getReAuthCookies() 호출이 끝난 후, 사용자 데이터를 불러오도록 코드 작성을 검토해볼 필요가 있음.
+
 import SwiftUI
 import Foundation
 import RealmSwift
@@ -74,10 +90,10 @@ final class ViewModel: ObservableObject {
     
     // MARK: - USER DEFAULTS
     
-    @AppStorage(UserDefaults.isLoggedIn) var isLoggedIn: Bool = false
-    @AppStorage(UserDefaults.isDataDownloaded) var isDataDownloaded: Bool = false
-    @AppStorage(UserDefaults.lastUpdateCheckDate) var lastUpdateCheckDate: Double = Double.infinity
-    @AppStorage(UserDefaults.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
+    @AppStorage(UserDefaultsKeys.isLoggedIn) var isLoggedIn: Bool = false
+    @AppStorage(UserDefaultsKeys.isDataDownloaded) var isDataDownloaded: Bool = false
+    @AppStorage(UserDefaultsKeys.lastUpdateCheckDate) var lastUpdateCheckDate: Double = Double.infinity
+    @AppStorage(UserDefaultsKeys.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
     
     // MARK: - WRAPPER PROPERTIES
     
@@ -166,7 +182,7 @@ final class ViewModel: ObservableObject {
     
     // MARK: - INTIALIZER
     
-    init() { 
+    init() {
         // 이미지 캐시 설정하기
         imageCache.memoryStorage.config.expiration = .seconds(300)
         imageCache.memoryStorage.config.countLimit = 256
@@ -305,7 +321,7 @@ final class ViewModel: ObservableObject {
     func logout() {
         // 새로운 세션 할당하기
         oauthManager.urlSession = URLSession(configuration: .ephemeral)
-        resourceManager.urlSession = URLSession.shared
+        resourceManager.urlSession = URLSession(configuration: .default)
         
         // 이미지 메모리・디스크 캐시 비우기
         imageCache.clearMemoryCache()
@@ -347,16 +363,17 @@ final class ViewModel: ObservableObject {
     // MARK: - REAUTH TOKENS
     
     @MainActor
-    private func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
+    @discardableResult
+    func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
         // ⭐️ 최초 로그인을 하면 사용자 고유 정보를 불러온 후, 키체인에 저장함.
         // ⭐️ 이후 HTTP 통신을 위해 사용자 고유 정보가 필요하다면 키체인에 저장된 데이터를 불러와 사용함.
         // ⭐️ 만약 토큰이 만료된다면 새롭게 사용자 고유 정보를 불러온 후, 키체인에 저장함.
         // ⭐️ 이를 통해, 앱의 로딩 속도를 비약적으로 상승시킬 수 있었음.
         
         // 키체인에 저장된 사용자 고유 정보가 있다면
-        if let accessToken = try? keychain.get(Keychains.accessToken),
-           let riotEntitlement = try? keychain.get(Keychains.riotEntitlement),
-           let puuid = try? keychain.get(Keychains.puuid) {
+        if let accessToken = try? keychain.get(KeychainKeys.accessToken),
+           let riotEntitlement = try? keychain.get(KeychainKeys.riotEntitlement),
+           let puuid = try? keychain.get(KeychainKeys.puuid) {
             // 토큰이 만료되었다면
             if self.isExpired(of: .token) {
                 do {
@@ -366,7 +383,7 @@ final class ViewModel: ObservableObject {
                     return .success(reAuthTokens)
                 } catch {
                     // 토큰 정보 불러오기에 실패하면 로그인 화면으로 되돌아가기
-                    self.isLoggedIn = false
+//                    self.logout()
                     return .failure(.noTokenError)
                 }
             }
@@ -388,7 +405,7 @@ final class ViewModel: ObservableObject {
                 return .success(reAuthTokens)
             } catch {
                 // 토큰 정보 불러오기에 실패하면 로그인 화면으로 되돌아가기
-                self.isLoggedIn = false
+//                self.logout()
                 return .failure(.noTokenError)
             }
         }
@@ -402,9 +419,9 @@ final class ViewModel: ObservableObject {
             let riotEntitlement: String = try await oauthManager.fetchRiotEntitlement(accessToken: accessToken).get()
             let puuid: String = try await oauthManager.fetchRiotAccountPUUID(accessToken: accessToken).get()
             // 불러온 사용자 고유 정보를 키체인에 저장하기
-            keychain[Keychains.accessToken] = accessToken
-            keychain[Keychains.riotEntitlement] = riotEntitlement
-            keychain[Keychains.puuid] = puuid
+            keychain[KeychainKeys.accessToken] = accessToken
+            keychain[KeychainKeys.riotEntitlement] = riotEntitlement
+            keychain[KeychainKeys.puuid] = puuid
             // 토큰 만료 시간을 UserDefaults에 저장하기
             accessTokenExpiryDate = Date().addingTimeInterval(3600.0).timeIntervalSinceReferenceDate
             
@@ -599,6 +616,7 @@ final class ViewModel: ObservableObject {
         }
     }
     
+    // Deprecated
     private func makeImageFileName(of type: ImageType, uuid: String) -> String {
         return "\(type.prefixFileName)-\(uuid).png"
     }

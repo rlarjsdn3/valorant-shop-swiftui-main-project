@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct UserDefaults {
+struct UserDefaultsKeys {
     
     // For Auth
     static var isLoggedIn: String = "isLoggedIn"
@@ -20,7 +20,7 @@ struct UserDefaults {
     static var isDataDownloaded: String = "isDataDownloaded"
 }
 
-struct Keychains {
+struct KeychainKeys {
     
     // For Auth
     static var accessToken: String = "AccessToken"

@@ -18,6 +18,11 @@ struct LoadingView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.systemBackground)
+        .overlay(alignment: .bottom) {
+            Text("Loading...")
+                .font(.custom(Fonts.valorantFont, size: 30))
+                .offset(y: -45)
+        }
     }
 }
 

@@ -13,9 +13,10 @@ import KeychainAccess
 enum Cookie: String, CaseIterable {
     case tdid
     case ssid
+    case asid
     case clid
-    case csid
     case sub
+    case csid
 }
 
 // MARK: - ERROR
@@ -96,6 +97,8 @@ final class OAuthManager {
     private init() { }
     
     // MARK: - PROPERTIES
+    let defaults = UserDefaults.standard
+    
     
     let keychain: Keychain = Keychain()
     // 캐시・쿠키 등 자격 증명을 디스크에 기록하지 않는 URLSession 설정
@@ -148,11 +151,7 @@ final class OAuthManager {
         urlRequest.httpBody = self.encode(reAuthCookiesBody)
         
         // 쿠키를 세션에 구성하기
-        for cookieKey in Cookie.allCases {
-            if let cookieValue = keychain[cookieKey.rawValue] {
-                configureSetCookie(cookieValue, key: cookieKey.rawValue)
-            }
-        }
+        loadSetCookie()
         
         // 비동기 HTTP 통신하기
         guard let (data, response) = try? await urlSession.data(for: urlRequest) else {
@@ -375,38 +374,69 @@ final class OAuthManager {
         // For Dubug
         print(#function)
         
+        // 모든 쿠키 불러오기
         let cookies = HTTPCookie.cookies(
             withResponseHeaderFields: httpResponse.allHeaderFields as! [String: String],
             for: httpResponse.url!
         )
-        for cookie in cookies {
-            // For Debug
-            print("\(cookie.name): \(cookie.value) - \(cookie.expiresDate!)")
-            // 키체인에 개별 Cookie 정보 저장하기
-            keychain[cookie.name] = cookie.value
+        do {
+            // 쿠키를 하나씩 키체인에 저장하기
+            for cookie in cookies {
+                let cookieData = try NSKeyedArchiver.archivedData(withRootObject: cookie, requiringSecureCoding: true)
+                keychain[data: cookie.name] = cookieData
+            }
+        } catch {
+            print("쿠키 저장 에러: \(#function)")
         }
     }
     
-    private func configureSetCookie(_ value: String, key: String) {
+    private func loadSetCookie() {
         // For Debug
         print(#function)
         
-        // 쿠키 설정하기
-        urlSession.configuration.httpCookieStorage?.setCookie(
-            HTTPCookie(properties: [
-                .name: key,
-                .value: value,
-                .path: "/",
-                .domain: "riotgames.com"
-            ])!
-        )
         
+        do {
+            for cookie in Cookie.allCases {
+                if let cookieData = try keychain.getData(cookie.rawValue) {
+                    if let cookie = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [HTTPCookie.self], from: cookieData) as? HTTPCookie {
+                        urlSession.configuration.httpCookieStorage?.setCookie(cookie)
+                    }
+                }
+            }
+        } catch {
+            print("쿠키 로드 에러: \(#function)")
+        }
     }
+    
+    func readCookie(forURL url: URL) -> [HTTPCookie] {
+        let cookieStorage = HTTPCookieStorage.shared
+        let cookies = cookieStorage.cookies(for: url) ?? []
+        return cookies
+    }
+
+    func deleteCookies(forURL url: URL) {
+        let cookieStorage = HTTPCookieStorage.shared
+
+        for cookie in readCookie(forURL: url) {
+            cookieStorage.deleteCookie(cookie)
+        }
+    }
+
+    func storeCookies(_ cookies: [HTTPCookie], forURL url: URL) {
+        let cookieStorage = HTTPCookieStorage.shared
+        cookieStorage.setCookies(cookies,
+                                 for: url,
+                                 mainDocumentURL: nil)
+    }
+    
+    // MARK: - ENCODE
     
     private func encode<T: Encodable>(_ data: T) -> Data? {
         let encoder = JSONEncoder()
         return try? encoder.encode(data)
     }
+    
+    // MARK: - DECODE
     
     private func decode<T: Decodable>(of type: T.Type, from data: Data) -> T? {
         let decoder = JSONDecoder()
