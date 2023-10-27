@@ -49,7 +49,7 @@ struct SkinDetailView: View {
             .padding(.horizontal)
             .overlay {
                 Text("스킨 세부 정보")
-                    .font(.system(size: 24, weight: .semibold))
+                    .font(.system(.title2, weight: .semibold))
             }
             .overlay(alignment: .bottom) {
                 Divider()

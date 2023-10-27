@@ -7,28 +7,23 @@
 
 import Foundation
 
-struct UserDefaults {
+struct UserDefaultsKeys {
     
     // For Auth
     static var isLoggedIn: String = "isLoggedIn"
     static var lastUpdateCheckDate: String = "lastUpdateCheckDate"
     static var accessTokenExpiryDate: String = "AccessTokenExpiryDate"
-    static var storeSkinsExpiryDate: String = "StoreSkinsExpiryDate"
-    static var storeBundlesExpiryDate: String = "StoreBundlesExpiryDate"
     
     // For Resource
     static var isDataDownloaded: String = "isDataDownloaded"
 }
 
-struct Keychains {
+struct KeychainKeys {
     
     // For Auth
     static var accessToken: String = "AccessToken"
     static var riotEntitlement: String = "RiotEntitlement"
     static var puuid: String = "PUUID"
-    
-    // For Cookie
-    static var ssid: String = "SSID"
     
 }
 
@@ -71,11 +66,12 @@ struct RiotURL {
     
     // For Help
     static var canNotLogin = "https://recovery.riotgames.com/ko"
+    
 }
 
 struct Fonts {
     
     // For Font
-    static var valorantFont: String = "VALORANT-Regular"
+    static var valorant: String = "VALORANT-Regular"
     
 }

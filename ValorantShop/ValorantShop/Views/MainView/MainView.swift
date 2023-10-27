@@ -46,6 +46,7 @@ struct MainView: View {
             
             // 사용자ID 등 기본적인 정보 불러오기
             Task {
+                // ⭐️ 사용자ID 등 기본적인 정보는 언제 바뀔지 모르니 항상 불러옴.
                 await viewModel.getPlayerID(forceLoad: true)
                 await viewModel.getPlayerWallet(forceLoad: true)
             }

@@ -10,10 +10,12 @@ import UIKit
 final class HapticManager {
     
     // MARK: - SINGLETON
+    
     static let shared = HapticManager()
     private init() { }
     
     // MARK: - FUNCTIONS
+    
     func play(_ feedbackStyle: UIImpactFeedbackGenerator.FeedbackStyle) {
         UIImpactFeedbackGenerator(style: feedbackStyle).impactOccurred()
     }

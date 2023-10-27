@@ -179,7 +179,7 @@ struct LoginView: View {
                         Text("Valorant")
                         Text("Store")
                     }
-                    .font(.custom(Fonts.valorantFont, size: 50))
+                    .font(.custom(Fonts.valorant, size: 50))
                     .padding(.top, screenSize.height * 0.1)
                     .offset(y: mainTextAnimation ? 0 : -screenSize.height)
                 }

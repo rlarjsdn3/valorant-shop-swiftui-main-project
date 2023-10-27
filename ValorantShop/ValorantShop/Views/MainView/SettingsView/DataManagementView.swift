@@ -30,7 +30,7 @@ struct DataManagementView: View {
         List {
             Section {
                 rowLabel(
-                    "캐시",
+                    "캐시 크기",
                     subText: "\(viewModel.diskCacheSize)MB",
                     systemName: "memorychip",
                     accentColor: Color.green

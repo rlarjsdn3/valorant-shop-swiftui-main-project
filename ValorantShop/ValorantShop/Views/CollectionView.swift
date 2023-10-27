@@ -27,6 +27,10 @@ enum CollectionTabType: CaseIterable {
 
 struct CollectionView: View {
     
+    // MARK: - PROPERTIES
+    
+    let hapticManager = HapticManager.shared
+    
     // MARK: - WRAPPER PROPERTIES
     
     @EnvironmentObject var viewModel: ViewModel
@@ -44,6 +48,7 @@ struct CollectionView: View {
                             withAnimation(.spring(response: 0.3)) {
                                 viewModel.selectedCollectionTab = type
                             }
+                            hapticManager.play(.rigid)
                         } label: {
                             Text(type.tabName)
                                 .font(.title)

@@ -30,6 +30,10 @@ enum StoreTabType: CaseIterable {
 
 struct StoreView: View {
     
+    // MARK: - PROPERTIES
+    
+    let hapticManager = HapticManager.shared
+    
     // MARK: - WRAPPER PROPERTIES
     
     @EnvironmentObject var viewModel: ViewModel
@@ -47,6 +51,7 @@ struct StoreView: View {
                             withAnimation(.spring(response: 0.3)) {
                                 viewModel.selectedStoreTab = type
                             }
+                            hapticManager.play(.rigid)
                         } label: {
                             Text(type.tabName)
                                 .font(.title)
@@ -72,9 +77,7 @@ struct StoreView: View {
                             case .skin:
                                 await viewModel.reloadPlayerData(of: .skin)
                             case .bundle:
-                                print("d")
-                            //case .bonus:
-                            //    -
+                                await viewModel.reloadPlayerData(of: .bundle)
                             }
                         }
                     } label: {
