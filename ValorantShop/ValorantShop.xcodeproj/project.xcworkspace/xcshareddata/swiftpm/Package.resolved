@@ -46,6 +46,15 @@
       }
     },
     {
+      "identity" : "swifttaskqueue",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/rickymohk/SwiftTaskQueue.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "02aa39c8c3fbce5775282e1e4a8d3ea16b6f4d45"
+      }
+    },
+    {
       "identity" : "swiftui-shimmer",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/markiv/SwiftUI-Shimmer",

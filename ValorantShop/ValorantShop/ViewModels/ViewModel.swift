@@ -7,22 +7,6 @@
 
 // ⚡️ 하나의 거대한 ViewModel을 LoginViewModel, ResourceViewModel과 SettingsViewModel로 나누는 방안 고민해보기
 
-// ❗️ 확인된 문제:
-// - 토큰이 만료되어 새로운 토큰을 발급받고, 사용자 데이터를 불러오는 과정에서 관련 함수를 중복으로 호출되는 문제가 확인됨.
-// log)
-//  fetchReAuthCookies()
-//  fetchReAuthCookies()
-//  loadSetCookie()
-//  loadSetCookie()
-//  saveSetCookie(_:)
-//  saveSetCookie(_:)
-//  fetchRiotEntitlement(accessToken:)
-//  fetchRiotEntitlement(accessToken:)
-//  fetchRiotAccountPUUID(accessToken:)
-//  fetchRiotAccountPUUID(accessToken:)
-// - 이는 비동기적으로 메서드가 호출되는 과정에서 기인하는 걸로 추정됨.
-// - 이를 해결하기 위해 CallBack과 같은 기법을 적용해서 getReAuthCookies() 호출이 끝난 후, 사용자 데이터를 불러오도록 코드 작성을 검토해볼 필요가 있음.
-
 import SwiftUI
 import Foundation
 import RealmSwift

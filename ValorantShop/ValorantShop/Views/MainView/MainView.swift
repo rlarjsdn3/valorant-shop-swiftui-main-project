@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftTaskQueue
 
 struct MainView: View {
     
@@ -39,23 +40,41 @@ struct MainView: View {
             CustomTabView()
         }
         .onAppear {
-            // 최신 버전의 데이터가 존재하는지 확인하기
+            let taskQueue = TaskQueue()
+            
             Task {
+                // 최신 버전의 데이터가 존재하는지 확인하기
                 await viewModel.checkValorantVersion()
             }
             
-            // 사용자ID 등 기본적인 정보 불러오기
-            Task {
+            // ⭐️ async 작업을 순서대로 처리하도록 도와주는 큐
+            // 이렇게 처리해주지 않는다면, 쿠키가 동시에 설정되어 통신에 실패할 가능성이 있음.
+            taskQueue.dispatch {
+                // 사용자ID 등 기본적인 정보 불러오기
                 // ⭐️ 사용자ID 등 기본적인 정보는 언제 바뀔지 모르니 항상 불러옴.
                 await viewModel.getPlayerID(forceLoad: true)
                 await viewModel.getPlayerWallet(forceLoad: true)
+                await viewModel.getOwnedWeaponSkins()
+                
+                // ⭐️
+                // taskQueue를 사용하지 않으면
+                // -- Consol Area --
+                //  fetchReAuthCookies()
+                //  fetchReAuthCookies()
+                //  loadSetCookie()
+                //  loadSetCookie()
+                //  saveSetCookie(_:)
+                //  saveSetCookie(_:)
+                //  fetchRiotEntitlement(accessToken:)
+                //  fetchRiotEntitlement(accessToken:)
+                //  fetchRiotAccountPUUID(accessToken:)
+                //  fetchRiotAccountPUUID(accessToken:)
+                // -----------------
+                // 와 같이 메서드가 중복으로 호출되는 문제가 발생함.
             }
             
             // 컬렉션 정보 불러오기
             viewModel.getCollection()
-            Task {
-                await viewModel.getOwnedWeaponSkins()
-            }
             
             // 로테이션 스킨 갱신 날짜 불러오기
             if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
