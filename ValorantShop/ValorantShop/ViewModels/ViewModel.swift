@@ -656,8 +656,11 @@ final class ViewModel: ObservableObject {
     func reloadPlayerData(of type: ReloadDataType) async {
         // 로딩 애니메이션 시작하기
         withAnimation(.spring(dampingFraction: 0.3)) { self.refreshButtonRotateAnimation = true }
-        // 사용자 지갑 데이터 불러오기
+        // 사용자ID 등 기본적인 정보 불러오기
+        // ❗️ Task로 감싸주지 않는다면, 직렬(Serial)로 수행되는 것처럼 보임.
+        await getPlayerID(forceLoad: true)
         await getPlayerWallet(forceLoad: true)
+        await getOwnedWeaponSkins()
         // 어느 데이터를 불러올지 확인하기
         switch type {
         case .skin:
