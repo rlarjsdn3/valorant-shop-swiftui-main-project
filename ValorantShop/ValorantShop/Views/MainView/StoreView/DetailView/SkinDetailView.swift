@@ -118,9 +118,8 @@ struct SkinDetailView: View {
                             
                             Spacer()
                             
-                            // ❗️ 미완성 코드
-                            Text("\(skinInfo.skin.levels[selectedLevel].levelItem?.displayName ?? "")")
-                                .font(.system(.title3))
+//                            Text("\(skinInfo.skin.levels[selectedLevel].levelItem?.displayName ?? "")")
+//                                .font(.system(.title3))
                         }
                         .padding([.horizontal, .top])
                         
@@ -158,9 +157,8 @@ struct SkinDetailView: View {
                                 
                                 Spacer()
                                 
-                                // ❗️ 미완성 코드
-                                Text("-")
-                                    .font(.system(.title3))
+//                                Text("-")
+//                                    .font(.system(.title3))
                             }
                             .padding([.horizontal, .top])
                             

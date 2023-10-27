@@ -110,7 +110,7 @@ enum LevelItem: String, PersistableEnum, Codable {
     case killEffect = "EEquippableSkinLevelItem::KillEffect"
     case randomizer = "EEquippableSkinLevelItem::Randomizer"
     case soundEffects = "EEquippableSkinLevelItem::SoundEffects"
-    case etopFrag = "EEquippableSkinLevelItem::TopFrag"
+    case topFrag = "EEquippableSkinLevelItem::TopFrag"
     case transformation = "EEquippableSkinLevelItem::Transformation"
     case vfx = "EEquippableSkinLevelItem::VFX"
     case voiceover = "EEquippableSkinLevelItem::Voiceover"
@@ -120,33 +120,33 @@ enum LevelItem: String, PersistableEnum, Codable {
         case .animation:
             return "애니메이션"
         case .attackerDefenderSwap:
-            return "-"
+            return "attackerDefenderSwap"
         case .finisher:
             return "마무리"
         case .fishAnimation:
-            return "-"
+            return "fishAnimation"
         case .heartbeatAndMapSensor:
-            return "-"
+            return "heartBeat"
         case .inspectAndKill:
-            return "-"
+            return "inspectAndKill"
         case .killBanner:
-            return "-"
+            return "킬 배너"
         case .killCounter:
-            return "-"
+            return "킬 카운터"
         case .killEffect:
-            return "-"
+            return "킬 이펙트"
         case .randomizer:
-            return "-"
+            return "randomizer"
         case .soundEffects:
-            return "-"
-        case .etopFrag:
-            return "-"
+            return "음향 효과"
+        case .topFrag:
+            return "etopFrag"
         case .transformation:
-            return "-"
+            return "trasnformation"
         case .vfx:
-            return "-"
+            return "VFX"
         case .voiceover:
-            return "-"
+            return "더빙"
         }
     }
 }
