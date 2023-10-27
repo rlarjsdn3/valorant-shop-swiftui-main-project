@@ -1279,7 +1279,7 @@ final class ViewModel: ObservableObject {
         // 시간 업데이트하기
         self.storeSkinsRemainingTime = self.remainingSkinsTimeString(from: currentDate, to: self.storeSkinsRenewalDate)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             withAnimation(.spring()) {
                 // 로딩 스크린 가리기
                 self.isPresentLoadingScreenViewFromSkinsTimer = false
@@ -1316,7 +1316,7 @@ final class ViewModel: ObservableObject {
             storeBundlesReminingTime.append(self.remainingBundlesTimeString(from: currentDate, to: renewalDate))
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             withAnimation(.spring()) {
                 // 로딩 스크린 가리기
                 self.isPresentLoadingScreenViewFromBundlesTimer = false

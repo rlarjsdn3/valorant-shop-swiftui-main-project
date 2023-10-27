@@ -113,7 +113,7 @@ struct MainView: View {
                 }
             }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 // 타이머 작동시키기
                 viewModel.storeSkinsTimer = Timer.scheduledTimer(
                     withTimeInterval: 1.0,
