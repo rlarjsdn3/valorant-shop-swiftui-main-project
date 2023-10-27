@@ -57,6 +57,7 @@
 		9EDCF0CA2AC1A17D0057772F /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0C92AC1A17D0057772F /* LoadingView.swift */; };
 		9EDCF0CC2AC1BB080057772F /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0CB2AC1BB080057772F /* DebugView.swift */; };
 		9EDCF0CE2AC1BEFA0057772F /* DataManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0CD2AC1BEFA0057772F /* DataManagementView.swift */; };
+		9EEF77072AEC0C2C002D672F /* SwiftTaskQueue in Frameworks */ = {isa = PBXBuildFile; productRef = 9EEF77062AEC0C2C002D672F /* SwiftTaskQueue */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -114,6 +115,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9EBDD3D72AE8D41A00D81410 /* Kingfisher in Frameworks */,
+				9EEF77072AEC0C2C002D672F /* SwiftTaskQueue in Frameworks */,
 				9E5E80002ACD2D750035C622 /* VideoPlayer in Frameworks */,
 				9EDCF0C82AC141A80057772F /* Shimmer in Frameworks */,
 				9E266EB62AB34E8B00178F25 /* RealmSwift in Frameworks */,
@@ -393,6 +395,7 @@
 				9EDCF0C72AC141A80057772F /* Shimmer */,
 				9E5E7FFF2ACD2D750035C622 /* VideoPlayer */,
 				9EBDD3D62AE8D41A00D81410 /* Kingfisher */,
+				9EEF77062AEC0C2C002D672F /* SwiftTaskQueue */,
 			);
 			productName = ValorantShop;
 			productReference = 9E2922842AB0A9D200D6FE07 /* ValorantShop.app */;
@@ -428,6 +431,7 @@
 				9EDCF0C62AC141A80057772F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */,
 				9E5E7FFE2ACD2D750035C622 /* XCRemoteSwiftPackageReference "VideoPlayer" */,
 				9EBDD3D52AE8D41A00D81410 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				9EEF77052AEC0C2C002D672F /* XCRemoteSwiftPackageReference "SwiftTaskQueue" */,
 			);
 			productRefGroup = 9E2922852AB0A9D200D6FE07 /* Products */;
 			projectDirPath = "";
@@ -755,6 +759,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		9EEF77052AEC0C2C002D672F /* XCRemoteSwiftPackageReference "SwiftTaskQueue" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rickymohk/SwiftTaskQueue.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -787,6 +799,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9EDCF0C62AC141A80057772F /* XCRemoteSwiftPackageReference "SwiftUI-Shimmer" */;
 			productName = Shimmer;
+		};
+		9EEF77062AEC0C2C002D672F /* SwiftTaskQueue */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9EEF77052AEC0C2C002D672F /* XCRemoteSwiftPackageReference "SwiftTaskQueue" */;
+			productName = SwiftTaskQueue;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
