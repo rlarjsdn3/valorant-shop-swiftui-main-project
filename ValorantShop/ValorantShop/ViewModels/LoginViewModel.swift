@@ -403,7 +403,7 @@ extension LoginViewModel {
         // 현재 날짜 불러오기
         let currentDate = Date().timeIntervalSinceReferenceDate
         // 토큰 갱신 시간 체크하기
-        return Date().timeIntervalSinceReferenceDate > accessTokenExpiryDate ? true : false
+        return currentDate > accessTokenExpiryDate ? true : false
     }
     
 }

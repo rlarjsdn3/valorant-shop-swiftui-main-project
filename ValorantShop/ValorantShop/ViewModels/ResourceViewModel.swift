@@ -22,7 +22,6 @@ enum ExpiryDateTye {
 enum ReloadDataType {
     case skin
     case bundle
-    case bonus
 }
 
 enum LoadingViewType {
@@ -74,9 +73,9 @@ struct Price {
 // MARK: - DELEGATE
 
 protocol ResourceViewModelDelegate: NSObject {
+    func getStorefront(forceLoad: Bool) async
     func clearAllResource()
     func clearStorefront()
-    func getStorefront(forceLoad: Bool) async
     func dismissLoadingView(of type: LoadingViewType)
 }
 
@@ -226,8 +225,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
             await self.getStoreSkins(forceLoad: true)
         case .bundle:
             await self.getStoreBundles(forceLoad: true)
-        case .bonus:
-            break // 임시
         }
         // 로딩 애니메이션 끝내기
         self.refreshButtonRotateAnimation = false
@@ -246,7 +243,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
                     do {
                         // 사용자ID 데이터를 불러와 Realm에 저장하기
                         if let playerID = try await self.fetchPlayerID() {
-                            self.overwriteRealmObject(playerID)
+                            realmManager.overwrite(playerID)
                         }
                     } catch {
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
@@ -257,7 +254,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
                 do {
                     // 사용자ID 데이터를 불러와 Realm에 저장하기
                     if let playerID = try await self.fetchPlayerID() {
-                        self.overwriteRealmObject(playerID)
+                        realmManager.overwrite(playerID)
                     }
                 } catch {
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
@@ -269,7 +266,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
         } else {
             do {
                 if let playerID = try await self.fetchPlayerID() {
-                    self.overwriteRealmObject(playerID)
+                    realmManager.overwrite(playerID)
                 }
             } catch {
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
@@ -322,7 +319,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
                     do {
                         // 사용자 지갑 데이터를 불러와 Realm에 저장하기
                         if let playerWallet = try await self.fetchPlayerWallet() {
-                            self.overwriteRealmObject(playerWallet)
+                            realmManager.overwrite(playerWallet)
                         }
                     } catch {
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
@@ -332,7 +329,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
                     do {
                         // 사용자 지갑 데이터를 불러와 Realm에 저장하기
                         if let playerWallet = try await self.fetchPlayerWallet() {
-                            self.overwriteRealmObject(playerWallet)
+                            realmManager.overwrite(playerWallet)
                         }
                     } catch {
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
@@ -346,7 +343,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
             do {
                 // 사용자 지갑 데이터를 불러와 Realm에 저장하기
                 if let playerWallet = try await self.fetchPlayerWallet() {
-                    self.overwriteRealmObject(playerWallet)
+                    realmManager.overwrite(playerWallet)
                 }
             } catch {
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
@@ -405,7 +402,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
                     do {
                         // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                         if let storeSkinsList = try await self.fetchStoreSkins() {
-                            self.overwriteRealmObject(storeSkinsList)
+                            realmManager.overwrite(storeSkinsList)
                         }
                     } catch {
                         withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
@@ -417,7 +414,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
                 do {
                     // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                     if let storeSkinsList = try await self.fetchStoreSkins() {
-                        self.overwriteRealmObject(storeSkinsList)
+                        realmManager.overwrite(storeSkinsList)
                     }
                 } catch {
                     withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
@@ -429,7 +426,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
             do {
                 // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
                 if let storeSkinsList = try await self.fetchStoreSkins() {
-                    self.overwriteRealmObject(storeSkinsList)
+                    realmManager.overwrite(storeSkinsList)
                 }
             } catch {
                 withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
@@ -551,7 +548,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
                     do {
                         // 번들 스킨 데이터를 불러와 Realm에 저장하기
                         if let bundlesList = try await self.fetchStoreBundles() {
-                            self.overwriteRealmObject(bundlesList)
+                            realmManager.overwrite(bundlesList)
                         }
                     } catch {
                         withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
@@ -563,7 +560,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
                 do {
                     // 번들 스킨 데이터를 불러와 Realm에 저장하기
                     if let bundlesList = try await self.fetchStoreBundles() {
-                        self.overwriteRealmObject(bundlesList)
+                        realmManager.overwrite(bundlesList)
                     }
                 } catch {
                     withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
@@ -575,7 +572,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
             do {
                 // 번들 스킨 데이터를 불러와 Realm에 저장하기
                 if let bundlesList = try await self.fetchStoreBundles() {
-                    self.overwriteRealmObject(bundlesList)
+                    realmManager.overwrite(bundlesList)
                 }
             } catch {
                 withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
@@ -712,24 +709,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
         }
         return storeBundlesList
     }
-
-    private func isExpired(of type: ExpiryDateTye) -> Bool {
-        // 현재 날짜 불러오기
-        let currentDate = Date()
-        // 체크해야 할 갱신 시간 체크하기
-        switch type {
-        case .token:
-            // 토큰 갱신 시간이 지났다면
-            return Date().timeIntervalSinceReferenceDate > accessTokenExpiryDate ? true : false
-        case .skin:
-            // 로테이션 갱신 시간이 지났다면
-            return currentDate > storeSkinsRenewalDate ? true : false
-        case .bundle:
-            // 로테이션 갱신 시간이 지났다면
-            // ⭐️ 번들 시간은 아니지만, 구현 편의를 위해 스킨 갱신 시간을 사용함.
-            return currentDate > storeSkinsRenewalDate ? true : false
-        }
-    }
     
     // MARK: - GET COLLECTION
     
@@ -844,15 +823,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
         self.ownedWeaponSkins = ownedWeaponSkins
     }
     
-    // MARK: - REALM CRUD
-    
-    private func overwriteRealmObject<T: Object>(_ object: T) {
-        // 데이터를 저장하기 전, 기존 데이터 삭제하기
-        realmManager.deleteAll(of: T.self)
-        // 새로운 데이터 저장하기
-        realmManager.create(object)
-    }
-    
     // MARK: - TIMER
     
     @objc func updateStoreSkinsRemainingTime(_ timer: Timer? = nil) {
@@ -963,13 +933,21 @@ final class ResourceViewModel: NSObject, ObservableObject {
     
 }
 
+// MARK: - EXTESNIONS
+
 extension ResourceViewModel: ResourceViewModelDelegate {
     
+    func getStorefront(forceLoad: Bool = false) async {
+        await self.getStoreSkins(forceLoad: forceLoad)
+        await self.getStoreBundles(forceLoad: forceLoad)
+    }
+    
     func clearAllResource() {
-        
-        self.storeSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: Double.infinity) // ⚡️
-        
+        // 토큰 및 상점 만료 날짜 정보 지우기
+        self.storeSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: Double.infinity)
         self.accessTokenExpiryDate = Double.infinity
+        
+        // Realm에 저장된 스킨 데이터 지우기
         self.realmManager.deleteAll(of: PlayerID.self)
         self.realmManager.deleteAll(of: PlayerWallet.self)
         self.realmManager.deleteAll(of: StoreSkinsList.self)
@@ -978,27 +956,23 @@ extension ResourceViewModel: ResourceViewModelDelegate {
         // 이미지 메모리・디스크 캐시 비우기
         imageCache.clearMemoryCache()
         imageCache.clearDiskCache()
+        
         // 쿠키 정보 및 사용자 고유 정보 삭제하기
         try? keychain.removeAll()
         
-        // 타이머 제거하기
-        self.storeSkinsTimer?.invalidate() // ⚡️
-        self.storeBundlesTimer?.invalidate() // ⚡️
+        // 타이머 및 관련 변수 제거하기
+        self.storeSkinsTimer?.invalidate()
+        self.storeBundlesTimer?.invalidate()
         
-        self.isIntialGettingStoreSkinsData = false // ⚡️
-        self.isAutoReloadedStoreSkinsData = false // ⚡️
-        self.isIntialGettingStoreBundlesData = false // ⚡️
-        self.isAutoReloadedStoreBundlesData = false // ⚡️
+        self.isIntialGettingStoreSkinsData = false
+        self.isAutoReloadedStoreSkinsData = false
+        self.isIntialGettingStoreBundlesData = false
+        self.isAutoReloadedStoreBundlesData = false
     }
     
     func clearStorefront() {
         self.storeSkins.skinInfos = []
         self.storeBundles = []
-    }
-    
-    func getStorefront(forceLoad: Bool = false) async {
-        await self.getStoreSkins(forceLoad: forceLoad)
-        await self.getStoreBundles(forceLoad: forceLoad)
     }
     
     func dismissLoadingView(of type: LoadingViewType) {
@@ -1011,4 +985,26 @@ extension ResourceViewModel: ResourceViewModelDelegate {
             withAnimation(.spring()) { self.isPresentLoadingScreenViewFromBundlesTimer = false }
         }
     }
+}
+
+extension ResourceViewModel {
+    
+    private func isExpired(of type: ExpiryDateTye) -> Bool {
+        // 현재 날짜 불러오기
+        let currentDate = Date().timeIntervalSinceReferenceDate
+        // 체크해야 할 갱신 시간 체크하기
+        switch type {
+        case .token:
+            // 토큰 갱신 시간이 지났다면
+            return currentDate > accessTokenExpiryDate ? true : false
+        case .skin:
+            // 로테이션 갱신 시간이 지났다면
+            return currentDate > storeSkinsRenewalDate.timeIntervalSinceReferenceDate ? true : false
+        case .bundle:
+            // 로테이션 갱신 시간이 지났다면
+            // ⭐️ 번들 시간은 아니지만, 구현 편의를 위해 스킨 갱신 시간을 사용함.
+            return currentDate > storeSkinsRenewalDate.timeIntervalSinceReferenceDate ? true : false
+        }
+    }
+    
 }
