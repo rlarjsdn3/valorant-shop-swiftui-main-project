@@ -39,7 +39,7 @@
 
 ## ✏️Project Structure
 
-<img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/7cbae573-f667-41cc-8470-00e4e916b050" align="center" width="1200" height="400">
+<img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/7cbae573-f667-41cc-8470-00e4e916b050" align="center" width="750" height="320">
 
  
 ## 👩🏻‍💻Reference
