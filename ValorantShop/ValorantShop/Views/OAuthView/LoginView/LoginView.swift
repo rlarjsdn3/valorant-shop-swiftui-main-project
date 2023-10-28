@@ -20,7 +20,7 @@ struct LoginView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var loginViewModel: LoginViewModel
     
     // For TextField
     @State private var inputUsername: String = ""
@@ -91,7 +91,7 @@ struct LoginView: View {
                             .onSubmit {
                                 dismissKeyboard()
                                 Task {
-                                    await viewModel.login(
+                                    await loginViewModel.login(
                                         username: inputUsername,
                                         password: inputPassword
                                     )
@@ -120,7 +120,7 @@ struct LoginView: View {
                     .offset(y: passwordTextFieldAnimation ? 0 : screenSize.height)
                     
                     
-                    Text("\(viewModel.loginErrorText)")
+                    Text("\(loginViewModel.loginErrorText)")
                         .font(.caption)
                         .foregroundColor(Color.valorant)
                         .frame(height: 10)
@@ -129,14 +129,14 @@ struct LoginView: View {
                     Button {
                         dismissKeyboard()
                         Task {
-                            await viewModel.login(
+                            await loginViewModel.login(
                                 username: inputUsername,
                                 password: inputPassword
                             )
                         }
                     } label: {
                         Group {
-                            if viewModel.isLoadingLogin {
+                            if loginViewModel.isLoadingLogin {
                                 ProgressView()
                             } else {
                                 Text("로그인")
@@ -150,8 +150,8 @@ struct LoginView: View {
                     }
                     .padding(.top, 1)
                     .offset(y: loginButtonAnimation ? 0 : screenSize.height)
-                    .disabled(viewModel.isLoadingLogin)
-                    .modifier(ShakeEffect(animatableData: viewModel.loginButtonShakeAnimation))
+                    .disabled(loginViewModel.isLoadingLogin)
+                    .modifier(ShakeEffect(animatableData: loginViewModel.loginButtonShakeAnimation))
                     
                     Spacer()
                 }
@@ -159,7 +159,7 @@ struct LoginView: View {
                     loginAnimation()
                 }
                 .onDisappear {
-                    viewModel.loginErrorText = ""
+                    loginViewModel.loginErrorText = ""
                 }
                 .onChange(of: focusField) { newValue in
                     if newValue == .username || newValue == .password {
@@ -195,7 +195,7 @@ struct LoginView: View {
                 .offset(y: keyboardAnimation ? -(screenSize.height * 0.1) : 0)
         }
         .overlay {
-            if viewModel.isPresentMultifactorAuthView {
+            if loginViewModel.isPresentMultifactorAuthView {
                 MultifactorAuthView()
             }
         }
@@ -205,7 +205,7 @@ struct LoginView: View {
     // MARK: - FUNCTION
     
     func loginAnimation() {
-        viewModel.loginErrorText = ""
+        loginViewModel.loginErrorText = ""
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             withAnimation(.spring()) {
@@ -245,6 +245,6 @@ struct LoginView: View {
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
         LoginView()
-            .environmentObject(ViewModel())
+            .environmentObject(LoginViewModel())
     }
 }

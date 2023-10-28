@@ -12,7 +12,7 @@ struct BundleListView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var resourceViewModel: ResourceViewModel
     
     // MARK: - PROPERTIES
     
@@ -22,12 +22,12 @@ struct BundleListView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 45) {
-                ForEach(Array(zip(viewModel.storeBundles.indices, viewModel.storeBundles)), id: \.0) { index, bundle in
+                ForEach(Array(zip(resourceViewModel.storeBundles.indices, resourceViewModel.storeBundles)), id: \.0) { index, bundle in
                     VStack(spacing: 20) {
                         
                         VStack(spacing: 11) {
                             HStack {
-                                Text("\(viewModel.storeBundlesReminingTime[index])")
+                                Text("\(resourceViewModel.storeBundlesReminingTime[index])")
                                 
                                 Spacer()
                             }
@@ -80,6 +80,6 @@ struct BundleListView: View {
 struct BundleListView_Previews: PreviewProvider {
     static var previews: some View {
         BundleListView()
-            .environmentObject(ViewModel())
+            .environmentObject(ResourceViewModel())
     }
 }

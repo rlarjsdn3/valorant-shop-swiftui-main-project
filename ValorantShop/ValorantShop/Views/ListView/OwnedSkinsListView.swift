@@ -11,7 +11,7 @@ struct OwnedSkinsListView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var resourceViewModel: ResourceViewModel
     
     // MARK: - COMPUTED PROPERTIES
     
@@ -19,10 +19,10 @@ struct OwnedSkinsListView: View {
         // 정렬된 스킨 데이터를 저장하는 배열 선언하기
         var sortedOwnedWeaponSkins: [SkinInfo] = []
         // 정렬 기준 확인하기
-        if viewModel.isAscendingOrder {
-            sortedOwnedWeaponSkins = viewModel.ownedWeaponSkins.sorted(by: { $0.skin.displayName < $1.skin.displayName })
+        if resourceViewModel.isAscendingOrder {
+            sortedOwnedWeaponSkins = resourceViewModel.ownedWeaponSkins.sorted(by: { $0.skin.displayName < $1.skin.displayName })
         } else {
-            sortedOwnedWeaponSkins = viewModel.ownedWeaponSkins.sorted(by: { $0.skin.displayName > $1.skin.displayName })
+            sortedOwnedWeaponSkins = resourceViewModel.ownedWeaponSkins.sorted(by: { $0.skin.displayName > $1.skin.displayName })
         }
         // 결과 반환하기
         return sortedOwnedWeaponSkins

@@ -18,7 +18,7 @@ struct MultifactorAuthView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var loginViewModel: LoginViewModel
     
     // For TextField
     @State private var inputCode: String = ""
@@ -44,7 +44,7 @@ struct MultifactorAuthView: View {
                 .onTapGesture {
                     withAnimation(.spring()) {
                         dismissKeyboard()
-                        viewModel.isPresentMultifactorAuthView = false
+                        loginViewModel.isPresentMultifactorAuthView = false
                     }
                 }
             
@@ -52,7 +52,7 @@ struct MultifactorAuthView: View {
                 Text("Login Code")
                     .font(.custom(Fonts.valorant, size: 40))
                 
-                Text("로그인 인증 코드가 포함된 메시지가 \(viewModel.multifactorAuthEmail)로 전송되었습니다. 계속하려면 코드를 입력하십시오.")
+                Text("로그인 인증 코드가 포함된 메시지가 \(loginViewModel.multifactorAuthEmail)로 전송되었습니다. 계속하려면 코드를 입력하십시오.")
                     .font(.caption)
                     .foregroundColor(Color.secondary)
                 
@@ -72,11 +72,11 @@ struct MultifactorAuthView: View {
                             .stroke(lineWidth: 1.0)
                             .foregroundColor(Color.secondary)
                     }
-                    .modifier(ShakeEffect(animatableData: viewModel.codeBoxShakeAnimation))
+                    .modifier(ShakeEffect(animatableData: loginViewModel.codeBoxShakeAnimation))
                     .keyboardType(.numberPad)
                     .focused($focusField, equals: .code)
                 
-                Text("\(viewModel.multifactorErrorText)")
+                Text("\(loginViewModel.multifactorErrorText)")
                     .font(.caption)
                     .foregroundColor(Color.valorant)
                     .frame(height: 10)
@@ -94,24 +94,24 @@ struct MultifactorAuthView: View {
                 }
             }
             .onDisappear {
-                viewModel.multifactorErrorText = ""
+                loginViewModel.multifactorErrorText = ""
                 withAnimation(.spring()) {
-                    viewModel.isLoadingLogin = false
+                    loginViewModel.isLoadingLogin = false
                 }
             }
             .onChange(of: inputCode) { input in
                 if input.count >= 6 {
                     Task {
-                        await viewModel.login(authenticationCode: inputCode)
+                        await loginViewModel.login(authenticationCode: inputCode)
                     }
                 }
             }
             // 에러가 발생했다면 텍스트필드 클리어하기
-            .onChange(of: viewModel.codeBoxShakeAnimation) { _ in
+            .onChange(of: loginViewModel.codeBoxShakeAnimation) { _ in
                 inputCode = ""
             }
             .overlay(alignment: .topTrailing) {
-                if viewModel.isLoadingMultifactor {
+                if loginViewModel.isLoadingMultifactor {
                     ProgressView()
                         .padding(7)
                 }
@@ -133,7 +133,7 @@ struct MultifactorAuthView: View {
 struct MultifactorAuthView_Previews: PreviewProvider {
     static var previews: some View {
         MultifactorAuthView()
-            .environmentObject(ViewModel())
+            .environmentObject(LoginViewModel())
             .previewLayout(.sizeThatFits)
     }
 }

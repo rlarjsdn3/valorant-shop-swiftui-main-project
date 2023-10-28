@@ -20,7 +20,7 @@ struct DataDownloadView: View {
     
     @Environment(\.dismiss) var dismiss
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var loginViewModel: LoginViewModel
     
     @State private var isDownloading: Bool = false
     
@@ -35,8 +35,8 @@ struct DataDownloadView: View {
     // MARK: - COMPUTED PROPERTIES
     
     var progressString: String {
-        let downloadedImages: Int = viewModel.downloadedImages
-        let imagesToDownload: Int = viewModel.imagesToDownload
+        let downloadedImages: Int = loginViewModel.downloadedfiles
+        let imagesToDownload: Int = loginViewModel.filesToDownload
         
         var progressString: String = ""
         if downloadedImages != 0 && imagesToDownload != 0 {
@@ -50,8 +50,8 @@ struct DataDownloadView: View {
     }
     
     var progressPercentage: Double {
-        let downloadedImages = Double(viewModel.downloadedImages)
-        let imagesToDownload = Double(viewModel.imagesToDownload)
+        let downloadedImages = Double(loginViewModel.downloadedfiles)
+        let imagesToDownload = Double(loginViewModel.filesToDownload)
         let progressPercentage = downloadedImages / imagesToDownload
         return progressPercentage >= 1.0 ? 1.0 : progressPercentage
     }
@@ -96,8 +96,8 @@ struct DataDownloadView: View {
                 Spacer()
             }
             .padding()
-            .opacity(viewModel.isLoadingDataDownloading ? 0 : 1)
-            .disabled(viewModel.isLoadingDataDownloading)
+            .opacity(loginViewModel.isLoadingDataDownloading ? 0 : 1)
+            .disabled(loginViewModel.isLoadingDataDownloading)
             
             VStack(alignment: .leading) {
                 Text("Data")
@@ -109,7 +109,7 @@ struct DataDownloadView: View {
                     .foregroundColor(Color.secondary)
                     .padding(.top, 1)
                 
-                Text("\(viewModel.downloadingErrorText)")
+                Text("\(loginViewModel.downloadingErrorText)")
                     .foregroundColor(Color.valorant)
                     .padding(.top, 1)
             }
@@ -140,14 +140,14 @@ struct DataDownloadView: View {
                 Task(priority: .high) {
                     switch type {
                     case .update:
-                        await viewModel.downloadValorantData(update: true)
+                        await loginViewModel.downloadValorantData(update: true)
                     case .download:
-                        await viewModel.downloadValorantData()
+                        await loginViewModel.downloadValorantData()
                     }
                 }
             } label: {
                 Group {
-                    if viewModel.isLoadingDataDownloading {
+                    if loginViewModel.isLoadingDataDownloading {
                         ProgressView()
                     } else {
                         Text("\(buttonLabel)")
@@ -161,13 +161,13 @@ struct DataDownloadView: View {
                 .padding(.horizontal)
                 .padding(.vertical, hasBezel ? 20 : 0)
             }
-            .modifier(ShakeEffect(animatableData: viewModel.downloadButtonShakeAnimation))
-            .disabled(viewModel.isLoadingDataDownloading)
+            .modifier(ShakeEffect(animatableData: loginViewModel.downloadButtonShakeAnimation))
+            .disabled(loginViewModel.isLoadingDataDownloading)
         }
         .onDisappear {
-            viewModel.downloadingErrorText = ""
-            viewModel.imagesToDownload = 0
-            viewModel.downloadedImages = 0
+            loginViewModel.downloadingErrorText = ""
+            loginViewModel.filesToDownload = 0
+            loginViewModel.downloadedfiles = 0
         }
     }
 }
@@ -178,7 +178,7 @@ struct DataDownloadView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
             DataDownloadView(of: .download)
-                .environmentObject(ViewModel())
+                .environmentObject(LoginViewModel())
         }
     }
 }

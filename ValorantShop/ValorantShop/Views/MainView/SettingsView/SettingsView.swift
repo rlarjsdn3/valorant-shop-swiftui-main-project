@@ -11,7 +11,9 @@ struct SettingsView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var loginViewModel: LoginViewModel
+    @EnvironmentObject var resourceViewModel: ResourceViewModel
+    @EnvironmentObject var settingsViewmodel: SettingsViewModel
     
     @State private var isPresentLogoutDialog: Bool = false
     
@@ -23,14 +25,14 @@ struct SettingsView: View {
                 Section {
                     rowLabel(
                         "Riot ID",
-                        subText: "\(viewModel.gameName)",
+                        subText: "\(resourceViewModel.gameName)",
                         systemName: "person",
                         accentColor: Color.red
                     )
                     
                     rowLabel(
                         "Tag Line",
-                        subText: "#\(viewModel.tagLine)",
+                        subText: "#\(resourceViewModel.tagLine)",
                         systemName: "tag",
                         accentColor: Color.green
                     )
@@ -41,19 +43,19 @@ struct SettingsView: View {
                 Section {
                     rowLabel(
                         "VP",
-                        subText: "\(viewModel.vp)",
+                        subText: "\(resourceViewModel.vp)",
                         ImageName: "VP"
                     )
                     
                     rowLabel(
                         "RP",
-                        subText: "\(viewModel.rp)",
+                        subText: "\(resourceViewModel.rp)",
                         ImageName: "RP"
                     )
                     
                     rowLabel(
                         "KP",
-                        subText: "\(viewModel.kp)",
+                        subText: "\(resourceViewModel.kp)",
                         ImageName: "KP"
                     )
                 }
@@ -96,7 +98,7 @@ struct SettingsView: View {
         }
         .confirmationDialog("", isPresented: $isPresentLogoutDialog) {
             Button("로그아웃", role: .destructive) {
-                viewModel.logout()
+                loginViewModel.logout()
             }
         } message: {
             Text("로그아웃하시겠습니까?")
@@ -155,6 +157,8 @@ struct SettingsView: View {
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView()
-            .environmentObject(ViewModel())
+            .environmentObject(LoginViewModel())
+            .environmentObject(ResourceViewModel())
+            .environmentObject(SettingsViewModel())
     }
 }

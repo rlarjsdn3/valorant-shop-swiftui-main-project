@@ -11,7 +11,7 @@ struct SkinListView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var resourceViewModel: ResourceViewModel
     
     // MARK: - BODY
     
@@ -19,7 +19,7 @@ struct SkinListView: View {
         ScrollView {
             VStack {
                 HStack {
-                    Text("\(viewModel.storeSkinsRemainingTime)")
+                    Text("\(resourceViewModel.storeSkinsRemainingTime)")
                     
                     Spacer()
                 }
@@ -27,7 +27,7 @@ struct SkinListView: View {
                 .padding(.horizontal)
                 
                 VStack(spacing: 20) {
-                    ForEach(viewModel.storeSkins.skinInfos) { skinInfo in
+                    ForEach(resourceViewModel.storeSkins.skinInfos) { skinInfo in
                         SkinCell(skinInfo)
                             .padding(.horizontal)
                     }
@@ -46,6 +46,6 @@ struct SkinListView: View {
 struct SkinsView_Previews: PreviewProvider {
     static var previews: some View {
         SkinListView()
-            .environmentObject(ViewModel())
+            .environmentObject(ResourceViewModel())
     }
 }
