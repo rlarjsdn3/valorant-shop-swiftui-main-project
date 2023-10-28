@@ -266,8 +266,6 @@ final class ViewModel: ObservableObject {
             let _ = try await self.getReAuthTokens().get()
             
             withAnimation(.spring()) {
-                // 로그인에 성공하면 로딩 버튼 가리기
-                self.isLoadingLogin = false
                 // 이중 인증 로딩 가리기
                 self.isLoadingMultifactor = false
                 // 이중 인증 화면 안 보이게 하기
@@ -284,6 +282,8 @@ final class ViewModel: ObservableObject {
                             // 다운로드 화면 보이게 하기
                             self.isPresentDataDownloadView = true
                         }
+                        // 로그인에 성공하면 로딩 버튼 가리기
+                        self.isLoadingLogin = false
                     }
                 }
             }

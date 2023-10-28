@@ -69,15 +69,15 @@ struct SettingsView: View {
                 }
 
                 // - For Debug -----
-                Section {
-                    NavigationLink {
-                        DebugView()
-                            .navigationBarTitleDisplayMode(.inline)
-                            .navigationTitle("개발자")
-                    } label: {
-                        rowLabel("개발자", systemName: "hammer", accentColor: Color.blue)
-                    }
-                }
+//                Section {
+//                    NavigationLink {
+//                        DebugView()
+//                            .navigationBarTitleDisplayMode(.inline)
+//                            .navigationTitle("개발자")
+//                    } label: {
+//                        rowLabel("개발자", systemName: "hammer", accentColor: Color.blue)
+//                    }
+//                }
                 // -----------------
                 
                 Section {
