@@ -13,6 +13,8 @@ struct SettingsView: View {
     
     @EnvironmentObject var viewModel: ViewModel
     
+    @State private var isPresentLogoutDialog: Bool = false
+    
     // MARK: - BODY
     
     var body: some View {
@@ -84,7 +86,7 @@ struct SettingsView: View {
                     HStack {
                         Spacer()
                         Button("로그아웃", role: .destructive) {
-                            viewModel.logout()
+                            isPresentLogoutDialog = true
                         }
                         Spacer()
                     }
@@ -92,9 +94,14 @@ struct SettingsView: View {
             }
             .navigationTitle("설정")
         }
-        .sheet(isPresented: $viewModel.isPresentDataDownloadView) {
-            DataDownloadView(of: .update)
+        .confirmationDialog("", isPresented: $isPresentLogoutDialog) {
+            Button("로그아웃", role: .destructive) {
+                viewModel.logout()
+            }
+        } message: {
+            Text("로그아웃하시겠습니까?")
         }
+
     }
     
     // MARK: - FUNCTIONS
