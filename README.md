@@ -39,11 +39,10 @@
 
 ## ✏️Project Structure
 
-<img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/7cbae573-f667-41cc-8470-00e4e916b050" align="center" width="750" height="320">
-
+<img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/7cbae573-f667-41cc-8470-00e4e916b050" align="center" width="697" height="265">
  
 ## 👩🏻‍💻Reference
 
-* [ValorantClientAPI](https://github.com/HeyM1ke/ValorantClientAPI)
-* [Valorant API Docs](https://valapidocs.techchrism.me/endpoint/storefront)
 * [Valorant-API](https://dash.valorant-api.com/endpoints/weapons)
+* [Valorant API Docs](https://valapidocs.techchrism.me/endpoint/storefront)
+* [ValorantClientAPI](https://github.com/HeyM1ke/ValorantClientAPI)
