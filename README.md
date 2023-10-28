@@ -36,6 +36,11 @@
 | <img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/ea43ac4d-9174-427a-b4b5-6afc598d4f73" align="center" width="235" height="511"> | <img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/ccde7fa7-d4c5-4f93-9805-592f7612dff5" align="center" width="235" height="511"> | <img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/6f6d5f1a-777c-4b08-a862-8c293db8af91" align="center" width="235" height="511"> |
 | GIF ① | GIF ② | GIF ③ |
 | <img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/83b86e67-8376-4471-8415-13a317137432" align="center" width="235" height="511"> | <img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/289aa5a3-47c7-4daf-9948-0c17f1f16398" align="center" width="235" height="511"> | <img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/b2187557-1f0d-4b63-8dfc-09239f129855" align="center" width="235" height="511"> |
+
+## ✏️Project Structure
+
+<img src="https://github.com/rlarjsdn3/valorant-shop-swiftui-main-project/assets/21079970/7cbae573-f667-41cc-8470-00e4e916b050" align="center" width="1200" height="400">
+
  
 ## 👩🏻‍💻Reference
 
