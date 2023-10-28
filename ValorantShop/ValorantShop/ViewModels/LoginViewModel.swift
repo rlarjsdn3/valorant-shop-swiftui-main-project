@@ -329,7 +329,8 @@ final class LoginViewModel: NSObject, ObservableObject {
                         // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
                         try await self.downloadValorantVersion()
                     }
-                    
+                    // 업데이트 화면 내리기
+                    self.isPresentDataUpdateView = false
                     // 로딩 버튼 가리기
                     self.isLoadingDataDownloading = false
                 }
