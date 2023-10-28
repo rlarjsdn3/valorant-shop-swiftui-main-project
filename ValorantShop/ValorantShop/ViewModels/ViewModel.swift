@@ -82,9 +82,9 @@ final class ViewModel: ObservableObject {
     // MARK: - WRAPPER PROPERTIES
     
     // For LaunchScreen
-    @Published var isPresentLoadingScreenViewFromView: Bool = true
-    @Published var isPresentLoadingScreenViewFromSkinsTimer: Bool = true
-    @Published var isPresentLoadingScreenViewFromBundlesTimer: Bool = true
+//    @Published var isPresentLoadingScreenViewFromView: Bool = true
+//    @Published var isPresentLoadingScreenViewFromSkinsTimer: Bool = true
+//    @Published var isPresentLoadingScreenViewFromBundlesTimer: Bool = true
     
     // For Login
     @Published var isLoadingLogin: Bool = false
@@ -146,7 +146,6 @@ final class ViewModel: ObservableObject {
     
     // MARK: - PROPERTIES
     
-    let keychain = Keychain()
     let imageCache = ImageCache.default
     
     let oauthManager = OAuthManager.shared
@@ -164,6 +163,8 @@ final class ViewModel: ObservableObject {
     var isIntialGettingStoreBundlesData: Bool = false
     var isAutoReloadedStoreBundlesData: Bool = false
     
+    weak var loginDelegate: LoginViewModelDelegate?
+    
     // MARK: - INTIALIZER
     
     init() {
@@ -175,432 +176,6 @@ final class ViewModel: ObservableObject {
         
         imageCache.diskStorage.config.expiration = .days(3)
         imageCache.diskStorage.config.sizeLimit = 512 * 1024 * 1024 // 512MB
-    }
-    
-    // MARK: - LOGIN
-    
-    @MainActor
-    func login(username: String, password: String) async {
-        // 로그아웃으로 캐시와 세션 초기화하기
-        self.logout()
-        
-        // 계정이름과 비밀번호가 입력되었는지 확인하기
-        guard !username.isEmpty, !password.isEmpty else {
-            // 에러 햅틱 피드백 전달하기
-            hapticManager.notify(.error)
-            // 에러 메시지 출력하기
-            self.loginErrorText = "계정이름과 비밀번호를 입력해주세요."
-            // 로그인 버튼에 흔들기 애니메이션 적용하기
-            withAnimation(.spring()) { self.loginButtonShakeAnimation += 1.0 }
-            return
-        }
-        
-        do {
-            // 로딩 버튼 보이게 하기
-            withAnimation(.spring()) { self.isLoadingLogin = true }
-            
-            // ID와 패스워드로 로그인이 가능한지 확인하기
-            let _ = try await oauthManager.fetchAuthCookies().get()
-            let _ = try await oauthManager.fetchAccessToken(username: username, password: password).get()
-            // 불러온 사용자 고유 정보를 키체인에 저장하기
-            let _ = try await self.getReAuthTokens().get()
-            
-            withAnimation(.spring()) {
-                // 로그인에 성공하면 로딩 버튼 가리기
-                self.isLoadingLogin = false
-                // 데이터 다운로드를 이미 했다면
-                if isDataDownloaded {
-                    // 로그인에 성공하면 성공 여부 수정하기
-                    self.isLoggedIn = true
-                // 데이터 다운로드를 해야 한다면
-                } else {
-                    // 다운로드 화면 보이게 하기
-                    self.isPresentDataDownloadView = true
-                }
-            }
-        // 이중 인증이 필요하다면
-        } catch OAuthError.needMultifactor(let email) {
-            // 인증 이메일을 뷰에 표시하기
-            self.multifactorAuthEmail = email
-            // 이중 인증 화면 보이게 하기
-            withAnimation(.spring()) { self.isPresentMultifactorAuthView = true }
-        // HTTP 통신에 실패한다면
-        } catch OAuthError.networkError, OAuthError.statusCodeError {
-            // 에러 메시지 출력하기
-            self.loginErrorText = "서버에 연결하는 데 문제가 발생하였습니다."
-            // 에러 햅틱 피드백 전달하기
-            hapticManager.notify(.error)
-            // 로그인에 성공하면 로딩 버튼 가리기
-            withAnimation(.spring()) { self.isLoadingLogin = false }
-            // 로그인 버튼에 흔들기 애니메이션 적용하기
-            withAnimation(.spring()) { self.loginButtonShakeAnimation += 1.0 }
-        // 토큰을 발급받을 수 없다면
-        } catch OAuthError.noTokenError {
-            // 에러 메시지 출력하기
-            self.loginErrorText = "계정이름과 비밀번호가 일치하지 않습니다."
-            // 에러 햅틱 피드백 전달하기
-            hapticManager.notify(.error)
-            // 로그인에 성공하면 로딩 버튼 가리기
-            withAnimation(.spring()) { self.isLoadingLogin = false }
-            // 로그인 버튼에 흔들기 애니메이션 적용하기
-            withAnimation(.spring()) { self.loginButtonShakeAnimation += 1.0 }
-        } catch {
-            // 에러 햅틱 피드백 전달하기
-            hapticManager.notify(.error)
-            // 로그인에 성공하면 로딩 버튼 가리기
-            withAnimation(.spring()) { self.isLoadingLogin = false }
-            // 로그인 버튼에 흔들기 애니메이션 적용하기
-            withAnimation(.spring()) { self.loginButtonShakeAnimation += 1.0 }
-        }
-    }
-    
-    @MainActor
-    func login(authenticationCode code: String) async {
-        do {
-            // 로딩 보이게 하기
-            withAnimation(.spring()) { self.isLoadingMultifactor = true }
-            
-            // 이중 인증 코드로 로그인이 가능한지 확인하기
-            let _ = try await oauthManager.fetchMultifactorAuth(authenticationCode: code).get()
-            // 불러온 사용자 고유 정보를 키체인에 저장하기
-            let _ = try await self.getReAuthTokens().get()
-            
-            withAnimation(.spring()) {
-                // 이중 인증 로딩 가리기
-                self.isLoadingMultifactor = false
-                // 이중 인증 화면 안 보이게 하기
-                self.isPresentMultifactorAuthView = false
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
-                    withAnimation(.spring()) {
-                        // 데이터 다운로드를 이미 했다면
-                        if self.isDataDownloaded {
-                            // 로그인에 성공하면 성공 여부 수정하기
-                            self.isLoggedIn = true
-                        // 데이터 다운로드를 해야 한다면
-                        } else {
-                            // 다운로드 화면 보이게 하기
-                            self.isPresentDataDownloadView = true
-                        }
-                        // 로그인에 성공하면 로딩 버튼 가리기
-                        self.isLoadingLogin = false
-                    }
-                }
-            }
-        } catch {
-            // 에러 햅틱 피드백 전달하기
-            hapticManager.notify(.error)
-            // 이중 인증 로딩 가리기
-            withAnimation(.spring()) { self.isLoadingMultifactor = false }
-            // 텍스트 필드에 흔들기 애니메이션 적용하기
-            withAnimation(.spring()) { self.codeBoxShakeAnimation += 1.0 }
-            // 에러 메시지 출력하기
-            self.multifactorErrorText = "로그인 코드가 일치하지 않습니다."
-            
-        }
-    }
-    
-    // MARK: - LOGOUT
-    
-    func logout() {
-        // 새로운 세션 할당하기
-        oauthManager.urlSession = URLSession(configuration: .ephemeral)
-        resourceManager.urlSession = URLSession(configuration: .default)
-        
-        // 이미지 메모리・디스크 캐시 비우기
-        imageCache.clearMemoryCache()
-        imageCache.clearDiskCache()
-        // 쿠키 정보 및 사용자 고유 정보 삭제하기
-        try? keychain.removeAll()
-        
-        // 로그인 여부 및 사용자 정보 삭제하기
-        withAnimation(.spring()) { self.isLoggedIn = false }
-        self.accessTokenExpiryDate = Double.infinity
-        self.storeSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: Double.infinity)
-        self.realmManager.deleteAll(of: PlayerID.self)
-        self.realmManager.deleteAll(of: PlayerWallet.self)
-        self.realmManager.deleteAll(of: StoreSkinsList.self)
-        self.realmManager.deleteAll(of: StoreBundlesList.self)
-        
-        // 타이머 제거하기
-        self.storeSkinsTimer?.invalidate()
-        self.storeBundlesTimer?.invalidate()
-        
-        self.isIntialGettingStoreSkinsData = false
-        self.isAutoReloadedStoreSkinsData = false
-        self.isIntialGettingStoreBundlesData = false
-        self.isAutoReloadedStoreBundlesData = false
-        
-        // 불러온 상점 데이터 삭제하기
-        //self.storeSkins = StoreSkin(renewalDate: Date())
-        // 불러온 번들 데이터 삭제하기
-        //self.storeBundles = StoreBundles()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            // 커스탬 탭 선택 초기화하기
-            self.selectedCustomTab = .shop
-            // 런치 스크린 표시 여부 수정하기
-            self.isPresentLoadingScreenViewFromView = true
-            // ✏️ 로그아웃 시, 화면이 어색하게 바뀌는 걸 방지하고자 1초 딜레이를 둠.
-        }
-    }
-    
-    // MARK: - REAUTH TOKENS
-    
-    @MainActor
-    @discardableResult
-    private func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
-        // ⭐️ 최초 로그인을 하면 사용자 고유 정보를 불러온 후, 키체인에 저장함.
-        // ⭐️ 이후 HTTP 통신을 위해 사용자 고유 정보가 필요하다면 키체인에 저장된 데이터를 불러와 사용함.
-        // ⭐️ 만약 토큰이 만료된다면 새롭게 사용자 고유 정보를 불러온 후, 키체인에 저장함.
-        // ⭐️ 이를 통해, 앱의 로딩 속도를 비약적으로 상승시킬 수 있었음.
-        
-        // 키체인에 저장된 사용자 고유 정보가 있다면
-        if let accessToken = try? keychain.get(KeychainKeys.accessToken),
-           let riotEntitlement = try? keychain.get(KeychainKeys.riotEntitlement),
-           let puuid = try? keychain.get(KeychainKeys.puuid) {
-            // 토큰이 만료되었다면
-            if self.isExpired(of: .token) {
-                do {
-                    // 새롭게 접근 토큰 등 사용자 고유 정보 불러오기
-                    let reAuthTokens = try await self.fetchReAuthTokens().get()
-                    // 저장된 사용자 고유 정보 반환하기
-                    return .success(reAuthTokens)
-                } catch {
-                    // 토큰 정보 불러오기에 실패하면 예외 던지기
-                    return .failure(.noTokenError)
-                }
-            }
-            
-            let reAuthTokens = ReAuthTokens(
-                accessToken: accessToken,
-                riotEntitlement: riotEntitlement,
-                puuid: puuid
-            )
-            // 저장된 사용자 고유 정보 반환하기
-            return .success(reAuthTokens)
-            
-        // 키체인에 저장된 사용자 고유 정보가 없다면
-        } else {
-            do {
-                // 새롭게 접근 토큰 등 사용자 고유 정보 불러오기
-                let reAuthTokens = try await self.fetchReAuthTokens().get()
-                // 저장된 사용자 고유 정보 반환하기
-                return .success(reAuthTokens)
-            } catch {
-                // 토큰 정보 불러오기에 실패하면 예외 던지기
-                return .failure(.noTokenError)
-            }
-        }
-    }
-    
-    @MainActor
-    func fetchReAuthTokens() async throws -> Result<ReAuthTokens, OAuthError> {
-        do {
-            // 새롭게 접근 토큰 등 사용자 고유 정보 불러오기
-            let accessToken: String = try await oauthManager.fetchReAuthCookies().get()
-            let riotEntitlement: String = try await oauthManager.fetchRiotEntitlement(accessToken: accessToken).get()
-            let puuid: String = try await oauthManager.fetchRiotAccountPUUID(accessToken: accessToken).get()
-            // 불러온 사용자 고유 정보를 키체인에 저장하기
-            keychain[KeychainKeys.accessToken] = accessToken
-            keychain[KeychainKeys.riotEntitlement] = riotEntitlement
-            keychain[KeychainKeys.puuid] = puuid
-            // 토큰 만료 시간을 UserDefaults에 저장하기
-            accessTokenExpiryDate = Date().addingTimeInterval(3600.0).timeIntervalSinceReferenceDate
-            
-            let reAuthTokens = ReAuthTokens(
-                accessToken: accessToken,
-                riotEntitlement: riotEntitlement,
-                puuid: puuid
-            )
-            // 저장된 사용자 고유 정보 반환하기
-            return .success(reAuthTokens)
-        } catch {
-            // 토큰 정보 불러오기에 실패하면 예외 던지기
-            return .failure(.noTokenError)
-        }
-    }
-    
-    // MARK: - DOWNLOAD DATA
-    
-    @MainActor
-    func downloadValorantData(update: Bool = false) async {
-        do {
-            // 로딩 버튼 보이게 하기
-            withAnimation(.spring()) { self.isLoadingDataDownloading = true }
-            //
-            self.imagesToDownload = 3
-            // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
-            // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
-            self.storeSkins.skinInfos = []
-            // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadBundlesData(); self.downloadedImages += 1
-            // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadWeaponSkinsData(); self.downloadedImages += 1
-            // 가격 정보 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadStorePricesData(); self.downloadedImages += 1
-            // 스킨 이미지 데이터 다운로드받고, 로컬 Document 폴더에 저장하기
-            //try await self.downloadWeaponSkinImages()
-            // 스킨 데이터를 업데이트하면
-            // ✏️ 최초 다운로드를 끝내면 onAppear로 자동으로 스킨 데이터를 불러올 수 있는 반면에,
-            // ✏️ 데이터 업데이트를 하면 스킨 데이터를 갱신할 수 있는 수단이 전무하기 때문에 명시적으로 호출함.
-            if update {
-                // 로테이션 스킨 데이터 불러오기
-                await self.getStoreSkins()
-                // 번들 스킨 데이터 불러오기
-                await self.getStoreBundles()
-                // + 야시장 스킨 데이터 불러오기
-            }
-            
-            withAnimation(.spring()) {
-                // 로그인에 성공하면 성공 여부 수정하기
-                self.isLoggedIn = true
-                // 다운로드를 모두 마치면 성공 여부 수정하기
-                self.isDataDownloaded = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                withAnimation(.spring()) {
-                    Task {
-                        // 발로란트 버전 데이터 다운로드받고, Realm에 저장하기
-                        try await self.downloadValorantVersion()
-                    }
-                    
-                    // 로딩 버튼 가리기
-                    self.isLoadingDataDownloading = false
-                    
-                }
-            }
-        } catch {
-            withAnimation(.spring()) {
-                // 로딩 버튼 가리기
-                self.isLoadingDataDownloading = false
-                // 다운로드 버튼에 흔들기 애니메이션 적용하기
-                self.downloadButtonShakeAnimation += 1.0
-            }
-            // 에러 햅틱 피드백 전달하기
-            hapticManager.notify(.error)
-            // 에러 메시지 출력하기
-            self.downloadingErrorText = "서버에 연결하는 데 문제가 발생하였습니다."
-        }
-    }
-    
-    @MainActor
-    private func downloadValorantVersion() async throws {
-        // 발로란트 버전 데이터 다운로드받기
-        let valorantVersion = try await resourceManager.fetchValorantVersion().get()
-        // 발로란트 버전 데이터를 Realm에 저장하기
-        self.overwriteRealmObject(valorantVersion)
-    }
-    
-    @MainActor
-    private func downloadBundlesData() async throws {
-        // 무기 스킨 데이터 다운로드받기
-        let bundles = try await resourceManager.fetchBundles().get()
-        // 무기 스킨 데이터를 Realm에 저장하기
-        self.overwriteRealmObject(bundles)
-    }
-    
-    @MainActor
-    private func downloadWeaponSkinsData() async throws {
-        // 무기 스킨 데이터 다운로드받기
-        let weaponSkins = try await resourceManager.fetchWeaponSkins().get()
-        // 무기 스킨 데이터를 Realm에 저장하기
-        self.overwriteRealmObject(weaponSkins)
-    }
-    
-    @MainActor
-    private func downloadStorePricesData() async throws {
-        // 접근 토큰, 등록 정보 및 PUUID값 가져오기
-        let reAuthTokens = try await self.getReAuthTokens().get()
-        // 상점 가격 데이터 다운로드받기
-        let storePrices = try await resourceManager.fetchStorePrices(
-            accessToken: reAuthTokens.accessToken,
-            riotEntitlement: reAuthTokens.riotEntitlement
-        ).get()
-        // 상점 가격 데이터를 Realm에 저장하기
-        self.overwriteRealmObject(storePrices)
-    }
-    
-    // Deprecated
-    @MainActor
-    private func downloadWeaponSkinImages() async throws {
-        // Realm으로부터 스킨 데이터 불러오기
-        guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else { return }
-        
-        // 경로 접근을 위한 파일 매니저 선언하기
-        let fileManager = FileManager.default
-        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        
-        // 경로에 이미지가 저장되지 않은 스킨 UUID값 저장하기
-        var notDownloadedImages: [(imageType: ImageType, uuid: String)] = []
-        
-        // 스킨 데이터를 순회하며 저장되지 않은 스킨 이미지 UUID값 솎아내기
-        for skin in skins {
-            // UUID값 저장하기
-            guard let uuid = skin.chromas.first?.uuid else { return }
-            // 경로 설정하기
-            let skinPath = documents.appending(path: makeImageFileName(of: ImageType.weaponSkins, uuid: uuid)).path()
-            // 파일 매니저의 경로에 해당 파일이 존재하지 않으면
-            if !fileManager.fileExists(atPath: skinPath) {
-                // 저장되지 않은 스킨 UUID값 저장하기
-                notDownloadedImages.append((ImageType.weaponSkins, uuid))
-            }
-            
-            // 스킨 속 크로마 데이터가 하나라면
-            if skin.chromas.count <= 1 { continue /* 이미지를 저장하지 않고 건너뛰기 */ }
-            
-            // 크로마 데이터를 순회하며 저장되지 않은 스킨과 스와치 이미지 UUID값 솎아내기
-            for chroma in skin.chromas {
-                // UUID값 저장하기
-                let uuid = chroma.uuid
-                // 경로 설정하기
-                let chromaPath = documents.appending(path: makeImageFileName(of: ImageType.weaponSkinChromas, uuid: uuid)).path()
-                //let swatchPath = documents.appending(path: makeImageFileName(of: ImageType.weaponSkinSwatchs, uuid: uuid)).path()
-                // 파일 매니저의 경로에 해당 파일이 존재하지 않으면
-                if !fileManager.fileExists(atPath: chromaPath) {
-                    // 저장되지 않은 스킨 UUID값 저장하기
-                    notDownloadedImages.append((ImageType.weaponSkinChromas, uuid))
-                }
-                // 파일 매너지의 경로에 해당 파일이 존재하지 않으면
-                //if !fileManager.fileExists(atPath: swatchPath) {
-                    // 저장되지 않은 스킨 UUID값 저장하기
-                //    notDownloadedImages.append((ImageType.weaponSkinSwatchs, uuid))
-                //}
-            }
-        }
-            
-        
-        // 총 다운로드할 이미지 개수를 프로퍼티 래퍼에 저장하기
-        self.imagesToDownload = notDownloadedImages.count
-        
-        // 이미지를 다운로드해 Documents 폴더에 저장하기
-        for notDownloadedImage in notDownloadedImages {
-            // 다운로드한 이미지 데이터를 저장하는 변수 선언하기
-            var imageData: Data
-            // 다운로드 한 이미지 개수 증가시키기
-            self.downloadedImages += 1
-            // 이미지 타입 저장하기
-            let imageType = notDownloadedImage.imageType
-            // UUID값 저장하기
-            let uuid = notDownloadedImage.uuid
-            // 이미지 다운로드하기
-            do {
-                imageData = try await resourceManager.fetchSkinImageData(
-                    of: notDownloadedImage.imageType,
-                    uuid: notDownloadedImage.uuid
-                ).get()
-                // 경로 설정하기
-                let saveUrl = documents.appending(path: makeImageFileName(of: imageType, uuid: uuid))
-                // 해당 경로에 이미지 파일 저장하기
-                try imageData.write(to: saveUrl)
-            } catch {
-                continue
-            }
-        }
-    }
-    
-    // Deprecated
-    private func makeImageFileName(of type: ImageType, uuid: String) -> String {
-        return "\(type.prefixFileName)-\(uuid).png"
     }
     
     // MARK: - CHECK VERSION
@@ -648,7 +223,7 @@ final class ViewModel: ObservableObject {
         // ✏️ 어색하게 갑작스레 뷰가 리-렌더링되는 모습을 숨기고자 1초 딜레이를 둠.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             // 로딩 스크린 화면 끄기
-            withAnimation(.easeInOut(duration: 0.2)) { self.isPresentLoadingScreenViewFromView = false }
+            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
         }
     }
     
@@ -686,7 +261,9 @@ final class ViewModel: ObservableObject {
                 if self.isExpired(of: .skin) {
                     do {
                         // 사용자ID 데이터를 불러와 Realm에 저장하기
-                        try await self.fetchPlayerID()
+                        if let playerID = try await self.fetchPlayerID() {
+                            self.overwriteRealmObject(playerID)
+                        }
                     } catch {
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                     }
@@ -695,7 +272,9 @@ final class ViewModel: ObservableObject {
             } else {
                 do {
                     // 사용자ID 데이터를 불러와 Realm에 저장하기
-                    try await self.fetchPlayerID()
+                    if let playerID = try await self.fetchPlayerID() {
+                        self.overwriteRealmObject(playerID)
+                    }
                 } catch {
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                 }
@@ -705,7 +284,9 @@ final class ViewModel: ObservableObject {
         // 강제로 다시 불러온다면
         } else {
             do {
-                try await self.fetchPlayerID()
+                if let playerID = try await self.fetchPlayerID() {
+                    self.overwriteRealmObject(playerID)
+                }
             } catch {
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
             }
@@ -723,19 +304,25 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    private func fetchPlayerID() async throws {
+    private func fetchPlayerID() async throws -> PlayerID? {
+        // playerID를 저장하는 변수 선언하기
+        var playerID: PlayerID?
         // Realm에 저장되어 있는 기존 사용자ID 데이터 삭제하기
-        realmManager.deleteAll(of: PlayerID.self)
+//        realmManager.deleteAll(of: PlayerID.self)
         // 접근 토큰 등 사용자 고유 정보 가져오기
-        let reAuthTokens = try await self.getReAuthTokens().get()
+        let reAuthTokens = try await self.loginDelegate?.getReAuthTokens().get()
         // 닉네임, 태그 정보 다운로드하기
-        let playerID = try await resourceManager.fetchPlayerID(
-            accessToken: reAuthTokens.accessToken,
-            riotEntitlement: reAuthTokens.riotEntitlement,
-            puuid: reAuthTokens.puuid
-        ).get()
+        if let tokens = reAuthTokens {
+            playerID = try await resourceManager.fetchPlayerID(
+                accessToken: tokens.accessToken,
+                riotEntitlement: tokens.riotEntitlement,
+                puuid: tokens.puuid
+            ).get()
+            return playerID
+        }
+        return nil
         // Realm에 새로운 사용자ID 데이터 저장하기
-        realmManager.create(playerID)
+//        realmManager.create(playerID)
     }
     
     @MainActor
@@ -750,7 +337,9 @@ final class ViewModel: ObservableObject {
                 if self.isExpired(of: .skin) {
                     do {
                         // 사용자 지갑 데이터를 불러와 Realm에 저장하기
-                        try await self.fetchPlayerWallet()
+                        if let playerWallet = try await self.fetchPlayerWallet() {
+                            self.overwriteRealmObject(playerWallet)
+                        }
                     } catch {
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                     }
@@ -758,7 +347,9 @@ final class ViewModel: ObservableObject {
                 } else {
                     do {
                         // 사용자 지갑 데이터를 불러와 Realm에 저장하기
-                        try await self.fetchPlayerWallet()
+                        if let playerWallet = try await self.fetchPlayerWallet() {
+                            self.overwriteRealmObject(playerWallet)
+                        }
                     } catch {
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                     }
@@ -770,7 +361,9 @@ final class ViewModel: ObservableObject {
         } else {
             do {
                 // 사용자 지갑 데이터를 불러와 Realm에 저장하기
-                try await self.fetchPlayerWallet()
+                if let playerWallet = try await self.fetchPlayerWallet() {
+                    self.overwriteRealmObject(playerWallet)
+                }
             } catch {
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
             }
@@ -792,19 +385,25 @@ final class ViewModel: ObservableObject {
     }
     
     @MainActor
-    private func fetchPlayerWallet() async throws {
+    private func fetchPlayerWallet() async throws -> PlayerWallet? {
+        // Wallet를 저장하는 변수 선언하기
+        var wallet: PlayerWallet?
         // Realm에 저장되어 있는 기존 사용자 지갑 데이터 삭제하기
-        realmManager.deleteAll(of: PlayerWallet.self)
+//        realmManager.deleteAll(of: PlayerWallet.self)
         // 접근 토큰 등 사용자 고유 정보 가져오기
-        let reAuthTokens = try await self.getReAuthTokens().get()
+        let reAuthTokens = try await self.loginDelegate?.getReAuthTokens().get()
         // 사용자 지갑 정보 다운로드하기
-        let wallet = try await resourceManager.fetchUserWallet(
-            accessToken: reAuthTokens.accessToken,
-            riotEntitlement: reAuthTokens.riotEntitlement,
-            puuid: reAuthTokens.puuid
-        ).get()
+        if let tokens = reAuthTokens {
+            wallet = try await resourceManager.fetchUserWallet(
+                accessToken: tokens.accessToken,
+                riotEntitlement: tokens.riotEntitlement,
+                puuid: tokens.puuid
+            ).get()
+            return wallet
+        }
+        return nil
         // Realm에 새로운 사용자 지갑 데이터 저장하기
-        realmManager.create(wallet)
+//        realmManager.create(wallet)
     }
     
     // MARK: - GET STORE DATA - SKINS
@@ -821,9 +420,11 @@ final class ViewModel: ObservableObject {
                 if self.isExpired(of: .skin) {
                     do {
                         // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
-                        try await self.fetchStoreSkins()
+                        if let storeSkinsList = try await self.fetchStoreSkins() {
+                            self.overwriteRealmObject(storeSkinsList)
+                        }
                     } catch {
-                        self.isPresentLoadingScreenViewFromView = false
+                        self.loginDelegate?.turnOffLoadingScreenView(of: .view)
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                     }
                 }
@@ -831,9 +432,11 @@ final class ViewModel: ObservableObject {
             } else {
                 do {
                     // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
-                    try await self.fetchStoreSkins()
+                    if let storeSkinsList = try await self.fetchStoreSkins() {
+                        self.overwriteRealmObject(storeSkinsList)
+                    }
                 } catch {
-                    self.isPresentLoadingScreenViewFromView = false
+                    self.loginDelegate?.turnOffLoadingScreenView(of: .view)
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                 }
             }
@@ -841,26 +444,28 @@ final class ViewModel: ObservableObject {
         } else {
             do {
                 // 로테이션 스킨 데이터를 불러와 Realm에 저장하기
-                try await self.fetchStoreSkins()
+                if let storeSkinsList = try await self.fetchStoreSkins() {
+                    self.overwriteRealmObject(storeSkinsList)
+                }
             } catch {
-                self.isPresentLoadingScreenViewFromView = false
+                self.loginDelegate?.turnOffLoadingScreenView(of: .view)
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
             }
         }
         
         // Realm으로부터 로테이션 스킨 데이터 불러오기
         guard let storeSkinsList = realmManager.read(of: StoreSkinsList.self).first else {
-            self.isPresentLoadingScreenViewFromView = false
+            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
             return
         }
         // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
-            self.isPresentLoadingScreenViewFromView = false
+            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
             return
         }
         // Realm으로부터 가격 데이터 불러오기
         guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
-            self.isPresentLoadingScreenViewFromView = false
+            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
             return
         }
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
@@ -900,22 +505,38 @@ final class ViewModel: ObservableObject {
         self.storeSkins = storeSkins
     }
     
+    private func fetchStoreSkins() async throws -> StoreSkinsList? {
+        if let skinsPanelLayout = try? await self.fetchSkinsPanelLayout() {
+            return transformSkinsPanelLayoutToStoreSkinsList(skinsPanelLayout)
+        }
+        return nil
+    }
+    
     @MainActor
-    private func fetchStoreSkins() async throws {
+    private func fetchSkinsPanelLayout() async throws -> SkinsPanelLayout? {
+        // 로테이션 스킨 데이터를 저장하는 변수 선언하기
+        var skinsPanelLayouts: SkinsPanelLayout?
         // Realm에 저장되어 있는 기존 로테이션 스킨 데이터 삭제하기
-        realmManager.deleteAll(of: StoreSkinsList.self)
+//        realmManager.deleteAll(of: StoreSkinsList.self)
         
         // 접근 토큰 등 사용자 고유 정보 가져오기
-        let reAuthTokens = try await self.getReAuthTokens().get()
+        let reAuthTokens = try await self.loginDelegate?.getReAuthTokens().get()
         // 새롭게 로테이션 스킨 데이터 불러오기
-        let skinsPanelLayouts = try await resourceManager.fetchStorefront(
-            accessToken: reAuthTokens.accessToken,
-            riotEntitlement: reAuthTokens.riotEntitlement,
-            puuid: reAuthTokens.puuid
-        ).get().skinsPanelLayout
-        
+        if let tokens = reAuthTokens {
+            skinsPanelLayouts = try await resourceManager.fetchStorefront(
+                accessToken: tokens.accessToken,
+                riotEntitlement: tokens.riotEntitlement,
+                puuid: tokens.puuid
+            ).get().skinsPanelLayout
+            return skinsPanelLayouts
+        }
+        return nil
+//        realmManager.create(storeSkinsList)
+    }
+    
+    private func transformSkinsPanelLayoutToStoreSkinsList(_ skinsPanelLayouts: SkinsPanelLayout) -> StoreSkinsList {
         // Realm에 새로운 로테이션 스킨 데이터 저장하기
-        let storeSkinsList = StoreSkinsList()
+        let storeSkinsList: StoreSkinsList = StoreSkinsList()
         // 로테이션 스킨 갱신 날짜 저장하기
         storeSkinsList.renewalDate = Date().addingTimeInterval(
             Double(skinsPanelLayouts.singleItemOffersRemainingDurationInSeconds)
@@ -926,8 +547,10 @@ final class ViewModel: ObservableObject {
             rotationSkinInfo.uuid = uuid
             storeSkinsList.itemInfos.append(rotationSkinInfo)
         }
-        realmManager.create(storeSkinsList)
+        
+        return storeSkinsList
     }
+    
     
     // MARK: - GET STORE DATA - BUNDLE
     
@@ -943,9 +566,11 @@ final class ViewModel: ObservableObject {
                 if self.isExpired(of: .bundle) {
                     do {
                         // 번들 스킨 데이터를 불러와 Realm에 저장하기
-                        try await self.fetchStoreBundles()
+                        if let bundlesList = try await self.fetchStoreBundles() {
+                            self.overwriteRealmObject(bundlesList)
+                        }
                     } catch {
-                        self.isPresentLoadingScreenViewFromView = false
+                        self.loginDelegate?.turnOffLoadingScreenView(of: .view)
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                     }
                 }
@@ -953,9 +578,11 @@ final class ViewModel: ObservableObject {
             } else {
                 do {
                     // 번들 스킨 데이터를 불러와 Realm에 저장하기
-                    try await self.fetchStoreBundles()
+                    if let bundlesList = try await self.fetchStoreBundles() {
+                        self.overwriteRealmObject(bundlesList)
+                    }
                 } catch {
-                    self.isPresentLoadingScreenViewFromView = false
+                    self.loginDelegate?.turnOffLoadingScreenView(of: .view)
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                 }
             }
@@ -963,9 +590,11 @@ final class ViewModel: ObservableObject {
         } else {
             do {
                 // 번들 스킨 데이터를 불러와 Realm에 저장하기
-                try await self.fetchStoreBundles()
+                if let bundlesList = try await self.fetchStoreBundles() {
+                    self.overwriteRealmObject(bundlesList)
+                }
             } catch {
-                self.isPresentLoadingScreenViewFromView = false
+                self.loginDelegate?.turnOffLoadingScreenView(of: .view)
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
             }
         }
@@ -980,7 +609,7 @@ final class ViewModel: ObservableObject {
         
         // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
-            self.isPresentLoadingScreenViewFromView = false
+            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
             return
         }
         // Realm으로부터 가격 데이터 불러오기
@@ -1039,29 +668,45 @@ final class ViewModel: ObservableObject {
         self.storeBundles = storeBundles
     }
     
+    private func fetchStoreBundles() async throws -> StoreBundlesList? {
+        if let featureBundles = try? await self.fetchFeatureBundle() {
+            return transformFeatureBundleToStoreBundlesList(featureBundles)
+        }
+        return nil
+    }
+    
     @MainActor
-    func fetchStoreBundles() async throws {
+    func fetchFeatureBundle() async throws -> FeaturedBundle? {
+        // 번들 스킨 데이터를 저장하는 변수 선언하기
+        var featureBundles: FeaturedBundle?
         // Realm에 저장되어 있는 기존 번들 스킨 데이터 삭제하기
-        realmManager.deleteAll(of: StoreBundlesList.self)
+//        realmManager.deleteAll(of: StoreBundlesList.self)
         
         // 접근 토큰 등 사용자 고유 정보 가져오기
-        let reAuthTokens = try await self.getReAuthTokens().get()
+        let reAuthTokens = try await self.loginDelegate?.getReAuthTokens().get()
         // 새롭게 번들 스킨 데이터 불러오기
-        let featureBundles = try await resourceManager.fetchStorefront(
-            accessToken: reAuthTokens.accessToken,
-            riotEntitlement: reAuthTokens.riotEntitlement,
-            puuid: reAuthTokens.puuid
-        ).get().featuredBundle
+        if let tokens = reAuthTokens {
+            featureBundles = try await resourceManager.fetchStorefront(
+                accessToken: tokens.accessToken,
+                riotEntitlement: tokens.riotEntitlement,
+                puuid: tokens.puuid
+            ).get().featuredBundle
+            return featureBundles
+        }
+        return nil
+    }
+    
+    private func transformFeatureBundleToStoreBundlesList(_ featureBundles: FeaturedBundle) -> StoreBundlesList {
         
+        let storeBundlesList = StoreBundlesList()
         for bundle in featureBundles.bundles {
             // Realm에 번들 스킨 데이터 저장하기
-            let storeBundle = StoreBundlesList()
-            storeBundle.uuid = bundle.uuid
-            storeBundle.basePrice = bundle.totalBasePrice?.vp ?? 0
-            storeBundle.discountedPrice = bundle.totalDiscountedPrice?.vp ?? 0
-            storeBundle.discountedPercent = bundle.totalDiscountPercent
+            storeBundlesList.uuid = bundle.uuid
+            storeBundlesList.basePrice = bundle.totalBasePrice?.vp ?? 0
+            storeBundlesList.discountedPrice = bundle.totalDiscountedPrice?.vp ?? 0
+            storeBundlesList.discountedPercent = bundle.totalDiscountPercent
             // 번들 갱신 시간을 Realm에 저장하기
-            storeBundle.renewalDate = Date().addingTimeInterval(
+            storeBundlesList.renewalDate = Date().addingTimeInterval(
                 Double(bundle.durationRemainingInSeconds)
             )
             
@@ -1077,11 +722,11 @@ final class ViewModel: ObservableObject {
                 bundleSkinInfo.uuid = item.item.uuid
                 bundleSkinInfo.basePrice = item.basePrice
                 bundleSkinInfo.discountedPrice = item.discountedPrice
-                storeBundle.itemInfos.append(bundleSkinInfo)
+                storeBundlesList.itemInfos.append(bundleSkinInfo)
             }
-            
-            realmManager.create(storeBundle)
+//            realmManager.create(storeBundle)
         }
+        return storeBundlesList
     }
 
     private func isExpired(of type: ExpiryDateTye) -> Bool {
@@ -1107,12 +752,12 @@ final class ViewModel: ObservableObject {
     func getCollection() {
         // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
-            self.isPresentLoadingScreenViewFromView = false
+            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
             return
         }
         // Realm으로부터 가격 데이터 불러오기
         guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
-            self.isPresentLoadingScreenViewFromView = false
+            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
             return
         }
         // 스킨 컬렉션을 저장할 배열 변수 선언하기
@@ -1153,25 +798,27 @@ final class ViewModel: ObservableObject {
         
         do {
             // 접근 토큰 등 사용자 고유 정보 가져오기
-            let reAuthTokens = try await self.getReAuthTokens().get()
+            let reAuthTokens = try await self.loginDelegate?.getReAuthTokens().get()
             // 새롭게 번들 스킨 데이터 불러오기
-            ownedItems = try await resourceManager.fetchOwnedItems(
-                accessToken: reAuthTokens.accessToken,
-                riotEntitlement: reAuthTokens.riotEntitlement,
-                puuid: reAuthTokens.puuid
-            ).get().entitlements
+            if let tokens = reAuthTokens {
+                ownedItems = try await resourceManager.fetchOwnedItems(
+                    accessToken: tokens.accessToken,
+                    riotEntitlement: tokens.riotEntitlement,
+                    puuid: tokens.puuid
+                ).get().entitlements
+            }
         } catch {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
         
         // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
-            self.isPresentLoadingScreenViewFromView = false
+            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
             return
         }
         // Realm으로부터 가격 데이터 불러오기
         guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
-            self.isPresentLoadingScreenViewFromView = false
+            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
             return
         }
         // 스킨 컬렉션을 저장할 배열 변수 선언하기
@@ -1214,6 +861,8 @@ final class ViewModel: ObservableObject {
     }
     
     // MARK: - REALM CRUD
+    
+    
     
     private func overwriteRealmObject<T: Object>(_ object: T) {
         // 데이터를 저장하기 전, 기존 데이터 삭제하기
@@ -1267,10 +916,8 @@ final class ViewModel: ObservableObject {
         self.storeSkinsRemainingTime = self.remainingSkinsTimeString(from: currentDate, to: self.storeSkinsRenewalDate)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            withAnimation(.spring()) {
-                // 로딩 스크린 가리기
-                self.isPresentLoadingScreenViewFromSkinsTimer = false
-            }
+            // 로딩 스크린 가리기
+            self.loginDelegate?.turnOffLoadingScreenView(of: .skinsTimer)
         }
         
     }
@@ -1304,10 +951,8 @@ final class ViewModel: ObservableObject {
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            withAnimation(.spring()) {
-                // 로딩 스크린 가리기
-                self.isPresentLoadingScreenViewFromBundlesTimer = false
-            }
+            // 로딩 스크린 가리기
+            self.loginDelegate?.turnOffLoadingScreenView(of: .bundlesTimer)
         }
     }
     
@@ -1365,7 +1010,7 @@ final class ViewModel: ObservableObject {
 extension ViewModel {
     
     func logoutForDeveloper() {
-        self.logout()
+//        self.logout() // ⚡️
     }
     
     func DeleteAllApplicationDataForDeveloper() {

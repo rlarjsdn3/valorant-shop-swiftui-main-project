@@ -20,6 +20,7 @@ struct LoginView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
+    @EnvironmentObject var loginViewModel: LoginViewModel
     @EnvironmentObject var viewModel: ViewModel
     
     // For TextField
@@ -91,7 +92,7 @@ struct LoginView: View {
                             .onSubmit {
                                 dismissKeyboard()
                                 Task {
-                                    await viewModel.login(
+                                    await loginViewModel.login(
                                         username: inputUsername,
                                         password: inputPassword
                                     )
@@ -129,7 +130,7 @@ struct LoginView: View {
                     Button {
                         dismissKeyboard()
                         Task {
-                            await viewModel.login(
+                            await loginViewModel.login(
                                 username: inputUsername,
                                 password: inputPassword
                             )

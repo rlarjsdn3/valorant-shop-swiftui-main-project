@@ -18,6 +18,7 @@ struct MultifactorAuthView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
+    @EnvironmentObject var loginViewModel: LoginViewModel
     @EnvironmentObject var viewModel: ViewModel
     
     // For TextField
@@ -102,7 +103,7 @@ struct MultifactorAuthView: View {
             .onChange(of: inputCode) { input in
                 if input.count >= 6 {
                     Task {
-                        await viewModel.login(authenticationCode: inputCode)
+                        await loginViewModel.login(authenticationCode: inputCode)
                     }
                 }
             }
@@ -133,6 +134,7 @@ struct MultifactorAuthView: View {
 struct MultifactorAuthView_Previews: PreviewProvider {
     static var previews: some View {
         MultifactorAuthView()
+            .environmentObject(LoginViewModel())
             .environmentObject(ViewModel())
             .previewLayout(.sizeThatFits)
     }

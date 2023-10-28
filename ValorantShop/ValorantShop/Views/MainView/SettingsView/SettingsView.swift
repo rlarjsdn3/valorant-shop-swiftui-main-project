@@ -11,6 +11,7 @@ struct SettingsView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
+    @EnvironmentObject var loginViewModel: LoginViewModel
     @EnvironmentObject var viewModel: ViewModel
     
     @State private var isPresentLogoutDialog: Bool = false
@@ -96,7 +97,7 @@ struct SettingsView: View {
         }
         .confirmationDialog("", isPresented: $isPresentLogoutDialog) {
             Button("로그아웃", role: .destructive) {
-                viewModel.logout()
+                loginViewModel.logout()
             }
         } message: {
             Text("로그아웃하시겠습니까?")
@@ -155,6 +156,7 @@ struct SettingsView: View {
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView()
+            .environmentObject(LoginViewModel())
             .environmentObject(ViewModel())
     }
 }

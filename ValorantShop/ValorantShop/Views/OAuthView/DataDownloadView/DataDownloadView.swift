@@ -20,6 +20,7 @@ struct DataDownloadView: View {
     
     @Environment(\.dismiss) var dismiss
     
+    @EnvironmentObject var loginViewModel: LoginViewModel
     @EnvironmentObject var viewModel: ViewModel
     
     @State private var isDownloading: Bool = false
@@ -140,9 +141,9 @@ struct DataDownloadView: View {
                 Task(priority: .high) {
                     switch type {
                     case .update:
-                        await viewModel.downloadValorantData(update: true)
+                        await loginViewModel.downloadValorantData(update: true)
                     case .download:
-                        await viewModel.downloadValorantData()
+                        await loginViewModel.downloadValorantData()
                     }
                 }
             } label: {

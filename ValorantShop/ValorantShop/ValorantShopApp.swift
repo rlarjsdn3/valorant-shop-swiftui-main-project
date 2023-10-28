@@ -13,13 +13,18 @@ struct ValorantShopApp: App {
     // MARK: - WRAPPER PROPERTIES
     
     @StateObject var viewModel: ViewModel = ViewModel()
+    @StateObject var loginViewModel: LoginViewModel = LoginViewModel()
     
     // MARK: - BODY
     
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(loginViewModel)
                 .environmentObject(viewModel)
+                .onAppear {
+                    viewModel.loginDelegate = loginViewModel
+                }
         }
     }
     

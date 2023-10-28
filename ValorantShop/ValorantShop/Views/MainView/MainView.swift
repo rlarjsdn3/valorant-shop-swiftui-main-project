@@ -12,6 +12,7 @@ struct MainView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
+    @EnvironmentObject var loginViewModel: LoginViewModel
     @EnvironmentObject var viewModel: ViewModel
     
     // MARK: - PROPERTIES
@@ -156,7 +157,7 @@ struct MainView: View {
                 
                 withAnimation(.spring()) {
                     // 로딩 스크린 가리기
-                    viewModel.isPresentLoadingScreenViewFromView = false
+                    loginViewModel.isPresentLoadingScreenViewFromView = false
                 }
                 
                 // 다운로드 화면을 가리기
@@ -176,20 +177,20 @@ struct MainView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 withAnimation(.spring()) {
                     // 로딩 화면 가리기
-                    viewModel.isPresentLoadingScreenViewFromView = false
+                    loginViewModel.isPresentLoadingScreenViewFromView = false
                 }
             }
         }
         .onReceive(didEnterBackgroundNotification) { _ in
             // 로딩 화면 띄우기
-            viewModel.isPresentLoadingScreenViewFromView = true
-            viewModel.isPresentLoadingScreenViewFromSkinsTimer = true
-            viewModel.isPresentLoadingScreenViewFromBundlesTimer = true
+            loginViewModel.isPresentLoadingScreenViewFromView = true
+            loginViewModel.isPresentLoadingScreenViewFromSkinsTimer = true
+            loginViewModel.isPresentLoadingScreenViewFromBundlesTimer = true
         }
         .overlay {
-            if viewModel.isPresentLoadingScreenViewFromView ||
-                viewModel.isPresentLoadingScreenViewFromSkinsTimer ||
-                viewModel.isPresentLoadingScreenViewFromBundlesTimer {
+            if loginViewModel.isPresentLoadingScreenViewFromView ||
+                loginViewModel.isPresentLoadingScreenViewFromSkinsTimer ||
+                loginViewModel.isPresentLoadingScreenViewFromBundlesTimer {
                 LoadingView()
             }
         }
@@ -204,6 +205,7 @@ struct MainView: View {
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
         MainView()
+            .environmentObject(LoginViewModel())
             .environmentObject(ViewModel())
     }
 }
