@@ -40,7 +40,7 @@ struct CustomTabView: View {
 
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var loginViewModel: LoginViewModel
+    @EnvironmentObject var appViewModel: AppViewModel
     
     // MARK: - BODY
     
@@ -51,12 +51,12 @@ struct CustomTabView: View {
                 
                 Button {
                     haptics.play(.medium)
-                    loginViewModel.selectedCustomTab = type
+                    appViewModel.selectedCustomTab = type
                 } label: {
                     Image(systemName: type.imageName)
                         .fontWeight(.bold)
                     // ✏️ Color.black로 한다면, 다크 모드가 원하는대로 적용되지 않음.
-                        .foregroundColor(type == loginViewModel.selectedCustomTab ? Color.valorant : Color.primary)
+                        .foregroundColor(type == appViewModel.selectedCustomTab ? Color.valorant : Color.primary)
                         .padding()
                 }
 
@@ -74,6 +74,6 @@ struct CustomTabView: View {
 struct CustomTabView_Previews: PreviewProvider {
     static var previews: some View {
         CustomTabView()
-            .environmentObject(LoginViewModel())
+            .environmentObject(AppViewModel())
     }
 }

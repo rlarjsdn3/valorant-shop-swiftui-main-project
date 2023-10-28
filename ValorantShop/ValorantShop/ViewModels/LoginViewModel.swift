@@ -11,19 +11,10 @@ import RealmSwift
 import KeychainAccess
 import Kingfisher
 
-// MARK: - ENUM
-
-enum LoadingScreenType {
-    case view
-    case skinsTimer
-    case bundlesTimer
-}
-
 // MARK: - DELEGATE
 
 protocol LoginViewModelDelegate: NSObject {
     func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError>
-    func turnOffLoadingScreenView(of type: LoadingScreenType)
     func presentDataUpdateView()
 }
 
@@ -39,11 +30,6 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
     
     // MARK: - WRAPPER PROPERTIES
     
-    // For LaunchScreen
-    @Published var isPresentLoadingScreenViewFromView: Bool = true
-    @Published var isPresentLoadingScreenViewFromSkinsTimer: Bool = true
-    @Published var isPresentLoadingScreenViewFromBundlesTimer: Bool = true
-    
     // For Login
     @Published var isLoadingLogin: Bool = false
     @Published var loginErrorText: String = ""
@@ -55,9 +41,6 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
     @Published var multifactorAuthEmail: String = ""
     @Published var multifactorErrorText: String = ""
     @Published var codeBoxShakeAnimation: CGFloat = 0.0
-    
-    // For CustomTab
-    @Published var selectedCustomTab: CustomTabType = .shop
     
     // For Downlaod Data
     @Published var isLoadingDataDownloading: Bool = false
@@ -80,6 +63,7 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
     
     // Delegate
     weak var resourceDelegate: ResourceViewModelDelegate?
+    weak var appDelegate: AppViewModelDelegate?
     
     // MARK: - LOGIN
     
@@ -214,17 +198,18 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
         // 로그인 여부 및 사용자 정보 삭제하기
         withAnimation(.spring()) { self.isLoggedIn = false }
         
-        self.resourceDelegate?.logout()
+        // 사용자 고유 정보 및 스킨 데이터 삭제하기
+        self.resourceDelegate?.clearAllResource()
         
         // 불러온 상점 데이터 삭제하기
         //self.storeSkins = StoreSkin(renewalDate: Date())
         // 불러온 번들 데이터 삭제하기
         //self.storeBundles = StoreBundles()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            // 커스탬 탭 선택 초기화하기
-            self.selectedCustomTab = .shop
+            // 탭 선택 초기화하기
+            self.appDelegate?.resetSelectedTab()
             // 런치 스크린 표시 여부 수정하기
-            self.isPresentLoadingScreenViewFromView = true
+            self.resourceDelegate?.dismissLoadingView(of: .view)
             // ✏️ 로그아웃 시, 화면이 어색하게 바뀌는 걸 방지하고자 1초 딜레이를 둠.
         }
     }
@@ -491,23 +476,6 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
     func presentDataUpdateView() {
         self.isPresentDataUpdateView = true
     }
-    
-    
-    
-    
-    
-    func turnOffLoadingScreenView(of type: LoadingScreenType) {
-        switch type {
-        case .view:
-            withAnimation(.easeInOut(duration: 0.2)) { self.isPresentLoadingScreenViewFromView = false }
-        case .skinsTimer:
-            withAnimation(.easeInOut(duration: 0.2)) { self.isPresentLoadingScreenViewFromSkinsTimer = false }
-        case .bundlesTimer:
-            withAnimation(.easeInOut(duration: 0.2)) { self.isPresentLoadingScreenViewFromBundlesTimer = false }
-        }
-    }
-    
-    
     
     
     // MARK: - REALM CRUD

@@ -12,6 +12,7 @@ struct MainView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
+    @EnvironmentObject var appViewModel: AppViewModel
     @EnvironmentObject var loginViewModel: LoginViewModel
     @EnvironmentObject var resourceViewModel: ResourceViewModel
     
@@ -27,7 +28,7 @@ struct MainView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            TabView(selection: $loginViewModel.selectedCustomTab) {
+            TabView(selection: $appViewModel.selectedCustomTab) {
                 StoreView()
                     .tag(CustomTabType.shop)
                 
@@ -157,7 +158,7 @@ struct MainView: View {
                 
                 withAnimation(.spring()) {
                     // 로딩 스크린 가리기
-                    loginViewModel.isPresentLoadingScreenViewFromView = false
+                    resourceViewModel.isPresentLoadingScreenViewFromView = false
                 }
                 
                 // 다운로드 화면을 가리기
@@ -177,20 +178,20 @@ struct MainView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 withAnimation(.spring()) {
                     // 로딩 화면 가리기
-                    loginViewModel.isPresentLoadingScreenViewFromView = false
+                    resourceViewModel.isPresentLoadingScreenViewFromView = false
                 }
             }
         }
         .onReceive(didEnterBackgroundNotification) { _ in
             // 로딩 화면 띄우기
-            loginViewModel.isPresentLoadingScreenViewFromView = true
-            loginViewModel.isPresentLoadingScreenViewFromSkinsTimer = true
-            loginViewModel.isPresentLoadingScreenViewFromBundlesTimer = true
+            resourceViewModel.isPresentLoadingScreenViewFromView = true
+            resourceViewModel.isPresentLoadingScreenViewFromSkinsTimer = true
+            resourceViewModel.isPresentLoadingScreenViewFromBundlesTimer = true
         }
         .overlay {
-            if loginViewModel.isPresentLoadingScreenViewFromView ||
-                loginViewModel.isPresentLoadingScreenViewFromSkinsTimer ||
-                loginViewModel.isPresentLoadingScreenViewFromBundlesTimer {
+            if resourceViewModel.isPresentLoadingScreenViewFromView ||
+                resourceViewModel.isPresentLoadingScreenViewFromSkinsTimer ||
+                resourceViewModel.isPresentLoadingScreenViewFromBundlesTimer {
                 LoadingView()
             }
         }
@@ -205,6 +206,7 @@ struct MainView: View {
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
         MainView()
+            .environmentObject(AppViewModel())
             .environmentObject(LoginViewModel())
             .environmentObject(ResourceViewModel())
     }

@@ -36,6 +36,7 @@ struct StoreView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
+    @EnvironmentObject var appViewModel: AppViewModel
     @EnvironmentObject var resourceViewModel: ResourceViewModel
     
     @Namespace var namespace: Namespace.ID
@@ -49,16 +50,16 @@ struct StoreView: View {
                     ForEach(StoreTabType.allCases, id: \.self) { type in
                         Button {
                             withAnimation(.spring(response: 0.3)) {
-                                resourceViewModel.selectedStoreTab = type
+                                appViewModel.selectedStoreTab = type
                             }
                             hapticManager.play(.rigid)
                         } label: {
                             Text(type.tabName)
                                 .font(.title)
-                                .fontWeight(resourceViewModel.selectedStoreTab == type ? .bold : .light)
+                                .fontWeight(appViewModel.selectedStoreTab == type ? .bold : .light)
                                 .foregroundColor(Color.primary)
                                 .overlay {
-                                    if resourceViewModel.selectedStoreTab == type {
+                                    if appViewModel.selectedStoreTab == type {
                                         Rectangle()
                                             .fill(Color.primary)
                                             .frame(height: 1.5)
@@ -73,7 +74,7 @@ struct StoreView: View {
                     
                     Button {
                         Task {
-                            switch resourceViewModel.selectedStoreTab {
+                            switch appViewModel.selectedStoreTab {
                             case .skin:
                                 await resourceViewModel.reloadPlayerData(of: .skin)
                             case .bundle:
@@ -104,7 +105,7 @@ struct StoreView: View {
                     Divider()
                 }
                 
-                switch resourceViewModel.selectedStoreTab {
+                switch appViewModel.selectedStoreTab {
                 case .skin:
                     SkinListView()
                 case .bundle:

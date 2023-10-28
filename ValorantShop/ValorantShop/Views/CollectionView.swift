@@ -33,6 +33,7 @@ struct CollectionView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
+    @EnvironmentObject var appViewModel: AppViewModel
     @EnvironmentObject var resourceViewModel: ResourceViewModel
     
     @Namespace var namespace: Namespace.ID
@@ -46,16 +47,16 @@ struct CollectionView: View {
                     ForEach(CollectionTabType.allCases, id: \.self) { type in
                         Button {
                             withAnimation(.spring(response: 0.3)) {
-                                resourceViewModel.selectedCollectionTab = type
+                                appViewModel.selectedCollectionTab = type
                             }
                             hapticManager.play(.rigid)
                         } label: {
                             Text(type.tabName)
                                 .font(.title)
-                                .fontWeight(resourceViewModel.selectedCollectionTab == type ? .bold : .light)
+                                .fontWeight(appViewModel.selectedCollectionTab == type ? .bold : .light)
                                 .foregroundColor(Color.primary)
                                 .overlay {
-                                    if resourceViewModel.selectedCollectionTab == type {
+                                    if appViewModel.selectedCollectionTab == type {
                                         Rectangle()
                                             .fill(Color.primary)
                                             .frame(height: 1.5)
@@ -95,7 +96,7 @@ struct CollectionView: View {
                     Divider()
                 }
                 
-                switch resourceViewModel.selectedCollectionTab {
+                switch appViewModel.selectedCollectionTab {
                 case .collection:
                     AllSkinsListView()
                 case .owned:
@@ -111,6 +112,7 @@ struct CollectionView: View {
 struct CollectionView_Previews: PreviewProvider {
     static var previews: some View {
         CollectionView()
+            .environmentObject(AppViewModel())
             .environmentObject(ResourceViewModel())
     }
 }

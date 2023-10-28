@@ -5,8 +5,6 @@
 //  Created by 김건우 on 2023/09/14.
 //
 
-// ⚡️ 하나의 거대한 ViewModel을 LoginViewModel, ResourceViewModel과 SettingsViewModel로 나누는 방안 고민해보기
-
 import SwiftUI
 import Foundation
 import RealmSwift
@@ -26,6 +24,12 @@ enum ReloadDataType {
     case skin
     case bundle
     case bonus
+}
+
+enum LoadingViewType {
+    case view
+    case skinsTimer
+    case bundlesTimer
 }
 
 // MARK: - MODELS
@@ -71,12 +75,13 @@ struct Price {
 // MARK: - DELEGATE
 
 protocol ResourceViewModelDelegate: NSObject {
-    func logout()
+    func clearAllResource()
+    func dismissLoadingView(of type: LoadingViewType)
 }
 
 // MARK: - VIEW MODEL
 
-final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDelegate {
+final class ResourceViewModel: NSObject, ObservableObject {
     
     // MARK: - USER DEFAULTS
     
@@ -86,6 +91,11 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
     @AppStorage(UserDefaultsKeys.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
     
     // MARK: - WRAPPER PROPERTIES
+    
+    // For LaunchScreen
+    @Published var isPresentLoadingScreenViewFromView: Bool = true
+    @Published var isPresentLoadingScreenViewFromSkinsTimer: Bool = true
+    @Published var isPresentLoadingScreenViewFromBundlesTimer: Bool = true
     
     // For PlayerID
     @Published var gameName: String = ""
@@ -110,11 +120,9 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
     @Published var storeBundlesReminingTime: [String] = []
     
     // For StoreView
-    @Published var selectedStoreTab: StoreTabType = .skin
     @Published var refreshButtonRotateAnimation: Bool = false
     
     // For CollectionView
-    @Published var selectedCollectionTab: CollectionTabType = .collection
     @Published var isAscendingOrder: Bool = true
     
     // For ImageCache
@@ -154,34 +162,6 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
         
         imageCache.diskStorage.config.expiration = .days(3)
         imageCache.diskStorage.config.sizeLimit = 512 * 1024 * 1024 // 512MB
-    }
-    
-    // MARK: - LOGOUT
-    
-    func logout() {
-        
-        self.storeSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: Double.infinity) // ⚡️
-        
-        self.accessTokenExpiryDate = Double.infinity
-        self.realmManager.deleteAll(of: PlayerID.self)
-        self.realmManager.deleteAll(of: PlayerWallet.self)
-        self.realmManager.deleteAll(of: StoreSkinsList.self)
-        self.realmManager.deleteAll(of: StoreBundlesList.self)
-        
-        // 이미지 메모리・디스크 캐시 비우기
-        imageCache.clearMemoryCache()
-        imageCache.clearDiskCache()
-        // 쿠키 정보 및 사용자 고유 정보 삭제하기
-        try? keychain.removeAll()
-        
-        // 타이머 제거하기
-        self.storeSkinsTimer?.invalidate() // ⚡️
-        self.storeBundlesTimer?.invalidate() // ⚡️
-        
-        self.isIntialGettingStoreSkinsData = false // ⚡️
-        self.isAutoReloadedStoreSkinsData = false // ⚡️
-        self.isIntialGettingStoreBundlesData = false // ⚡️
-        self.isAutoReloadedStoreBundlesData = false // ⚡️
     }
     
     // MARK: - CHECK VERSION
@@ -229,7 +209,7 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
         // ✏️ 어색하게 갑작스레 뷰가 리-렌더링되는 모습을 숨기고자 1초 딜레이를 둠.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             // 로딩 스크린 화면 끄기
-            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
         }
     }
     
@@ -430,7 +410,7 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
                             self.overwriteRealmObject(storeSkinsList)
                         }
                     } catch {
-                        self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+                        withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                     }
                 }
@@ -442,7 +422,7 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
                         self.overwriteRealmObject(storeSkinsList)
                     }
                 } catch {
-                    self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+                    withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                 }
             }
@@ -454,24 +434,24 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
                     self.overwriteRealmObject(storeSkinsList)
                 }
             } catch {
-                self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+                withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
             }
         }
         
         // Realm으로부터 로테이션 스킨 데이터 불러오기
         guard let storeSkinsList = realmManager.read(of: StoreSkinsList.self).first else {
-            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
             return
         }
         // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
-            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
             return
         }
         // Realm으로부터 가격 데이터 불러오기
         guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
-            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
             return
         }
         // 스킨과 가격 정보를 저장할 배열 변수 선언하기
@@ -576,7 +556,7 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
                             self.overwriteRealmObject(bundlesList)
                         }
                     } catch {
-                        self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+                        withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
                         return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                     }
                 }
@@ -588,7 +568,7 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
                         self.overwriteRealmObject(bundlesList)
                     }
                 } catch {
-                    self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+                    withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
                     return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
                 }
             }
@@ -600,7 +580,7 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
                     self.overwriteRealmObject(bundlesList)
                 }
             } catch {
-                self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+                withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
                 return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
             }
         }
@@ -615,7 +595,7 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
         
         // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
-            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
             return
         }
         // Realm으로부터 가격 데이터 불러오기
@@ -758,12 +738,12 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
     func getCollection() {
         // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
-            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
             return
         }
         // Realm으로부터 가격 데이터 불러오기
         guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
-            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
             return
         }
         // 스킨 컬렉션을 저장할 배열 변수 선언하기
@@ -819,12 +799,12 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
         
         // Realm으로부터 전체 스킨 데이터 불러오기
         guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else {
-            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
             return
         }
         // Realm으로부터 가격 데이터 불러오기
         guard let prices = realmManager.read(of: StorePrices.self).first?.offers else {
-            self.loginDelegate?.turnOffLoadingScreenView(of: .view)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
             return
         }
         // 스킨 컬렉션을 저장할 배열 변수 선언하기
@@ -923,7 +903,7 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             // 로딩 스크린 가리기
-            self.loginDelegate?.turnOffLoadingScreenView(of: .skinsTimer)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromSkinsTimer = false }
         }
         
     }
@@ -958,7 +938,7 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             // 로딩 스크린 가리기
-            self.loginDelegate?.turnOffLoadingScreenView(of: .bundlesTimer)
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromBundlesTimer = false }
         }
     }
     
@@ -1010,8 +990,49 @@ final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDele
     
 }
 
+extension ResourceViewModel: ResourceViewModelDelegate {
+    
+    func clearAllResource() {
+        
+        self.storeSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: Double.infinity) // ⚡️
+        
+        self.accessTokenExpiryDate = Double.infinity
+        self.realmManager.deleteAll(of: PlayerID.self)
+        self.realmManager.deleteAll(of: PlayerWallet.self)
+        self.realmManager.deleteAll(of: StoreSkinsList.self)
+        self.realmManager.deleteAll(of: StoreBundlesList.self)
+        
+        // 이미지 메모리・디스크 캐시 비우기
+        imageCache.clearMemoryCache()
+        imageCache.clearDiskCache()
+        // 쿠키 정보 및 사용자 고유 정보 삭제하기
+        try? keychain.removeAll()
+        
+        // 타이머 제거하기
+        self.storeSkinsTimer?.invalidate() // ⚡️
+        self.storeBundlesTimer?.invalidate() // ⚡️
+        
+        self.isIntialGettingStoreSkinsData = false // ⚡️
+        self.isAutoReloadedStoreSkinsData = false // ⚡️
+        self.isIntialGettingStoreBundlesData = false // ⚡️
+        self.isAutoReloadedStoreBundlesData = false // ⚡️
+    }
+    
+    func dismissLoadingView(of type: LoadingViewType) {
+        switch type {
+        case .view:
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
+        case .skinsTimer:
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromSkinsTimer = false }
+        case .bundlesTimer:
+            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromBundlesTimer = false }
+        }
+    }
+}
 
 // MARK: - DEVELOPER MENU
+
+
 
 extension ResourceViewModel {
     

@@ -59,6 +59,7 @@
 		9EDCF0CE2AC1BEFA0057772F /* DataManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDCF0CD2AC1BEFA0057772F /* DataManagementView.swift */; };
 		9EEF77072AEC0C2C002D672F /* SwiftTaskQueue in Frameworks */ = {isa = PBXBuildFile; productRef = 9EEF77062AEC0C2C002D672F /* SwiftTaskQueue */; };
 		9EEF77092AED3CD5002D672F /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEF77082AED3CD5002D672F /* LoginViewModel.swift */; };
+		9EEF770B2AED5BBE002D672F /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEF770A2AED5BBE002D672F /* AppViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -109,6 +110,7 @@
 		9EDCF0CB2AC1BB080057772F /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		9EDCF0CD2AC1BEFA0057772F /* DataManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManagementView.swift; sourceTree = "<group>"; };
 		9EEF77082AED3CD5002D672F /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
+		9EEF770A2AED5BBE002D672F /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -188,6 +190,7 @@
 		9E2922962AB0AE2200D6FE07 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				9EEF770A2AED5BBE002D672F /* AppViewModel.swift */,
 				9EEF77082AED3CD5002D672F /* LoginViewModel.swift */,
 				9E266EAA2AB3483300178F25 /* ResourceViewModel.swift */,
 			);
@@ -466,6 +469,7 @@
 			files = (
 				9EDCF0BF2AC043A40057772F /* Bundles.swift in Sources */,
 				9E3E23AD2ACE7F6F00C67804 /* AllSkinsListView.swift in Sources */,
+				9EEF770B2AED5BBE002D672F /* AppViewModel.swift in Sources */,
 				9ED509562AB6A6F200149206 /* DataDownloadView.swift in Sources */,
 				9E29229C2AB0AF3D00D6FE07 /* CustomTabView.swift in Sources */,
 				9E2922A42AB0B54400D6FE07 /* CollectionView.swift in Sources */,
