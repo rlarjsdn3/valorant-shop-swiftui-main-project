@@ -22,7 +22,8 @@
 * MVVM Design Pattern
 * [KeychainAccess](https://github.com/kishikawakatsumi/KeychainAccess)
 * [Kingfisher](https://github.com/onevcat/Kingfisher)
-* [RealmDatabase](https://github.com/realm/realm-swift)
+* [RealmSwift](https://github.com/realm/realm-swift)
+* [SwiftTaskQueue](https://github.com/rickymohk/SwiftTaskQueue)
 * [SwiftUI-Shimmer](https://github.com/markiv/SwiftUI-Shimmer)
 * [VideoPlayer](https://github.com/wxxsw/VideoPlayer)
 
