@@ -17,7 +17,6 @@ enum ExpiryDateTye {
     case token
     case skin
     case bundle
-    //case bonus
 }
 
 enum ReloadDataType {
@@ -76,6 +75,8 @@ struct Price {
 
 protocol ResourceViewModelDelegate: NSObject {
     func clearAllResource()
+    func clearStorefront()
+    func getStorefront(forceLoad: Bool) async
     func dismissLoadingView(of type: LoadingViewType)
 }
 
@@ -124,9 +125,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
     
     // For CollectionView
     @Published var isAscendingOrder: Bool = true
-    
-    // For ImageCache
-    @Published var diskCacheSize: String = "0.0"
     
     // MARK: - PROPERTIES
     
@@ -848,36 +846,11 @@ final class ResourceViewModel: NSObject, ObservableObject {
     
     // MARK: - REALM CRUD
     
-    
-    
     private func overwriteRealmObject<T: Object>(_ object: T) {
         // 데이터를 저장하기 전, 기존 데이터 삭제하기
         realmManager.deleteAll(of: T.self)
         // 새로운 데이터 저장하기
         realmManager.create(object)
-    }
-    
-    // MARK: - CACHE
-    
-    func calculateDiskCache() {
-        imageCache.calculateDiskStorageSize { result in
-            switch result {
-            case .success(let size):
-                let mb = Float(size) / 1024.0 / 1024.0
-                let formatter = NumberFormatter()
-                formatter.minimumFractionDigits = 1
-                // ✏️ 업-캐스팅을 하므로 as?, as!와 같은 키워드는 안 써도 됨.
-                self.diskCacheSize = formatter.string(from: mb as NSNumber) ?? "0.0"
-            case .failure:
-                self.diskCacheSize = "0.0"
-            }
-        }
-    }
-    
-    func clearDiskCache() {
-        imageCache.clearDiskCache {
-            self.diskCacheSize = "0.0"
-        }
     }
     
     // MARK: - TIMER
@@ -1018,6 +991,16 @@ extension ResourceViewModel: ResourceViewModelDelegate {
         self.isAutoReloadedStoreBundlesData = false // ⚡️
     }
     
+    func clearStorefront() {
+        self.storeSkins.skinInfos = []
+        self.storeBundles = []
+    }
+    
+    func getStorefront(forceLoad: Bool = false) async {
+        await self.getStoreSkins(forceLoad: forceLoad)
+        await self.getStoreBundles(forceLoad: forceLoad)
+    }
+    
     func dismissLoadingView(of type: LoadingViewType) {
         switch type {
         case .view:
@@ -1028,22 +1011,4 @@ extension ResourceViewModel: ResourceViewModelDelegate {
             withAnimation(.spring()) { self.isPresentLoadingScreenViewFromBundlesTimer = false }
         }
     }
-}
-
-// MARK: - DEVELOPER MENU
-
-
-
-extension ResourceViewModel {
-    
-    func logoutForDeveloper() {
-//        self.logout() // ⚡️
-    }
-    
-    func DeleteAllApplicationDataForDeveloper() {
-        self.logoutForDeveloper()
-        realmManager.deleteAll()
-        self.isDataDownloaded = false
-    }
-    
 }

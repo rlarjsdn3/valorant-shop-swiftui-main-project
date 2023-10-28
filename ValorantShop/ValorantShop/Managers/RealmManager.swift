@@ -16,9 +16,6 @@ final class RealmManager {
             deleteRealmIfMigrationNeeded: true
         )
         realm = try! Realm(configuration: configuration)
-        
-        // For Debug
-        print(realm.configuration.fileURL?.path())
     }
     
     // MARK: - PROPERTIES
@@ -35,6 +32,13 @@ final class RealmManager {
     
     func read<T: Object>(of type: T.Type) -> Results<T> {
         return realm.objects(type)
+    }
+    
+    func overwrite<T: Object>(_ object: T) {
+        // 데이터를 저장하기 전, 기존 데이터 삭제하기
+        self.deleteAll(of: T.self)
+        // 새로운 데이터 저장하기
+        self.create(object)
     }
     
     func delete<T: Object>(of type: T.Type, object: T) {

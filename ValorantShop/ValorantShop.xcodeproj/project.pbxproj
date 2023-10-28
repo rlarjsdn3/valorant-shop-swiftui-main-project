@@ -60,6 +60,7 @@
 		9EEF77072AEC0C2C002D672F /* SwiftTaskQueue in Frameworks */ = {isa = PBXBuildFile; productRef = 9EEF77062AEC0C2C002D672F /* SwiftTaskQueue */; };
 		9EEF77092AED3CD5002D672F /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEF77082AED3CD5002D672F /* LoginViewModel.swift */; };
 		9EEF770B2AED5BBE002D672F /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEF770A2AED5BBE002D672F /* AppViewModel.swift */; };
+		9EEF770D2AED670F002D672F /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEF770C2AED670F002D672F /* SettingsViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -111,6 +112,7 @@
 		9EDCF0CD2AC1BEFA0057772F /* DataManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManagementView.swift; sourceTree = "<group>"; };
 		9EEF77082AED3CD5002D672F /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		9EEF770A2AED5BBE002D672F /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		9EEF770C2AED670F002D672F /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,6 +195,7 @@
 				9EEF770A2AED5BBE002D672F /* AppViewModel.swift */,
 				9EEF77082AED3CD5002D672F /* LoginViewModel.swift */,
 				9E266EAA2AB3483300178F25 /* ResourceViewModel.swift */,
+				9EEF770C2AED670F002D672F /* SettingsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -482,6 +485,7 @@
 				9ED509582AB71D8700149206 /* View+Extension.swift in Sources */,
 				9EAA7D7C2AB57F460095A205 /* ResourceManager.swift in Sources */,
 				9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */,
+				9EEF770D2AED670F002D672F /* SettingsViewModel.swift in Sources */,
 				9E611D022ABED7F300D1A310 /* SkinListView.swift in Sources */,
 				9EDCF0CC2AC1BB080057772F /* DebugView.swift in Sources */,
 				9E266EAB2AB3483300178F25 /* ResourceViewModel.swift in Sources */,

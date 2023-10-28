@@ -13,6 +13,8 @@ protocol AppViewModelDelegate: NSObject {
     func resetSelectedTab()
 }
 
+// MARK: - VIEW MODEL
+
 final class AppViewModel: NSObject, ObservableObject {
     
     // MARK: - WRAPPER PROPERTIES
@@ -23,6 +25,8 @@ final class AppViewModel: NSObject, ObservableObject {
     @Published var selectedCollectionTab: CollectionTabType = .collection
  
 }
+
+// MARK: - EXTESNIONS
 
 extension AppViewModel: AppViewModelDelegate {
     

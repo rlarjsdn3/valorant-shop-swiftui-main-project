@@ -12,6 +12,7 @@ struct DataManagementView: View {
     // MARK: - WRAPPER PROPERTIES
     
     @EnvironmentObject var resourceViewModel: ResourceViewModel
+    @EnvironmentObject var settingsViewModel: SettingsViewModel
     
     // MARK: - COMPUTED PROPERTIES
     
@@ -31,13 +32,13 @@ struct DataManagementView: View {
             Section {
                 rowLabel(
                     "캐시 크기",
-                    subText: "\(resourceViewModel.diskCacheSize)MB",
+                    subText: "\(settingsViewModel.diskCacheSize)MB",
                     systemName: "memorychip",
                     accentColor: Color.green
                 )
                 
                 Button("캐시 비우기") {
-                    resourceViewModel.clearDiskCache()
+                    settingsViewModel.clearDiskCache()
                 }
             } header: {
                 Text("캐시")
@@ -59,7 +60,7 @@ struct DataManagementView: View {
             }
         }
         .onAppear {
-            resourceViewModel.calculateDiskCache()
+            settingsViewModel.calculateDiskCache()
         }
     }
     

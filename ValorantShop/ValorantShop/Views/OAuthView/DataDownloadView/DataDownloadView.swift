@@ -35,8 +35,8 @@ struct DataDownloadView: View {
     // MARK: - COMPUTED PROPERTIES
     
     var progressString: String {
-        let downloadedImages: Int = loginViewModel.downloadedImages
-        let imagesToDownload: Int = loginViewModel.imagesToDownload
+        let downloadedImages: Int = loginViewModel.downloadedfiles
+        let imagesToDownload: Int = loginViewModel.filesToDownload
         
         var progressString: String = ""
         if downloadedImages != 0 && imagesToDownload != 0 {
@@ -50,8 +50,8 @@ struct DataDownloadView: View {
     }
     
     var progressPercentage: Double {
-        let downloadedImages = Double(loginViewModel.downloadedImages)
-        let imagesToDownload = Double(loginViewModel.imagesToDownload)
+        let downloadedImages = Double(loginViewModel.downloadedfiles)
+        let imagesToDownload = Double(loginViewModel.filesToDownload)
         let progressPercentage = downloadedImages / imagesToDownload
         return progressPercentage >= 1.0 ? 1.0 : progressPercentage
     }
@@ -166,8 +166,8 @@ struct DataDownloadView: View {
         }
         .onDisappear {
             loginViewModel.downloadingErrorText = ""
-            loginViewModel.imagesToDownload = 0
-            loginViewModel.downloadedImages = 0
+            loginViewModel.filesToDownload = 0
+            loginViewModel.downloadedfiles = 0
         }
     }
 }

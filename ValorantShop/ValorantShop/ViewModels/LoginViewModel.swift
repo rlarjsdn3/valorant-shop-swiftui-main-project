@@ -20,7 +20,7 @@ protocol LoginViewModelDelegate: NSObject {
 
 // MARK: - VIEW MODEL
 
-final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
+final class LoginViewModel: NSObject, ObservableObject {
     
     // MARK: - USER DEFAULTS
     
@@ -49,8 +49,8 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
     @Published var downloadingErrorText: String = ""
     @Published var downloadButtonShakeAnimation: CGFloat = 0.0
     
-    @Published var imagesToDownload: Int = 0
-    @Published var downloadedImages: Int = 0
+    @Published var filesToDownload: Int = 0
+    @Published var downloadedfiles: Int = 0
     
     // MARK: - PROPERTIES
     
@@ -217,7 +217,6 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
     // MARK: - REAUTH TOKENS
     
     @MainActor
-    @discardableResult
     func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError> {
         // ⭐️ 최초 로그인을 하면 사용자 고유 정보를 불러온 후, 키체인에 저장함.
         // ⭐️ 이후 HTTP 통신을 위해 사용자 고유 정보가 필요하다면 키체인에 저장된 데이터를 불러와 사용함.
@@ -229,7 +228,7 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
            let riotEntitlement = try? keychain.get(KeychainKeys.riotEntitlement),
            let puuid = try? keychain.get(KeychainKeys.puuid) {
             // 토큰이 만료되었다면
-            if self.isExpired(of: .token) {
+            if self.isExpiredToken {
                 do {
                     // 새롭게 접근 토큰 등 사용자 고유 정보 불러오기
                     let reAuthTokens = try await self.fetchReAuthTokens().get()
@@ -298,27 +297,24 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
             // 로딩 버튼 보이게 하기
             withAnimation(.spring()) { self.isLoadingDataDownloading = true }
             //
-            self.imagesToDownload = 3
+            self.filesToDownload = 3
             // ⭐️ 새로운 스킨 데이터가 삭제되는(덮어씌워지는) 와중에 뷰에서는 삭제된 데이터에 접근하고 있기 때문에
             // ⭐️ 'Realm object has been deleted or invalidated' 에러가 발생함. 이를 막기 위해 다운로드 동안 뷰에 표시할 데이터를 삭제함.
-//            self.storeSkins.skinInfos = [] // ⚡️
+            self.resourceDelegate?.clearStorefront()
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadBundlesData(); self.downloadedImages += 1
+            try await self.downloadBundlesData(); self.downloadedfiles += 1
             // 무기 스킨 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadWeaponSkinsData(); self.downloadedImages += 1
+            try await self.downloadWeaponSkinsData(); self.downloadedfiles += 1
             // 가격 정보 데이터 다운로드받고, Realm에 저장하기
-            try await self.downloadStorePricesData(); self.downloadedImages += 1
+            try await self.downloadStorePricesData(); self.downloadedfiles += 1
             // 스킨 이미지 데이터 다운로드받고, 로컬 Document 폴더에 저장하기
             //try await self.downloadWeaponSkinImages()
-            // 스킨 데이터를 업데이트하면
-            // ✏️ 최초 다운로드를 끝내면 onAppear로 자동으로 스킨 데이터를 불러올 수 있는 반면에,
-            // ✏️ 데이터 업데이트를 하면 스킨 데이터를 갱신할 수 있는 수단이 전무하기 때문에 명시적으로 호출함.
+            // ✏️ 스킨 데이터를 업데이트하면
+            // 앱을 켜면 onAppear로 자동으로 스킨 데이터를 불러올 수 있는 반면에,
+            // 데이터 업데이트를 하면 스킨 데이터를 갱신할 수 있는 수단이 전무하기 때문에 명시적으로 호출함.
             if update {
-                // 로테이션 스킨 데이터 불러오기
-//                await self.getStoreSkins() // ⚡️
-                // 번들 스킨 데이터 불러오기
-//                await self.getStoreBundles() // ⚡️
-                // + 야시장 스킨 데이터 불러오기
+                // 상점 스킨 데이터 불러오기
+                await self.resourceDelegate?.getStorefront(forceLoad: true)
             }
             
             withAnimation(.spring()) {
@@ -336,7 +332,6 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
                     
                     // 로딩 버튼 가리기
                     self.isLoadingDataDownloading = false
-                    
                 }
             }
         } catch {
@@ -358,7 +353,7 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
         // 발로란트 버전 데이터 다운로드받기
         let valorantVersion = try await resourceManager.fetchValorantVersion().get()
         // 발로란트 버전 데이터를 Realm에 저장하기
-        self.overwriteRealmObject(valorantVersion)
+        realmManager.overwrite(valorantVersion)
     }
     
     @MainActor
@@ -366,7 +361,7 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
         // 무기 스킨 데이터 다운로드받기
         let bundles = try await resourceManager.fetchBundles().get()
         // 무기 스킨 데이터를 Realm에 저장하기
-        self.overwriteRealmObject(bundles)
+        realmManager.overwrite(bundles)
     }
     
     @MainActor
@@ -374,7 +369,7 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
         // 무기 스킨 데이터 다운로드받기
         let weaponSkins = try await resourceManager.fetchWeaponSkins().get()
         // 무기 스킨 데이터를 Realm에 저장하기
-        self.overwriteRealmObject(weaponSkins)
+        realmManager.overwrite(weaponSkins)
     }
     
     @MainActor
@@ -387,126 +382,28 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
             riotEntitlement: reAuthTokens.riotEntitlement
         ).get()
         // 상점 가격 데이터를 Realm에 저장하기
-        self.overwriteRealmObject(storePrices)
+        realmManager.overwrite(storePrices)
     }
     
-    // Deprecated
-    @MainActor
-    private func downloadWeaponSkinImages() async throws {
-        // Realm으로부터 스킨 데이터 불러오기
-        guard let skins = realmManager.read(of: WeaponSkins.self).first?.weaponSkins else { return }
-        
-        // 경로 접근을 위한 파일 매니저 선언하기
-        let fileManager = FileManager.default
-        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        
-        // 경로에 이미지가 저장되지 않은 스킨 UUID값 저장하기
-        var notDownloadedImages: [(imageType: ImageType, uuid: String)] = []
-        
-        // 스킨 데이터를 순회하며 저장되지 않은 스킨 이미지 UUID값 솎아내기
-        for skin in skins {
-            // UUID값 저장하기
-            guard let uuid = skin.chromas.first?.uuid else { return }
-            // 경로 설정하기
-            let skinPath = documents.appending(path: makeImageFileName(of: ImageType.weaponSkins, uuid: uuid)).path()
-            // 파일 매니저의 경로에 해당 파일이 존재하지 않으면
-            if !fileManager.fileExists(atPath: skinPath) {
-                // 저장되지 않은 스킨 UUID값 저장하기
-                notDownloadedImages.append((ImageType.weaponSkins, uuid))
-            }
-            
-            // 스킨 속 크로마 데이터가 하나라면
-            if skin.chromas.count <= 1 { continue /* 이미지를 저장하지 않고 건너뛰기 */ }
-            
-            // 크로마 데이터를 순회하며 저장되지 않은 스킨과 스와치 이미지 UUID값 솎아내기
-            for chroma in skin.chromas {
-                // UUID값 저장하기
-                let uuid = chroma.uuid
-                // 경로 설정하기
-                let chromaPath = documents.appending(path: makeImageFileName(of: ImageType.weaponSkinChromas, uuid: uuid)).path()
-                //let swatchPath = documents.appending(path: makeImageFileName(of: ImageType.weaponSkinSwatchs, uuid: uuid)).path()
-                // 파일 매니저의 경로에 해당 파일이 존재하지 않으면
-                if !fileManager.fileExists(atPath: chromaPath) {
-                    // 저장되지 않은 스킨 UUID값 저장하기
-                    notDownloadedImages.append((ImageType.weaponSkinChromas, uuid))
-                }
-                // 파일 매너지의 경로에 해당 파일이 존재하지 않으면
-                //if !fileManager.fileExists(atPath: swatchPath) {
-                    // 저장되지 않은 스킨 UUID값 저장하기
-                //    notDownloadedImages.append((ImageType.weaponSkinSwatchs, uuid))
-                //}
-            }
-        }
-            
-        
-        // 총 다운로드할 이미지 개수를 프로퍼티 래퍼에 저장하기
-        self.imagesToDownload = notDownloadedImages.count
-        
-        // 이미지를 다운로드해 Documents 폴더에 저장하기
-        for notDownloadedImage in notDownloadedImages {
-            // 다운로드한 이미지 데이터를 저장하는 변수 선언하기
-            var imageData: Data
-            // 다운로드 한 이미지 개수 증가시키기
-            self.downloadedImages += 1
-            // 이미지 타입 저장하기
-            let imageType = notDownloadedImage.imageType
-            // UUID값 저장하기
-            let uuid = notDownloadedImage.uuid
-            // 이미지 다운로드하기
-            do {
-                imageData = try await resourceManager.fetchSkinImageData(
-                    of: notDownloadedImage.imageType,
-                    uuid: notDownloadedImage.uuid
-                ).get()
-                // 경로 설정하기
-                let saveUrl = documents.appending(path: makeImageFileName(of: imageType, uuid: uuid))
-                // 해당 경로에 이미지 파일 저장하기
-                try imageData.write(to: saveUrl)
-            } catch {
-                continue
-            }
-        }
-    }
-    
-    // Deprecated
-    private func makeImageFileName(of type: ImageType, uuid: String) -> String {
-        return "\(type.prefixFileName)-\(uuid).png"
-    }
+}
+
+// MARK: - EXTENSIONS
+
+extension LoginViewModel: LoginViewModelDelegate {
     
     func presentDataUpdateView() {
         self.isPresentDataUpdateView = true
     }
     
+}
+
+extension LoginViewModel {
     
-    // MARK: - REALM CRUD
-    
-    private func overwriteRealmObject<T: Object>(_ object: T) {
-        // 데이터를 저장하기 전, 기존 데이터 삭제하기
-        realmManager.deleteAll(of: T.self)
-        // 새로운 데이터 저장하기
-        realmManager.create(object)
-    }
-    
-    
-    private func isExpired(of type: ExpiryDateTye) -> Bool {
+    var isExpiredToken: Bool {
         // 현재 날짜 불러오기
-        let currentDate = Date()
-        // 체크해야 할 갱신 시간 체크하기
-        switch type {
-        case .token:
-            // 토큰 갱신 시간이 지났다면
-            return Date().timeIntervalSinceReferenceDate > accessTokenExpiryDate ? true : false
-        case .skin:
-            // 로테이션 갱신 시간이 지났다면
-//            return currentDate > storeSkinsRenewalDate ? true : false
-            break
-        case .bundle:
-            // 로테이션 갱신 시간이 지났다면
-            // ⭐️ 번들 시간은 아니지만, 구현 편의를 위해 스킨 갱신 시간을 사용함.
-//            return currentDate > storeSkinsRenewalDate ? true : false
-            break
-        }
-        return true
+        let currentDate = Date().timeIntervalSinceReferenceDate
+        // 토큰 갱신 시간 체크하기
+        return Date().timeIntervalSinceReferenceDate > accessTokenExpiryDate ? true : false
     }
     
 }

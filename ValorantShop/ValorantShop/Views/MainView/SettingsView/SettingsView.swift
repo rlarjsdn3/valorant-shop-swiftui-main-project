@@ -13,6 +13,7 @@ struct SettingsView: View {
     
     @EnvironmentObject var loginViewModel: LoginViewModel
     @EnvironmentObject var resourceViewModel: ResourceViewModel
+    @EnvironmentObject var settingsViewmodel: SettingsViewModel
     
     @State private var isPresentLogoutDialog: Bool = false
     
@@ -158,5 +159,6 @@ struct SettingsView_Previews: PreviewProvider {
         SettingsView()
             .environmentObject(LoginViewModel())
             .environmentObject(ResourceViewModel())
+            .environmentObject(SettingsViewModel())
     }
 }
