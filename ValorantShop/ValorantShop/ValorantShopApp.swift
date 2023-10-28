@@ -12,7 +12,7 @@ struct ValorantShopApp: App {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @StateObject var viewModel: ViewModel = ViewModel()
+    @StateObject var resourceViewModel: ResourceViewModel = ResourceViewModel()
     @StateObject var loginViewModel: LoginViewModel = LoginViewModel()
     
     // MARK: - BODY
@@ -21,9 +21,11 @@ struct ValorantShopApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(loginViewModel)
-                .environmentObject(viewModel)
+                .environmentObject(resourceViewModel)
                 .onAppear {
-                    viewModel.loginDelegate = loginViewModel
+                    loginViewModel.resourceDelegate = resourceViewModel
+                    resourceViewModel.loginDelegate = loginViewModel
+                    
                 }
         }
     }

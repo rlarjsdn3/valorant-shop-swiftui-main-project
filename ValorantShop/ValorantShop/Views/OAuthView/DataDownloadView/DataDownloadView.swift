@@ -21,7 +21,6 @@ struct DataDownloadView: View {
     @Environment(\.dismiss) var dismiss
     
     @EnvironmentObject var loginViewModel: LoginViewModel
-    @EnvironmentObject var viewModel: ViewModel
     
     @State private var isDownloading: Bool = false
     
@@ -36,8 +35,8 @@ struct DataDownloadView: View {
     // MARK: - COMPUTED PROPERTIES
     
     var progressString: String {
-        let downloadedImages: Int = viewModel.downloadedImages
-        let imagesToDownload: Int = viewModel.imagesToDownload
+        let downloadedImages: Int = loginViewModel.downloadedImages
+        let imagesToDownload: Int = loginViewModel.imagesToDownload
         
         var progressString: String = ""
         if downloadedImages != 0 && imagesToDownload != 0 {
@@ -51,8 +50,8 @@ struct DataDownloadView: View {
     }
     
     var progressPercentage: Double {
-        let downloadedImages = Double(viewModel.downloadedImages)
-        let imagesToDownload = Double(viewModel.imagesToDownload)
+        let downloadedImages = Double(loginViewModel.downloadedImages)
+        let imagesToDownload = Double(loginViewModel.imagesToDownload)
         let progressPercentage = downloadedImages / imagesToDownload
         return progressPercentage >= 1.0 ? 1.0 : progressPercentage
     }
@@ -97,8 +96,8 @@ struct DataDownloadView: View {
                 Spacer()
             }
             .padding()
-            .opacity(viewModel.isLoadingDataDownloading ? 0 : 1)
-            .disabled(viewModel.isLoadingDataDownloading)
+            .opacity(loginViewModel.isLoadingDataDownloading ? 0 : 1)
+            .disabled(loginViewModel.isLoadingDataDownloading)
             
             VStack(alignment: .leading) {
                 Text("Data")
@@ -110,7 +109,7 @@ struct DataDownloadView: View {
                     .foregroundColor(Color.secondary)
                     .padding(.top, 1)
                 
-                Text("\(viewModel.downloadingErrorText)")
+                Text("\(loginViewModel.downloadingErrorText)")
                     .foregroundColor(Color.valorant)
                     .padding(.top, 1)
             }
@@ -148,7 +147,7 @@ struct DataDownloadView: View {
                 }
             } label: {
                 Group {
-                    if viewModel.isLoadingDataDownloading {
+                    if loginViewModel.isLoadingDataDownloading {
                         ProgressView()
                     } else {
                         Text("\(buttonLabel)")
@@ -162,13 +161,13 @@ struct DataDownloadView: View {
                 .padding(.horizontal)
                 .padding(.vertical, hasBezel ? 20 : 0)
             }
-            .modifier(ShakeEffect(animatableData: viewModel.downloadButtonShakeAnimation))
-            .disabled(viewModel.isLoadingDataDownloading)
+            .modifier(ShakeEffect(animatableData: loginViewModel.downloadButtonShakeAnimation))
+            .disabled(loginViewModel.isLoadingDataDownloading)
         }
         .onDisappear {
-            viewModel.downloadingErrorText = ""
-            viewModel.imagesToDownload = 0
-            viewModel.downloadedImages = 0
+            loginViewModel.downloadingErrorText = ""
+            loginViewModel.imagesToDownload = 0
+            loginViewModel.downloadedImages = 0
         }
     }
 }
@@ -179,7 +178,7 @@ struct DataDownloadView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
             DataDownloadView(of: .download)
-                .environmentObject(ViewModel())
+                .environmentObject(LoginViewModel())
         }
     }
 }

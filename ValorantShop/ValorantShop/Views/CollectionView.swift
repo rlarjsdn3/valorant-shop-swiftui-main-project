@@ -33,7 +33,7 @@ struct CollectionView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var resourceViewModel: ResourceViewModel
     
     @Namespace var namespace: Namespace.ID
     
@@ -46,16 +46,16 @@ struct CollectionView: View {
                     ForEach(CollectionTabType.allCases, id: \.self) { type in
                         Button {
                             withAnimation(.spring(response: 0.3)) {
-                                viewModel.selectedCollectionTab = type
+                                resourceViewModel.selectedCollectionTab = type
                             }
                             hapticManager.play(.rigid)
                         } label: {
                             Text(type.tabName)
                                 .font(.title)
-                                .fontWeight(viewModel.selectedCollectionTab == type ? .bold : .light)
+                                .fontWeight(resourceViewModel.selectedCollectionTab == type ? .bold : .light)
                                 .foregroundColor(Color.primary)
                                 .overlay {
-                                    if viewModel.selectedCollectionTab == type {
+                                    if resourceViewModel.selectedCollectionTab == type {
                                         Rectangle()
                                             .fill(Color.primary)
                                             .frame(height: 1.5)
@@ -70,7 +70,7 @@ struct CollectionView: View {
                     
                     Button {
                         withAnimation(.spring()) {
-                            viewModel.isAscendingOrder.toggle()
+                            resourceViewModel.isAscendingOrder.toggle()
                         }
                     } label: {
                         Image(systemName: "arrow.up")
@@ -79,7 +79,7 @@ struct CollectionView: View {
                             .font(.title)
                             .foregroundColor(Color.primary)
                             .frame(width: 28, height: 28)
-                            .rotationEffect(.degrees(viewModel.isAscendingOrder ? 0 : 180))
+                            .rotationEffect(.degrees(resourceViewModel.isAscendingOrder ? 0 : 180))
                     }
                     
                 }
@@ -95,7 +95,7 @@ struct CollectionView: View {
                     Divider()
                 }
                 
-                switch viewModel.selectedCollectionTab {
+                switch resourceViewModel.selectedCollectionTab {
                 case .collection:
                     AllSkinsListView()
                 case .owned:
@@ -111,6 +111,6 @@ struct CollectionView: View {
 struct CollectionView_Previews: PreviewProvider {
     static var previews: some View {
         CollectionView()
-            .environmentObject(ViewModel())
+            .environmentObject(ResourceViewModel())
     }
 }

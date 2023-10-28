@@ -11,12 +11,12 @@ struct DataManagementView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var resourceViewModel: ResourceViewModel
     
     // MARK: - COMPUTED PROPERTIES
     
     var lastUpdateCheckDateString: String {
-        let lastUpdateCheckDate: Date = Date(timeIntervalSinceReferenceDate: viewModel.lastUpdateCheckDate)
+        let lastUpdateCheckDate: Date = Date(timeIntervalSinceReferenceDate: resourceViewModel.lastUpdateCheckDate)
         
         let formatter = DateFormatter()
         formatter.dateFormat = "M월 d일(E) HH:mm"
@@ -31,13 +31,13 @@ struct DataManagementView: View {
             Section {
                 rowLabel(
                     "캐시 크기",
-                    subText: "\(viewModel.diskCacheSize)MB",
+                    subText: "\(resourceViewModel.diskCacheSize)MB",
                     systemName: "memorychip",
                     accentColor: Color.green
                 )
                 
                 Button("캐시 비우기") {
-                    viewModel.clearDiskCache()
+                    resourceViewModel.clearDiskCache()
                 }
             } header: {
                 Text("캐시")
@@ -49,7 +49,7 @@ struct DataManagementView: View {
             Section {
                 Button("업데이트 확인") {
                     Task {
-                        await viewModel.checkValorantVersion()
+                        await resourceViewModel.checkValorantVersion()
                     }
                 }
             } header: {
@@ -59,7 +59,7 @@ struct DataManagementView: View {
             }
         }
         .onAppear {
-            viewModel.calculateDiskCache()
+            resourceViewModel.calculateDiskCache()
         }
     }
     
@@ -92,6 +92,6 @@ struct DataManagementView: View {
 struct DBUpdateView_Previews: PreviewProvider {
     static var previews: some View {
         DataManagementView()
-            .environmentObject(ViewModel())
+            .environmentObject(ResourceViewModel())
     }
 }

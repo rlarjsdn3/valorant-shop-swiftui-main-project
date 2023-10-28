@@ -14,7 +14,7 @@
 		9E266E722AB208C700178F25 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266E712AB208C700178F25 /* Color+Extension.swift */; };
 		9E266EA72AB342DC00178F25 /* OAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EA62AB342DC00178F25 /* OAuthManager.swift */; };
 		9E266EA92AB3436600178F25 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EA82AB3436600178F25 /* Constants.swift */; };
-		9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EAA2AB3483300178F25 /* ViewModel.swift */; };
+		9E266EAB2AB3483300178F25 /* ResourceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EAA2AB3483300178F25 /* ResourceViewModel.swift */; };
 		9E266EAE2AB34A7400178F25 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E266EAD2AB34A7400178F25 /* LoginView.swift */; };
 		9E266EB12AB34E6B00178F25 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 9E266EB02AB34E6B00178F25 /* KeychainAccess */; };
 		9E266EB42AB34E8B00178F25 /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 9E266EB32AB34E8B00178F25 /* Realm */; };
@@ -69,7 +69,7 @@
 		9E266E712AB208C700178F25 /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		9E266EA62AB342DC00178F25 /* OAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthManager.swift; sourceTree = "<group>"; };
 		9E266EA82AB3436600178F25 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		9E266EAA2AB3483300178F25 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		9E266EAA2AB3483300178F25 /* ResourceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResourceViewModel.swift; sourceTree = "<group>"; };
 		9E266EAD2AB34A7400178F25 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		9E2922842AB0A9D200D6FE07 /* ValorantShop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ValorantShop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E2922872AB0A9D200D6FE07 /* ValorantShopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValorantShopApp.swift; sourceTree = "<group>"; };
@@ -188,8 +188,8 @@
 		9E2922962AB0AE2200D6FE07 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				9E266EAA2AB3483300178F25 /* ViewModel.swift */,
 				9EEF77082AED3CD5002D672F /* LoginViewModel.swift */,
+				9E266EAA2AB3483300178F25 /* ResourceViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -480,7 +480,7 @@
 				9E266E702AB201DD00178F25 /* HapticManager.swift in Sources */,
 				9E611D022ABED7F300D1A310 /* SkinListView.swift in Sources */,
 				9EDCF0CC2AC1BB080057772F /* DebugView.swift in Sources */,
-				9E266EAB2AB3483300178F25 /* ViewModel.swift in Sources */,
+				9E266EAB2AB3483300178F25 /* ResourceViewModel.swift in Sources */,
 				9EB4C5652AB4A14700AE4425 /* Version.swift in Sources */,
 				9EDCF0C22AC111D90057772F /* SkinCell.swift in Sources */,
 				9E611D072ABED81700D1A310 /* BonusListView.swift in Sources */,

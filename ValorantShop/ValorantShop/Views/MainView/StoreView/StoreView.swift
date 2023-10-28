@@ -36,7 +36,7 @@ struct StoreView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var resourceViewModel: ResourceViewModel
     
     @Namespace var namespace: Namespace.ID
     
@@ -49,16 +49,16 @@ struct StoreView: View {
                     ForEach(StoreTabType.allCases, id: \.self) { type in
                         Button {
                             withAnimation(.spring(response: 0.3)) {
-                                viewModel.selectedStoreTab = type
+                                resourceViewModel.selectedStoreTab = type
                             }
                             hapticManager.play(.rigid)
                         } label: {
                             Text(type.tabName)
                                 .font(.title)
-                                .fontWeight(viewModel.selectedStoreTab == type ? .bold : .light)
+                                .fontWeight(resourceViewModel.selectedStoreTab == type ? .bold : .light)
                                 .foregroundColor(Color.primary)
                                 .overlay {
-                                    if viewModel.selectedStoreTab == type {
+                                    if resourceViewModel.selectedStoreTab == type {
                                         Rectangle()
                                             .fill(Color.primary)
                                             .frame(height: 1.5)
@@ -73,11 +73,11 @@ struct StoreView: View {
                     
                     Button {
                         Task {
-                            switch viewModel.selectedStoreTab {
+                            switch resourceViewModel.selectedStoreTab {
                             case .skin:
-                                await viewModel.reloadPlayerData(of: .skin)
+                                await resourceViewModel.reloadPlayerData(of: .skin)
                             case .bundle:
-                                await viewModel.reloadPlayerData(of: .bundle)
+                                await resourceViewModel.reloadPlayerData(of: .bundle)
                             }
                         }
                     } label: {
@@ -88,7 +88,7 @@ struct StoreView: View {
                             .foregroundColor(Color.primary)
                             .frame(width: 30, height: 30)
                             .offset(y: -3)
-                            .rotationEffect(Angle(degrees: viewModel.refreshButtonRotateAnimation ? 360 : 0))
+                            .rotationEffect(Angle(degrees: resourceViewModel.refreshButtonRotateAnimation ? 360 : 0))
                     }
                     
                 }
@@ -104,7 +104,7 @@ struct StoreView: View {
                     Divider()
                 }
                 
-                switch viewModel.selectedStoreTab {
+                switch resourceViewModel.selectedStoreTab {
                 case .skin:
                     SkinListView()
                 case .bundle:
@@ -122,6 +122,6 @@ struct StoreView: View {
 struct StoreView_Previews: PreviewProvider {
     static var previews: some View {
         StoreView()
-            .environmentObject(ViewModel())
+            .environmentObject(ResourceViewModel())
     }
 }

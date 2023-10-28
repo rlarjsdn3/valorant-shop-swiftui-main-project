@@ -11,14 +11,14 @@ struct OAuthView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var loginViewModel: LoginViewModel
     
     // MARK: - BODY
     
     var body: some View {
         NavigationStack {
             LoginView()
-                .navigationDestination(isPresented: $viewModel.isPresentDataDownloadView) {
+                .navigationDestination(isPresented: $loginViewModel.isPresentDataDownloadView) {
                     DataDownloadView(of: .download)
                         .navigationBarBackButtonHidden()
                 }
@@ -61,6 +61,6 @@ struct OAuthView: View {
 struct OAuthView_Previews: PreviewProvider {
     static var previews: some View {
         OAuthView()
-            .environmentObject(ViewModel())
+            .environmentObject(LoginViewModel())
     }
 }

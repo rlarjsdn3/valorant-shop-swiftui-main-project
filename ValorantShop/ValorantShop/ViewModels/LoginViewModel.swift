@@ -24,6 +24,7 @@ enum LoadingScreenType {
 protocol LoginViewModelDelegate: NSObject {
     func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError>
     func turnOffLoadingScreenView(of type: LoadingScreenType)
+    func presentDataUpdateView()
 }
 
 // MARK: - VIEW MODEL
@@ -71,12 +72,14 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
     // MARK: - PROPERTIES
     
     let keychain = Keychain()
-    let imageCache = ImageCache.default
     
     let oauthManager = OAuthManager.shared
     let realmManager = RealmManager.shared
     let resourceManager = ResourceManager.shared
     let hapticManager = HapticManager.shared
+    
+    // Delegate
+    weak var resourceDelegate: ResourceViewModelDelegate?
     
     // MARK: - LOGIN
     
@@ -208,29 +211,10 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
         oauthManager.urlSession = URLSession(configuration: .ephemeral)
         resourceManager.urlSession = URLSession(configuration: .default)
         
-        // 이미지 메모리・디스크 캐시 비우기
-        imageCache.clearMemoryCache()
-        imageCache.clearDiskCache()
-        // 쿠키 정보 및 사용자 고유 정보 삭제하기
-        try? keychain.removeAll()
-        
         // 로그인 여부 및 사용자 정보 삭제하기
         withAnimation(.spring()) { self.isLoggedIn = false }
-        self.accessTokenExpiryDate = Double.infinity
-//        self.storeSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: Double.infinity) // ⚡️
-        self.realmManager.deleteAll(of: PlayerID.self)
-        self.realmManager.deleteAll(of: PlayerWallet.self)
-        self.realmManager.deleteAll(of: StoreSkinsList.self)
-        self.realmManager.deleteAll(of: StoreBundlesList.self)
         
-        // 타이머 제거하기
-//        self.storeSkinsTimer?.invalidate() // ⚡️
-//        self.storeBundlesTimer?.invalidate() // ⚡️
-        
-//        self.isIntialGettingStoreSkinsData = false // ⚡️
-//        self.isAutoReloadedStoreSkinsData = false // ⚡️
-//        self.isIntialGettingStoreBundlesData = false // ⚡️
-//        self.isAutoReloadedStoreBundlesData = false // ⚡️
+        self.resourceDelegate?.logout()
         
         // 불러온 상점 데이터 삭제하기
         //self.storeSkins = StoreSkin(renewalDate: Date())
@@ -295,7 +279,7 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
     }
     
     @MainActor
-    func fetchReAuthTokens() async throws -> Result<ReAuthTokens, OAuthError> {
+    private func fetchReAuthTokens() async throws -> Result<ReAuthTokens, OAuthError> {
         do {
             // 새롭게 접근 토큰 등 사용자 고유 정보 불러오기
             let accessToken: String = try await oauthManager.fetchReAuthCookies().get()
@@ -502,6 +486,10 @@ final class LoginViewModel: NSObject, ObservableObject, LoginViewModelDelegate {
     // Deprecated
     private func makeImageFileName(of type: ImageType, uuid: String) -> String {
         return "\(type.prefixFileName)-\(uuid).png"
+    }
+    
+    func presentDataUpdateView() {
+        self.isPresentDataUpdateView = true
     }
     
     

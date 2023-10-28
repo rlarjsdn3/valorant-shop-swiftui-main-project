@@ -11,7 +11,8 @@ struct ContentView: View {
     
     // MARK: - WRAPPER PROPERTIES
     
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var loginViewModel: LoginViewModel
+    @EnvironmentObject var resourceViewModel: ResourceViewModel
     
     // MARK: - INTIALIZER
     
@@ -23,7 +24,7 @@ struct ContentView: View {
     
     var body: some View {
         // 로그인을 하지 않았다면
-        if !viewModel.isLoggedIn {
+        if !loginViewModel.isLoggedIn {
             OAuthView()
         // 로그인을 하였다면
         } else {
@@ -38,6 +39,6 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
-            .environmentObject(ViewModel())
+            .environmentObject(ResourceViewModel())
     }
 }

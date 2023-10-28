@@ -68,9 +68,15 @@ struct Price {
     }
 }
 
+// MARK: - DELEGATE
+
+protocol ResourceViewModelDelegate: NSObject {
+    func logout()
+}
+
 // MARK: - VIEW MODEL
 
-final class ViewModel: ObservableObject {
+final class ResourceViewModel: NSObject, ObservableObject, ResourceViewModelDelegate {
     
     // MARK: - USER DEFAULTS
     
@@ -80,36 +86,6 @@ final class ViewModel: ObservableObject {
     @AppStorage(UserDefaultsKeys.accessTokenExpiryDate) var accessTokenExpiryDate: Double = Double.infinity
     
     // MARK: - WRAPPER PROPERTIES
-    
-    // For LaunchScreen
-//    @Published var isPresentLoadingScreenViewFromView: Bool = true
-//    @Published var isPresentLoadingScreenViewFromSkinsTimer: Bool = true
-//    @Published var isPresentLoadingScreenViewFromBundlesTimer: Bool = true
-    
-    // For Login
-    @Published var isLoadingLogin: Bool = false
-    @Published var loginErrorText: String = ""
-    @Published var loginButtonShakeAnimation: CGFloat = 0.0
-    
-    // For MultifactorAuth
-    @Published var isLoadingMultifactor: Bool = false
-    @Published var isPresentMultifactorAuthView: Bool = false
-    @Published var multifactorAuthEmail: String = ""
-    @Published var multifactorErrorText: String = ""
-    @Published var codeBoxShakeAnimation: CGFloat = 0.0
-    
-    // For CustomTab
-    @Published var selectedCustomTab: CustomTabType = .shop
-    
-    // For Downlaod Data
-    @Published var isLoadingDataDownloading: Bool = false
-    @Published var isPresentDataDownloadView: Bool = false
-    @Published var isPresentDataUpdateView: Bool = false
-    @Published var downloadingErrorText: String = ""
-    @Published var downloadButtonShakeAnimation: CGFloat = 0.0
-    
-    @Published var imagesToDownload: Int = 0
-    @Published var downloadedImages: Int = 0
     
     // For PlayerID
     @Published var gameName: String = ""
@@ -146,6 +122,7 @@ final class ViewModel: ObservableObject {
     
     // MARK: - PROPERTIES
     
+    let keychain = Keychain()
     let imageCache = ImageCache.default
     
     let oauthManager = OAuthManager.shared
@@ -163,11 +140,12 @@ final class ViewModel: ObservableObject {
     var isIntialGettingStoreBundlesData: Bool = false
     var isAutoReloadedStoreBundlesData: Bool = false
     
+    // Delegate
     weak var loginDelegate: LoginViewModelDelegate?
     
     // MARK: - INTIALIZER
     
-    init() {
+    override init() {
         // 이미지 캐시 설정하기
         imageCache.memoryStorage.config.expiration = .seconds(300)
         imageCache.memoryStorage.config.countLimit = 256
@@ -176,6 +154,34 @@ final class ViewModel: ObservableObject {
         
         imageCache.diskStorage.config.expiration = .days(3)
         imageCache.diskStorage.config.sizeLimit = 512 * 1024 * 1024 // 512MB
+    }
+    
+    // MARK: - LOGOUT
+    
+    func logout() {
+        
+        self.storeSkinsRenewalDate = Date(timeIntervalSinceReferenceDate: Double.infinity) // ⚡️
+        
+        self.accessTokenExpiryDate = Double.infinity
+        self.realmManager.deleteAll(of: PlayerID.self)
+        self.realmManager.deleteAll(of: PlayerWallet.self)
+        self.realmManager.deleteAll(of: StoreSkinsList.self)
+        self.realmManager.deleteAll(of: StoreBundlesList.self)
+        
+        // 이미지 메모리・디스크 캐시 비우기
+        imageCache.clearMemoryCache()
+        imageCache.clearDiskCache()
+        // 쿠키 정보 및 사용자 고유 정보 삭제하기
+        try? keychain.removeAll()
+        
+        // 타이머 제거하기
+        self.storeSkinsTimer?.invalidate() // ⚡️
+        self.storeBundlesTimer?.invalidate() // ⚡️
+        
+        self.isIntialGettingStoreSkinsData = false // ⚡️
+        self.isAutoReloadedStoreSkinsData = false // ⚡️
+        self.isIntialGettingStoreBundlesData = false // ⚡️
+        self.isAutoReloadedStoreBundlesData = false // ⚡️
     }
     
     // MARK: - CHECK VERSION
@@ -202,7 +208,7 @@ final class ViewModel: ObservableObject {
         // 버전을 비교한 결과 서로 다르다면
         } catch ResourceError.urlError {
             // 업데이트 화면이 보이게 하기
-            self.isPresentDataUpdateView = true
+            self.loginDelegate?.presentDataUpdateView()
         } catch {
             return // 다운로드에 실패하면 수행할 예외 처리 코드 작성하기
         }
@@ -1007,7 +1013,7 @@ final class ViewModel: ObservableObject {
 
 // MARK: - DEVELOPER MENU
 
-extension ViewModel {
+extension ResourceViewModel {
     
     func logoutForDeveloper() {
 //        self.logout() // ⚡️
