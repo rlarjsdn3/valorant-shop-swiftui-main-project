@@ -72,17 +72,9 @@ struct SettingsView: View {
                     Text("문서 및 데이터")
                 }
 
-                // - For Debug -----
-//                Section {
-//                    NavigationLink {
-//                        DebugView()
-//                            .navigationBarTitleDisplayMode(.inline)
-//                            .navigationTitle("개발자")
-//                    } label: {
-//                        rowLabel("개발자", systemName: "hammer", accentColor: Color.blue)
-//                    }
-//                }
-                // -----------------
+                Button("dd") {
+                    resourceViewModel.storeSkinsRenewalDate = Date(timeIntervalSinceNow: -86400 * 2)
+                }
                 
                 Section {
                     HStack {
