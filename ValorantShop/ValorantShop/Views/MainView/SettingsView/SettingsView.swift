@@ -71,10 +71,6 @@ struct SettingsView: View {
                 } header: {
                     Text("문서 및 데이터")
                 }
-
-                Button("dd") {
-                    resourceViewModel.storeSkinsRenewalDate = Date(timeIntervalSinceNow: -86400 * 2)
-                }
                 
                 Section {
                     HStack {

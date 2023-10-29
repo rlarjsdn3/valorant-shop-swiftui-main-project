@@ -48,6 +48,9 @@ struct DataManagementView: View {
 
             
             Section {
+                
+                rowLabel("버전", subText: settingsViewModel.getClientVersion())
+                
                 Button("업데이트 확인") {
                     Task {
                         await resourceViewModel.checkValorantVersion()
@@ -56,7 +59,7 @@ struct DataManagementView: View {
             } header: {
                 Text("업데이트")
             } footer: {
-                Text("최근 업데이트 확인: \(lastUpdateCheckDateString)\n\n애플리케이션이 발로란트의 스킨 정보를 올바르게 표시하기 위해 DB가 최신 상태를 유지하여야 합니다. 애플리케이션은 주기적으로 업데이트를 확인하며, 미업데이트 시 애플리케이션 이용이 제한됩니다. ")
+                Text("최근 업데이트 확인: \(lastUpdateCheckDateString)\n\n애플리케이션은 발로란트의 스킨 정보를 올바르게 표시하기 위해 데이터베이스가 최신 상태를 유지하여야 합니다. 애플리케이션은 주기적으로 업데이트를 확인하며, 미업데이트 시 애플리케이션 이용이 제한됩니다. ")
             }
         }
         .onAppear {
@@ -94,5 +97,6 @@ struct DBUpdateView_Previews: PreviewProvider {
     static var previews: some View {
         DataManagementView()
             .environmentObject(ResourceViewModel())
+            .environmentObject(SettingsViewModel())
     }
 }

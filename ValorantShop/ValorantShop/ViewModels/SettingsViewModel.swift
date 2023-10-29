@@ -21,6 +21,8 @@ final class SettingsViewModel: NSObject, ObservableObject {
     
     let imageCache = ImageCache.default
     
+    let realmManager = RealmManager.shared
+    
     // MARK: - FUNCTIONS
     
     func calculateDiskCache() {
@@ -42,6 +44,15 @@ final class SettingsViewModel: NSObject, ObservableObject {
         imageCache.clearDiskCache {
             self.diskCacheSize = "0.0"
         }
+    }
+    
+    func getClientVersion() -> String {
+        let version = realmManager.read(of: Version.self)
+        if let riotClientVersion = version.first?.client?.riotClientVersion {
+            let version = riotClientVersion.split(separator: "-")[1]
+            return String(version)
+        }
+        return "-"
     }
     
 }
