@@ -191,22 +191,89 @@ final class ResourceViewModel: NSObject, ObservableObject {
         }
     }
     
-    // MARK: - GET PLAYER DATA
+    // MARK: - LOAD PLAYER DATA
     
-    // Deprecated
     @MainActor
-    func getPlayerData(forceLoad: Bool = false) async {
-        // 사용자ID 등 사용자 데이터 불러오기
-        await self.getPlayerID(forceLoad: forceLoad)
-        await self.getPlayerWallet(forceLoad: forceLoad)
-        await self.getStoreSkins(forceLoad: forceLoad)
-        await self.getStoreBundles(forceLoad: forceLoad)
+    func loadPlayerData() async {
+        // ❗️ Task로 감싸주지 않는다면, 직렬(Serial)로 수행되는 것처럼 보임.
         
-        // ✏️ 사용자에게 화면이 보여지고 나서도
-        // ✏️ 어색하게 갑작스레 뷰가 리-렌더링되는 모습을 숨기고자 1초 딜레이를 둠.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            // 로딩 스크린 화면 끄기
-            withAnimation(.spring()) { self.isPresentLoadingScreenViewFromView = false }
+        // 최신 버전의 데이터가 존재하는지 확인하기
+        await self.checkValorantVersion()
+        
+        // 사용자 ID 등 기본적인 정보 불러오기
+        // ⭐️ 사용자ID 등 기본적인 정보는 언제 바뀔지 모르니 항상 불러옴.
+        await self.getPlayerID(forceLoad: true)
+        await self.getPlayerWallet(forceLoad: true)
+        
+        // 컬렉션 정보 불러오기
+        self.getCollection()
+        await self.getOwnedWeaponSkins()
+        
+        // 로테이션 스킨 갱신 날짜 불러오기
+        if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
+            self.storeSkinsRenewalDate = renewalDate
+        }
+        // 번들 스킨 갱신 날짜 불러오기
+        self.storeBundlesRenewalDate = []
+        let storeBundles = realmManager.read(of: StoreBundlesList.self)
+        for bundle in storeBundles {
+            self.storeBundlesRenewalDate.append(bundle.renewalDate)
+        }
+        
+        // 현재 날짜 불러오기
+        let currentDate = Date()
+        // 로테이션 스킨을 갱신할 필요가 없다면
+        if currentDate < self.storeSkinsRenewalDate {
+            // Realm에서 데이터 가져오기
+            await self.getStoreSkins()
+        } else {
+            // 서버에서 데이터 가져오기
+            await self.getStoreSkins(forceLoad: true)
+        }
+        
+        // 번들 갱신이 필요한지 확인하는 변수 선언하기
+        var needRenewalBundles: Bool = false
+        // 각 번들을 순회해보며
+        for renewalDate in self.storeBundlesRenewalDate {
+            // 번들 스킨을 갱신할 필요가 없다면
+            if currentDate < renewalDate {
+                continue
+            // 번들 스킨을 갱신할 필요가 있다면
+            } else {
+                needRenewalBundles = true; break
+            }
+        }
+        // 번들 스킨을 갱신할 필요가 없다면
+        if !needRenewalBundles {
+            // Realm에서 데이터 가져오기
+            await self.getStoreBundles()
+        // 번들 스킨을 갱신할 필요가 있다면
+        } else {
+            // 서버에서 데이터 가져오기
+            await self.getStoreBundles(forceLoad: true)
+        }
+        
+        // 타이머 작동시키기
+        self.storeSkinsTimer = Timer.scheduledTimer(
+            withTimeInterval: 0.1,
+            repeats: true,
+            block: updateStoreSkinsRemainingTime(_:)
+        )
+        self.storeBundlesTimer = Timer.scheduledTimer(
+            withTimeInterval: 0.1,
+            repeats: true,
+            block: updateStoreBundlesRemainingTime(_:)
+        )
+        
+        // ✏️ 팝 내비게이션 스택 애니메이션이 보이게 하지 않기 위해 0.25초 딜레이를 둠.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            withAnimation(.spring()) {
+                // 로딩 스크린 가리기
+                self.isPresentLoadingScreenViewFromView = false
+            }
+            
+            // 다운로드 화면을 가리기
+            self.loginDelegate?.dismissDataDownloadView()
         }
     }
     
@@ -218,7 +285,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
         // ❗️ Task로 감싸주지 않는다면, 직렬(Serial)로 수행되는 것처럼 보임.
         await getPlayerID(forceLoad: true)
         await getPlayerWallet(forceLoad: true)
-        await getOwnedWeaponSkins()
         // 어느 데이터를 불러올지 확인하기
         switch type {
         case .skin:
@@ -226,9 +292,12 @@ final class ResourceViewModel: NSObject, ObservableObject {
         case .bundle:
             await self.getStoreBundles(forceLoad: true)
         }
+        await getOwnedWeaponSkins()
         // 로딩 애니메이션 끝내기
         self.refreshButtonRotateAnimation = false
     }
+    
+    // MARK: - GET PLAYER DATA
     
     @MainActor
     func getPlayerID(forceLoad: Bool = false) async {
@@ -288,8 +357,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
     private func fetchPlayerID() async throws -> PlayerID? {
         // playerID를 저장하는 변수 선언하기
         var playerID: PlayerID?
-        // Realm에 저장되어 있는 기존 사용자ID 데이터 삭제하기
-//        realmManager.deleteAll(of: PlayerID.self)
         // 접근 토큰 등 사용자 고유 정보 가져오기
         let reAuthTokens = try await self.loginDelegate?.getReAuthTokens().get()
         // 닉네임, 태그 정보 다운로드하기
@@ -302,8 +369,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
             return playerID
         }
         return nil
-        // Realm에 새로운 사용자ID 데이터 저장하기
-//        realmManager.create(playerID)
     }
     
     @MainActor
@@ -369,8 +434,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
     private func fetchPlayerWallet() async throws -> PlayerWallet? {
         // Wallet를 저장하는 변수 선언하기
         var wallet: PlayerWallet?
-        // Realm에 저장되어 있는 기존 사용자 지갑 데이터 삭제하기
-//        realmManager.deleteAll(of: PlayerWallet.self)
         // 접근 토큰 등 사용자 고유 정보 가져오기
         let reAuthTokens = try await self.loginDelegate?.getReAuthTokens().get()
         // 사용자 지갑 정보 다운로드하기
@@ -383,8 +446,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
             return wallet
         }
         return nil
-        // Realm에 새로운 사용자 지갑 데이터 저장하기
-//        realmManager.create(wallet)
     }
     
     // MARK: - GET STORE DATA - SKINS
@@ -487,7 +548,9 @@ final class ResourceViewModel: NSObject, ObservableObject {
     }
     
     private func fetchStoreSkins() async throws -> StoreSkinsList? {
+        // 로테이션 상점 데이터를 정상적으로 받아왔다면
         if let skinsPanelLayout = try? await self.fetchSkinsPanelLayout() {
+            // 화면에 출력하기 쉬운 형태로 데이터 가공하기
             return transformSkinsPanelLayoutToStoreSkinsList(skinsPanelLayout)
         }
         return nil
@@ -497,9 +560,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
     private func fetchSkinsPanelLayout() async throws -> SkinsPanelLayout? {
         // 로테이션 스킨 데이터를 저장하는 변수 선언하기
         var skinsPanelLayouts: SkinsPanelLayout?
-        // Realm에 저장되어 있는 기존 로테이션 스킨 데이터 삭제하기
-//        realmManager.deleteAll(of: StoreSkinsList.self)
-        
         // 접근 토큰 등 사용자 고유 정보 가져오기
         let reAuthTokens = try await self.loginDelegate?.getReAuthTokens().get()
         // 새롭게 로테이션 스킨 데이터 불러오기
@@ -512,7 +572,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
             return skinsPanelLayouts
         }
         return nil
-//        realmManager.create(storeSkinsList)
     }
     
     private func transformSkinsPanelLayoutToStoreSkinsList(_ skinsPanelLayouts: SkinsPanelLayout) -> StoreSkinsList {
@@ -650,7 +709,9 @@ final class ResourceViewModel: NSObject, ObservableObject {
     }
     
     private func fetchStoreBundles() async throws -> StoreBundlesList? {
+        // 로테이션 상점 데이터를 정상적으로 받아왔다면
         if let featureBundles = try? await self.fetchFeatureBundle() {
+            // 화면에 출력하기 쉬운 형태로 데이터 가공하기
             return transformFeatureBundleToStoreBundlesList(featureBundles)
         }
         return nil
@@ -660,9 +721,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
     func fetchFeatureBundle() async throws -> FeaturedBundle? {
         // 번들 스킨 데이터를 저장하는 변수 선언하기
         var featureBundles: FeaturedBundle?
-        // Realm에 저장되어 있는 기존 번들 스킨 데이터 삭제하기
-//        realmManager.deleteAll(of: StoreBundlesList.self)
-        
         // 접근 토큰 등 사용자 고유 정보 가져오기
         let reAuthTokens = try await self.loginDelegate?.getReAuthTokens().get()
         // 새롭게 번들 스킨 데이터 불러오기
@@ -678,8 +736,9 @@ final class ResourceViewModel: NSObject, ObservableObject {
     }
     
     private func transformFeatureBundleToStoreBundlesList(_ featureBundles: FeaturedBundle) -> StoreBundlesList {
-        
+        // 번들 스킨 정보를 담은 변수 선언하기
         let storeBundlesList = StoreBundlesList()
+        // 개별 스킨 정보를 하나씩 순회하며
         for bundle in featureBundles.bundles {
             // Realm에 번들 스킨 데이터 저장하기
             storeBundlesList.uuid = bundle.uuid
@@ -705,7 +764,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
                 bundleSkinInfo.discountedPrice = item.discountedPrice
                 storeBundlesList.itemInfos.append(bundleSkinInfo)
             }
-//            realmManager.create(storeBundle)
         }
         return storeBundlesList
     }
@@ -825,6 +883,8 @@ final class ResourceViewModel: NSObject, ObservableObject {
     
     // MARK: - TIMER
     
+    // ❓ Sendable의 의미가 뭐지?
+    @Sendable
     @objc func updateStoreSkinsRemainingTime(_ timer: Timer? = nil) {
         // 현재 날짜 불러오기
         let currentDate = Date()
@@ -851,6 +911,7 @@ final class ResourceViewModel: NSObject, ObservableObject {
         
     }
     
+    @Sendable
     @objc func updateStoreBundlesRemainingTime(_ timer: Timer? = nil) {
         // 현재 날짜 불러오기
         let currentDate = Date()
@@ -999,7 +1060,7 @@ extension ResourceViewModel {
             return currentDate > accessTokenExpiryDate ? true : false
         case .skin:
             // 로테이션 갱신 시간이 지났다면
-            return currentDate > storeSkinsRenewalDate.timeIntervalSinceReferenceDate ? true : false
+            fallthrough
         case .bundle:
             // 로테이션 갱신 시간이 지났다면
             // ⭐️ 번들 시간은 아니지만, 구현 편의를 위해 스킨 갱신 시간을 사용함.

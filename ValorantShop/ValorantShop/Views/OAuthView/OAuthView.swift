@@ -23,6 +23,11 @@ struct OAuthView: View {
                         .navigationBarBackButtonHidden()
                 }
                 .navigationBarBackButtonHidden()
+                .overlay(alignment: .bottomTrailing) {
+                    Button("다운로드 초기화") {
+                        loginViewModel.isDataDownloaded = false
+                    }
+                }
         }
     }
     

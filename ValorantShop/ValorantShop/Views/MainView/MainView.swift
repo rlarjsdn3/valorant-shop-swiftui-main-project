@@ -51,18 +51,9 @@ struct MainView: View {
             // Realm에서는 불러올 필요가 없는 이유는 메모리에서 해제된 상태가 아니기 때문임.
             // (즉, Persisted 변수에 상점 정보가 유지되어 있음)
             
-            let taskQueue = TaskQueue()
-            
-            // ⭐️ async 작업을 순서대로 처리하도록 도와주는 큐
-            // 이렇게 처리해주지 않는다면, 타이머로 인해 불필요한 메서드가 호출될 수 있음.
-            taskQueue.dispatch {
-                await loadResources()
-                
-                startStoreTimer()
-                
-                dismissLoadingView()
+            Task {
+                await resourceViewModel.loadPlayerData()
             }
-            
         }
         .onReceive(willEnterForegroundNotification) { _ in
             // 최신 버전의 데이터가 존재하는지 확인하기
@@ -97,132 +88,7 @@ struct MainView: View {
             DataDownloadView(of: .update)
         }
     }
-    
-    // MARK: - FUNCTIONS
-    
-    func loadResources() async {
-        
-        let taskQueue = TaskQueue()
-        
-        Task {
-            // 최신 버전의 데이터가 존재하는지 확인하기
-            await resourceViewModel.checkValorantVersion()
-        }
-        
-        // ⭐️ async 작업을 순서대로 처리하도록 도와주는 큐
-        // 이렇게 처리해주지 않는다면, 쿠키가 동시에 설정되어 통신에 실패할 가능성이 있음.
-        try? await taskQueue.dispatch {
-            // 사용자ID 등 기본적인 정보 불러오기
-            // ⭐️ 사용자ID 등 기본적인 정보는 언제 바뀔지 모르니 항상 불러옴.
-            await resourceViewModel.getPlayerID(forceLoad: true)
-            await resourceViewModel.getPlayerWallet(forceLoad: true)
-            
-            // ⭐️
-            // taskQueue를 사용하지 않으면
-            // -- Consol Area --
-            //  fetchReAuthCookies()
-            //  fetchReAuthCookies()
-            //  loadSetCookie()
-            //  loadSetCookie()
-            //  saveSetCookie(_:)
-            //  saveSetCookie(_:)
-            //  fetchRiotEntitlement(accessToken:)
-            //  fetchRiotEntitlement(accessToken:)
-            //  fetchRiotAccountPUUID(accessToken:)
-            //  fetchRiotAccountPUUID(accessToken:)
-            // -----------------
-            // 와 같이 메서드가 중복으로 호출되는 문제가 발생함.
-            // 경우에 따라서, 쿠키 설정 오류로 인해 통신에 실패하도 함.
-        }
-        
-        // 컬렉션 정보 불러오기
-        resourceViewModel.getCollection()
-        await resourceViewModel.getOwnedWeaponSkins()
-        
-        // 로테이션 스킨 갱신 날짜 불러오기
-        if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
-            resourceViewModel.storeSkinsRenewalDate = renewalDate
-        }
-        // 번들 스킨 갱신 날짜 불러오기
-        resourceViewModel.storeBundlesRenewalDate = []
-        let storeBundles = realmManager.read(of: StoreBundlesList.self)
-        for bundle in storeBundles {
-            resourceViewModel.storeBundlesRenewalDate.append(bundle.renewalDate)
-        }
-        
-        // 현재 날짜 불러오기
-        let currentDate = Date()
-        // 로테이션 스킨을 갱신할 필요가 없다면
-        if currentDate < resourceViewModel.storeSkinsRenewalDate {
-            print("OnAppear: Skin - Realm에서 데이터 가져오기")
-            // Realm에서 데이터 가져오기
-            Task {
-                await resourceViewModel.getStoreSkins()
-            }
-        } else {
-            print("OnAppear: Skin - 서버에서 데이터 가져오기")
-            // 서버에서 데이터 가져오기
-            Task {
-                await resourceViewModel.getStoreSkins(forceLoad: true)
-            }
-        }
-        
-        // 번들 갱신이 필요한지 확인하는 변수 선언하기
-        var needRenewalBundles: Bool = false
-        // 각 번들을 순회해보며
-        for renewalDate in resourceViewModel.storeBundlesRenewalDate {
-            // 번들 스킨을 갱신할 필요가 없다면
-            if currentDate < renewalDate {
-                continue
-            // 번들 스킨을 갱신할 필요가 있다면
-            } else {
-                needRenewalBundles = true; break
-            }
-        }
-        // 번들 스킨을 갱신할 필요가 없다면
-        if !needRenewalBundles {
-            print("OnAppear: Bundle - Realm에서 데이터 가져오기")
-            // Realm에서 데이터 가져오기
-            Task {
-                await resourceViewModel.getStoreBundles()
-            }
-        // 번들 스킨을 갱신할 필요가 있다면
-        } else {
-            print("OnAppear: Bundle - 서버에서 데이터 가져오기")
-            // 서버에서 데이터 가져오기
-            Task {
-                await resourceViewModel.getStoreBundles(forceLoad: true)
-            }
-        }
-        
-    }
-    
-    func startStoreTimer() {
-        // 타이머 작동시키기
-        resourceViewModel.storeSkinsTimer = Timer.scheduledTimer(
-            withTimeInterval: 0.1,
-            repeats: true,
-            block: resourceViewModel.updateStoreSkinsRemainingTime(_:)
-        )
-        resourceViewModel.storeBundlesTimer = Timer.scheduledTimer(
-            withTimeInterval: 0.1,
-            repeats: true,
-            block: resourceViewModel.updateStoreBundlesRemainingTime(_:)
-        )
-    }
-    
-    func dismissLoadingView() {
-        // ✏️ 팝 내비게이션 스택 애니메이션이 보이게 하지 않기 위해 0.25초 딜레이를 둠.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            withAnimation(.spring()) {
-                // 로딩 스크린 가리기
-                resourceViewModel.isPresentLoadingScreenViewFromView = false
-            }
-            
-            // 다운로드 화면을 가리기
-            loginViewModel.isPresentDataDownloadView = false
-        }
-    }
+ 
 }
 
 // MARK: - PREVIEW

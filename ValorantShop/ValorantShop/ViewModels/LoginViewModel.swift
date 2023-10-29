@@ -16,6 +16,7 @@ import Kingfisher
 protocol LoginViewModelDelegate: NSObject {
     func getReAuthTokens() async -> Result<ReAuthTokens, OAuthError>
     func presentDataUpdateView()
+    func dismissDataDownloadView()
 }
 
 // MARK: - VIEW MODEL
@@ -394,6 +395,10 @@ extension LoginViewModel: LoginViewModelDelegate {
     
     func presentDataUpdateView() {
         self.isPresentDataUpdateView = true
+    }
+    
+    func dismissDataDownloadView() {
+        self.isPresentDataDownloadView = false
     }
     
 }
