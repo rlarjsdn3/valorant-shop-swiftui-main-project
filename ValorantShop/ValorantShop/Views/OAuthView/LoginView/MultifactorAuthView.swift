@@ -120,7 +120,7 @@ struct MultifactorAuthView: View {
             .padding(.top, 30)
             .padding(.bottom, 15)
             // ✏️ Color.white로 한다면, 다크 모드가 원하는대로 적용되지 않음.
-            .background(Color(UIColor.systemBackground), in: RoundedRectangle(cornerRadius: 15))
+            .background(Color.systemBackground, in: RoundedRectangle(cornerRadius: 15))
             .offset(y: codeBoxAnimation ? -(screenSize.height * 0.2) : -screenSize.height)
             .padding()
         }

@@ -74,8 +74,8 @@ struct Price {
 
 protocol ResourceViewModelDelegate: NSObject {
     func getStorefront(forceLoad: Bool) async
-    func clearAllResource()
     func clearStorefront()
+    func clearAllResource()
     func dismissLoadingView(of type: LoadingViewType)
 }
 
@@ -197,9 +197,6 @@ final class ResourceViewModel: NSObject, ObservableObject {
     func loadPlayerData() async {
         // ❗️ Task로 감싸주지 않는다면, 직렬(Serial)로 수행되는 것처럼 보임.
         
-        // 최신 버전의 데이터가 존재하는지 확인하기
-        await self.checkValorantVersion()
-        
         // 사용자 ID 등 기본적인 정보 불러오기
         // ⭐️ 사용자ID 등 기본적인 정보는 언제 바뀔지 모르니 항상 불러옴.
         await self.getPlayerID(forceLoad: true)
@@ -208,6 +205,9 @@ final class ResourceViewModel: NSObject, ObservableObject {
         // 컬렉션 정보 불러오기
         self.getCollection()
         await self.getOwnedWeaponSkins()
+        
+        // 최신 버전의 데이터가 존재하는지 확인하기
+        await self.checkValorantVersion()
         
         // 로테이션 스킨 갱신 날짜 불러오기
         if let renewalDate = realmManager.read(of: StoreSkinsList.self).first?.renewalDate {
@@ -998,9 +998,13 @@ final class ResourceViewModel: NSObject, ObservableObject {
 
 extension ResourceViewModel: ResourceViewModelDelegate {
     
+    @MainActor
     func getStorefront(forceLoad: Bool = false) async {
         await self.getStoreSkins(forceLoad: forceLoad)
         await self.getStoreBundles(forceLoad: forceLoad)
+        
+        self.getCollection()
+        await self.getOwnedWeaponSkins()
     }
     
     func clearAllResource() {
@@ -1034,6 +1038,9 @@ extension ResourceViewModel: ResourceViewModelDelegate {
     func clearStorefront() {
         self.storeSkins.skinInfos = []
         self.storeBundles = []
+        
+        self.collections = []
+        self.ownedWeaponSkins = []
     }
     
     func dismissLoadingView(of type: LoadingViewType) {
